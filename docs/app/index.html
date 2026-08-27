@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>택시 호출 연습하기</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ─────────────  아이콘 스프라이트  ───────────── -->
+<svg class="sprite" aria-hidden="true"><defs>
+  <symbol id="ic-back" viewBox="0 0 24 24"><path d="M15 4 7 12l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ic-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-home" viewBox="0 0 24 24"><path d="M3.6 10.4 12 3.6l8.4 6.8V20a.8.8 0 0 1-.8.8h-4.4v-5.6H8.8v5.6H4.4a.8.8 0 0 1-.8-.8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-office" viewBox="0 0 24 24"><rect x="4.2" y="3.6" width="15.6" height="16.8" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="8.4" r="1.05" fill="currentColor"/><circle cx="15" cy="8.4" r="1.05" fill="currentColor"/><circle cx="9" cy="13.2" r="1.05" fill="currentColor"/><circle cx="15" cy="13.2" r="1.05" fill="currentColor"/><path d="M10.2 20.4v-3.1h3.6v3.1" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+  <symbol id="ic-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.1" fill="currentColor"/><path d="M12 1.9v3.2M12 18.9v3.2M1.9 12h3.2M18.9 12h3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ic-mapfold" viewBox="0 0 24 24"><path d="M9 4.2 3.4 6.3v13.5L9 17.7l6 2.1 5.6-2.1V4.2L15 6.3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 4.2v13.5M15 6.3v13.5" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+  <symbol id="ic-mic" viewBox="0 0 24 24"><rect x="9.2" y="3" width="5.6" height="10.6" rx="2.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.6 11.4a6.4 6.4 0 0 0 12.8 0M12 17.8V21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="ic-xcircle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M8.6 8.6l6.8 6.8M15.4 8.6l-6.8 6.8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="currentColor"/><path d="M12 6.6V12l3.6 2.2" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-cal" viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="15.4" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.4 9.6h17.2M8 3.2v3.6M16 3.2v3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="ic-grid" viewBox="0 0 24 24"><circle cx="8.4" cy="8.4" r="2.7" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="15.6" cy="8.4" r="2.7" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8.4" cy="15.6" r="2.7" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="15.6" cy="15.6" r="2.7" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="ic-biz" viewBox="0 0 24 24"><rect x="2.8" y="7" width="18.4" height="13" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.6 7V5.4a1.6 1.6 0 0 1 1.6-1.6h3.6a1.6 1.6 0 0 1 1.6 1.6V7" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="ic-navhome" viewBox="0 0 24 24"><path d="M3.4 10.6 12 3.4l8.6 7.2V20a.9.9 0 0 1-.9.9h-4.9v-5.6H9.2v5.6H4.3a.9.9 0 0 1-.9-.9z" fill="currentColor"/></symbol>
+  <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M12 3.2a5.8 5.8 0 0 0-5.8 5.8c0 4.6-1.6 6-2.2 6.8-.3.4 0 1 .5 1h15c.5 0 .8-.6.5-1-.6-.8-2.2-2.2-2.2-6.8A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.8 19.4a2.4 2.4 0 0 0 4.4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ic-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.6 20.6a7.4 7.4 0 0 1 14.8 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ic-swap" viewBox="0 0 24 24"><path d="M4 8.6h11.4a3.4 3.4 0 0 1 0 6.8H8.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.6" cy="15.4" r="1.7" fill="currentColor"/><path d="M7.4 5.6 4 8.6l3.4 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+
+  <!-- 서비스 타일 / 호출 옵션용 컬러 아이콘 -->
+  <symbol id="ic-taxi" viewBox="0 0 48 32">
+    <rect x="18" y="1.5" width="12" height="5" rx="1.6" fill="#FEE500" stroke="#2B2B2B" stroke-width="1.4"/>
+    <path d="M6 24V17c0-1.4.7-2.6 1.9-3.3l4.6-2.6a6 6 0 0 1 3-.8h13a6 6 0 0 1 3.4 1l6.2 4.2c.5.4 1.1.6 1.8.7l3.3.5A3 3 0 0 1 45.8 20l.2 2.1c.1 1.2-.8 2.2-2 2.2H6Z" fill="#F2F3F5" stroke="#2B2B2B" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M14 11.6 12.4 24M22 10.6 20.6 24" stroke="#FEE500" stroke-width="3"/>
+    <circle cx="13.5" cy="24.5" r="5" fill="#2B2B2B"/><circle cx="13.5" cy="24.5" r="2.1" fill="#D9DBE0"/>
+    <circle cx="34.5" cy="24.5" r="5" fill="#2B2B2B"/><circle cx="34.5" cy="24.5" r="2.1" fill="#D9DBE0"/>
+  </symbol>
+  <symbol id="ic-taxi-blue" viewBox="0 0 48 32">
+    <rect x="18" y="1.5" width="12" height="5" rx="1.6" fill="#1B64DA" stroke="#16305E" stroke-width="1.4"/>
+    <path d="M6 24V17c0-1.4.7-2.6 1.9-3.3l4.6-2.6a6 6 0 0 1 3-.8h13a6 6 0 0 1 3.4 1l6.2 4.2c.5.4 1.1.6 1.8.7l3.3.5A3 3 0 0 1 45.8 20l.2 2.1c.1 1.2-.8 2.2-2 2.2H6Z" fill="#E7EFFC" stroke="#16305E" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M14 11.6 12.4 24M22 10.6 20.6 24" stroke="#1B64DA" stroke-width="3"/>
+    <circle cx="13.5" cy="24.5" r="5" fill="#16305E"/><circle cx="13.5" cy="24.5" r="2.1" fill="#C7D4EA"/>
+    <circle cx="34.5" cy="24.5" r="5" fill="#16305E"/><circle cx="34.5" cy="24.5" r="2.1" fill="#C7D4EA"/>
+  </symbol>
+  <symbol id="ic-venti" viewBox="0 0 48 32">
+    <rect x="18" y="1.5" width="12" height="4.4" rx="1.5" fill="#FEE500" stroke="#2B2B2B" stroke-width="1.3"/>
+    <path d="M5 24V13.4c0-2 1.6-3.6 3.6-3.6h27c1.2 0 2.3.6 3 1.6l4.4 6.4c.4.6.6 1.2.6 1.9V22c0 1.1-.9 2-2 2H5Z" fill="#F2F3F5" stroke="#2B2B2B" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M13 9.8 11.6 24M21 9.8 19.6 24" stroke="#FEE500" stroke-width="3"/>
+    <circle cx="13" cy="24.5" r="5" fill="#2B2B2B"/><circle cx="13" cy="24.5" r="2.1" fill="#D9DBE0"/>
+    <circle cx="35" cy="24.5" r="5" fill="#2B2B2B"/><circle cx="35" cy="24.5" r="2.1" fill="#D9DBE0"/>
+  </symbol>
+  <symbol id="ic-black" viewBox="0 0 48 32">
+    <path d="M5 24v-6c0-1.5.8-2.8 2.1-3.5l5-2.7a7 7 0 0 1 3.3-.8h12.4c1.2 0 2.4.3 3.4 1l6.4 4.3c.5.3 1.1.5 1.7.6l3.2.5A3 3 0 0 1 45 20.3v1.5c0 1.2-1 2.2-2.2 2.2H5Z" fill="#232323" stroke="#0F0F0F" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M16.5 11.4 15 17.6h13.5l-5-6.2z" fill="#5A6070"/>
+    <circle cx="13.5" cy="24.5" r="5" fill="#0F0F0F"/><circle cx="13.5" cy="24.5" r="2.1" fill="#8E939E"/>
+    <circle cx="34.5" cy="24.5" r="5" fill="#0F0F0F"/><circle cx="34.5" cy="24.5" r="2.1" fill="#8E939E"/>
+  </symbol>
+  <symbol id="ic-mobum" viewBox="0 0 48 32">
+    <rect x="18" y="1.5" width="12" height="5" rx="1.6" fill="#FEE500" stroke="#2B2B2B" stroke-width="1.4"/>
+    <path d="M6 24V17c0-1.4.7-2.6 1.9-3.3l4.6-2.6a6 6 0 0 1 3-.8h13a6 6 0 0 1 3.4 1l6.2 4.2c.5.4 1.1.6 1.8.7l3.3.5A3 3 0 0 1 45.8 20l.2 2.1c.1 1.2-.8 2.2-2 2.2H6Z" fill="#2B2B2B" stroke="#141414" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M6.4 18.4h39" stroke="#FEE500" stroke-width="2.6"/>
+    <circle cx="13.5" cy="24.5" r="5" fill="#141414"/><circle cx="13.5" cy="24.5" r="2.1" fill="#8E939E"/>
+    <circle cx="34.5" cy="24.5" r="5" fill="#141414"/><circle cx="34.5" cy="24.5" r="2.1" fill="#8E939E"/>
+  </symbol>
+  <symbol id="ic-rentcar" viewBox="0 0 48 32">
+    <path d="M5 24v-6.2c0-1.5.8-2.8 2.1-3.5l5-2.7a7 7 0 0 1 3.3-.8h12.4c1.2 0 2.4.3 3.4 1l6.4 4.3c.5.3 1.1.5 1.7.6l3.2.5A3 3 0 0 1 45 20.3v1.5c0 1.2-1 2.2-2.2 2.2H5Z" fill="#2F6BFF" stroke="#1B3D8F" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M16.5 11.4 15 17.4h13.5l-5-6z" fill="#BBD2FF"/>
+    <circle cx="13.5" cy="24.5" r="5" fill="#1B3D8F"/><circle cx="13.5" cy="24.5" r="2.1" fill="#C7D4EA"/>
+    <circle cx="34.5" cy="24.5" r="5" fill="#1B3D8F"/><circle cx="34.5" cy="24.5" r="2.1" fill="#C7D4EA"/>
+  </symbol>
+  <symbol id="ic-bike" viewBox="0 0 48 32">
+    <circle cx="11" cy="21" r="7" fill="none" stroke="#2B2B2B" stroke-width="2.2"/>
+    <circle cx="37" cy="21" r="7" fill="none" stroke="#2B2B2B" stroke-width="2.2"/>
+    <path d="M11 21 19 9h7l6 12M19 21h13M26 9h5" fill="none" stroke="#FEE500" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="14" y="7" width="8" height="6" rx="1.4" fill="none" stroke="#2B2B2B" stroke-width="1.8"/>
+  </symbol>
+  <symbol id="ic-bike30" viewBox="0 0 48 32">
+    <circle cx="11" cy="21" r="7" fill="none" stroke="#2B2B2B" stroke-width="2.2"/>
+    <circle cx="37" cy="21" r="7" fill="none" stroke="#2B2B2B" stroke-width="2.2"/>
+    <path d="M11 21 19 9h7l6 12M19 21h13" fill="none" stroke="#FEE500" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="20" y="1.5" width="18" height="11" rx="2.4" fill="#2F6BFF"/>
+    <path d="M25 9.6l8-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="25.4" cy="4.6" r="1.5" fill="#fff"/><circle cx="32.6" cy="9.4" r="1.5" fill="#fff"/>
+  </symbol>
+  <symbol id="ic-trainbus" viewBox="0 0 48 32">
+    <path d="M4 22V12a7 7 0 0 1 7-7h16a12 12 0 0 1 12 12v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" fill="#DCEAFB" stroke="#2B4C7E" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M9 10h13v6H9zM26 10h8.5a8 8 0 0 1 3.5 6H26z" fill="#8FB8E8"/>
+    <circle cx="12" cy="25" r="3.4" fill="#2B4C7E"/><circle cx="34" cy="25" r="3.4" fill="#2B4C7E"/>
+  </symbol>
+  <symbol id="ic-taxical" viewBox="0 0 48 32">
+    <rect x="20" y="3" width="26" height="24" rx="3.4" fill="#2F6BFF"/>
+    <path d="M20 10h26" stroke="#fff" stroke-width="1.8"/>
+    <path d="M27 19.5l4 4 8-8.5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M2 24v-5.6c0-1.3.7-2.4 1.8-3l4.4-2.5a5.6 5.6 0 0 1 2.8-.7h10.4v11.8H2Z" fill="#F2F3F5" stroke="#2B2B2B" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M10 12.6 8.6 24" stroke="#FEE500" stroke-width="3"/>
+    <circle cx="9.5" cy="24.5" r="4.6" fill="#2B2B2B"/><circle cx="9.5" cy="24.5" r="1.9" fill="#D9DBE0"/>
+  </symbol>
+  <symbol id="ic-quick" viewBox="0 0 48 32">
+    <rect x="10" y="8" width="20" height="17" rx="2.2" fill="#C79A6B" stroke="#8A6236" stroke-width="1.6"/>
+    <path d="M20 8v17M10 15h20" stroke="#8A6236" stroke-width="1.6"/>
+    <circle cx="38" cy="12" r="5" fill="#2F6BFF"/>
+  </symbol>
+  <symbol id="ic-daeri" viewBox="0 0 48 32">
+    <circle cx="24" cy="16" r="12" fill="#2F6BFF"/>
+    <circle cx="24" cy="16" r="4.4" fill="#fff"/>
+    <path d="M24 4v7.6M12 16h7.6M28.4 16H36M24 20.4V28" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+  </symbol>
+</defs></svg>
+
+<div class="stage">
+  <div class="phone" id="phone">
+
+    <!-- ═══════════  홈  ═══════════ -->
+    <section class="screen screen--home" data-screen="home">
+      <div class="home-scroll">
+        <div class="home-search" id="homeSearch">
+          <span class="home-search__q">어디로 갈까요?</span>
+          <span class="home-search__acts">
+            <span class="hs-act"><svg class="i18"><use href="#ic-home"/></svg>집</span>
+            <span class="hs-div"></span>
+            <span class="hs-act"><svg class="i18"><use href="#ic-office"/></svg>회사</span>
+          </span>
+        </div>
+
+        <div class="home-ad">
+          <div class="home-ad__txt">
+            <div class="home-ad__from"><span class="ad-avatar">🧢</span>터치제주 오픈채팅에서 확인</div>
+            <div class="home-ad__title">제주형 스마트폰 활용 교재</div>
+            <div class="home-ad__meta"><b class="ad-badge">AD</b> Touchjeju 광고입니다.</div>
+          </div>
+          <div class="home-ad__art" aria-hidden="true">
+            <svg viewBox="0 0 120 96">
+              <path d="M96 8 66 44" stroke="#6E6E6E" stroke-width="3" stroke-linecap="round"/>
+              <ellipse cx="56" cy="24" rx="30" ry="8" fill="#CACACA"/>
+              <ellipse cx="56" cy="20" rx="19" ry="12" fill="#D7D7D7"/>
+              <circle cx="56" cy="46" r="20" fill="#D7D7D7"/>
+              <circle cx="49" cy="44" r="2.6" fill="#3A3A3A"/><circle cx="63" cy="44" r="2.6" fill="#3A3A3A"/>
+              <ellipse cx="56" cy="51" rx="4" ry="3" fill="#F0A030"/>
+              <path d="M34 96c0-14 10-24 22-24s22 10 22 24z" fill="#D7D7D7"/>
+              <path d="M74 60c7-2 15-7 21-15" stroke="#D7D7D7" stroke-width="9" stroke-linecap="round" fill="none"/>
+              <circle cx="56" cy="92" r="9" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="home-tabs">
+          <button class="home-tab is-on">이동할 때</button>
+          <button class="home-tab">운전할 때</button>
+          <button class="home-tab">물건보낼 때</button>
+          <button class="home-tab">해외결제</button>
+        </div>
+
+        <div class="home-card">
+          <div class="home-grid">
+            <div class="promo">
+              <div class="promo__sub">블루파트너스 이…</div>
+              <div class="promo__title">무료로 이용하…</div>
+              <svg class="promo__art" viewBox="0 0 130 96">
+                <rect x="44" y="10" width="46" height="34" rx="6" fill="#2F6BFF"/>
+                <text x="67" y="36" font-size="24" font-weight="800" fill="#fff" text-anchor="middle">M</text>
+                <circle cx="32" cy="20" r="10" fill="#FFC94A"/><text x="32" y="26" font-size="12" font-weight="800" fill="#8A6100" text-anchor="middle">%</text>
+                <circle cx="100" cy="52" r="8" fill="#FFC94A"/>
+                <g transform="translate(6,50) scale(1.7)"><use href="#ic-taxi"/></g>
+              </svg>
+            </div>
+            <button class="svc" id="svcTaxi"><span class="svc__ico"><svg viewBox="0 0 48 32"><use href="#ic-taxi"/></svg></span><span class="svc__label">택시</span></button>
+            <button class="svc"><span class="svc__ico"><svg viewBox="0 0 48 32"><use href="#ic-taxical"/></svg></span><span class="svc__label">택시예약</span></button>
+            <button class="svc"><span class="svc__ico"><svg viewBox="0 0 48 32"><use href="#ic-rentcar"/></svg></span><span class="svc__label">렌터카</span></button>
+            <button class="svc"><span class="svc__ico"><svg viewBox="0 0 48 32"><use href="#ic-bike"/></svg></span><span class="svc__label">바이크</span></button>
+            <button class="svc"><span class="svc__ico"><svg viewBox="0 0 48 32"><use href="#ic-bike30"/></svg></span><span class="svc__label">바이크30분</span></button>
+            <button class="svc"><span class="svc__ico"><svg viewBox="0 0 48 32"><use href="#ic-trainbus"/></svg></span><span class="svc__label">기차/버스</span></button>
+          </div>
+          <button class="home-more">전체 서비스 보기</button>
+        </div>
+
+        <div class="home-card">
+          <div class="home-card__head"><span>자주 쓰는 서비스</span><span class="home-card__edit">편집</span></div>
+          <div class="home-tip">자주 쓰는 서비스를 추가하세요</div>
+          <div class="fav-row">
+            <div class="fav"><span class="fav__ico"><svg viewBox="0 0 48 32"><use href="#ic-taxi"/></svg><i class="fav__plus">＋</i></span><span>택시</span></div>
+            <div class="fav"><span class="fav__ico"><svg viewBox="0 0 48 32"><use href="#ic-bike"/></svg><i class="fav__plus">＋</i></span><span>바이크</span></div>
+            <div class="fav"><span class="fav__ico"><svg viewBox="0 0 48 32"><use href="#ic-daeri"/></svg><i class="fav__plus">＋</i></span><span>대리</span></div>
+            <div class="fav"><span class="fav__ico"><svg viewBox="0 0 48 32"><use href="#ic-quick"/></svg><i class="fav__plus">＋</i></span><span>퀵·배송</span></div>
+            <div class="fav fav--muted"><span class="fav__ico fav__ico--pin">📌</span><span>추가</span></div>
+          </div>
+        </div>
+        <div class="home-pad"></div>
+      </div>
+
+      <nav class="home-nav">
+        <button><svg class="i22"><use href="#ic-grid"/></svg><span>전체…</span></button>
+        <button><svg class="i22"><use href="#ic-biz"/></svg><span>비즈…</span></button>
+        <button class="is-on"><svg class="i22"><use href="#ic-navhome"/></svg><span>홈</span></button>
+        <button class="has-dot"><svg class="i22"><use href="#ic-bell"/></svg><span>이용/…</span></button>
+        <button class="has-dot"><svg class="i22"><use href="#ic-person"/></svg><span>내 정보</span></button>
+      </nav>
+    </section>
+
+    <!-- ═══════════  S2 · 택시 지도 / 출발지 설정  ═══════════ -->
+    <section class="screen screen--taxi" data-screen="taxi">
+      <div class="map" id="mapBox">
+        <svg class="map__svg" id="svgS2" preserveAspectRatio="xMidYMid slice">
+          <g id="s2Pan">
+            <g id="s2Static"></g>
+            <g id="s2Me"></g>
+            <g id="s2Taxis"></g>
+          </g>
+        </svg>
+
+        <button class="map-back" data-back aria-label="뒤로"><svg class="i24"><use href="#ic-back"/></svg></button>
+
+        <div class="pin" id="pin">
+          <div class="pin__bubble">출발</div>
+          <div class="pin__flag">
+            <svg viewBox="0 0 40 46">
+              <rect x="18.4" y="11" width="2.6" height="31" rx="1.3" fill="#1B1B1B"/>
+              <rect x="20" y="4" width="16" height="11" rx="1.6" fill="#fff"/>
+              <rect x="20" y="4" width="4" height="3.7" fill="#2F6BFF"/><rect x="28" y="4" width="4" height="3.7" fill="#2F6BFF"/>
+              <rect x="24" y="7.7" width="4" height="3.7" fill="#2F6BFF"/><rect x="32" y="7.7" width="4" height="3.7" fill="#2F6BFF"/>
+              <rect x="20" y="11.4" width="4" height="3.6" fill="#2F6BFF"/><rect x="28" y="11.4" width="4" height="3.6" fill="#2F6BFF"/>
+              <rect x="20" y="4" width="16" height="11" rx="1.6" fill="none" stroke="#1B1B1B" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <div class="pin__shadow" id="pinShadow"></div>
+        </div>
+
+        <button class="map-pill" id="btnReserve"><svg class="i20"><use href="#ic-cal"/></svg>예약하기<svg class="i14 map-pill__chev"><use href="#ic-chev"/></svg></button>
+        <button class="map-locate" id="btnLocate" aria-label="현위치로"><svg class="i26"><use href="#ic-crosshair"/></svg></button>
+      </div>
+
+      <div class="sheet">
+        <div class="sheet__row" id="rowOrigin">
+          <i class="dot dot--origin"></i>
+          <span class="sheet__text" id="originText">제주시청</span>
+        </div>
+        <div class="sheet__line"></div>
+        <div class="sheet__row" id="rowDest">
+          <i class="dot dot--dest"></i>
+          <span class="sheet__text sheet__text--ph">어디로 갈까요?</span>
+        </div>
+        <div class="chips">
+          <button class="chip" data-fav="home"><svg class="i20"><use href="#ic-home"/></svg>집</button>
+          <button class="chip" data-fav="work"><svg class="i20"><use href="#ic-office"/></svg>회사</button>
+          <button class="chip" data-fav="airport">제주국제공항</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════  S3 · 도착지 검색  ═══════════ -->
+    <section class="screen screen--search" data-screen="search">
+      <div class="srch-head">
+        <button class="srch-back" data-back aria-label="뒤로"><svg class="i26"><use href="#ic-back"/></svg></button>
+        <div class="srch-origin"><i class="dot dot--origin"></i><span id="srchOrigin">제주시청</span></div>
+        <form class="srch-field" id="srchForm" autocomplete="off" action="#">
+          <i class="dot dot--dest"></i>
+          <input id="srchInput" type="search" inputmode="text" enterkeyhint="search"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                 placeholder="도착지 검색">
+          <button type="button" class="srch-mic" id="srchMic" aria-label="음성 검색"><svg class="i24"><use href="#ic-mic"/></svg></button>
+          <button type="button" class="srch-clear" id="srchClear" aria-label="지우기" hidden><svg class="i22"><use href="#ic-xcircle"/></svg></button>
+        </form>
+        <div class="srch-tools" id="srchTools">
+          <button class="srch-tool" data-fav="home"><svg class="i22"><use href="#ic-home"/></svg>집</button>
+          <button class="srch-tool" data-fav="work"><svg class="i22"><use href="#ic-office"/></svg>회사</button>
+          <span class="srch-tools__sp"></span>
+          <button class="srch-tool srch-tool--icon" aria-label="현위치"><svg class="i24"><use href="#ic-crosshair"/></svg></button>
+          <span class="srch-tools__div"></span>
+          <button class="srch-tool srch-tool--icon" aria-label="지도에서 찾기"><svg class="i24"><use href="#ic-mapfold"/></svg></button>
+        </div>
+      </div>
+      <div class="srch-body" id="srchBody"></div>
+    </section>
+
+    <!-- ═══════════  S4 · 경로 + 호출 옵션  ═══════════ -->
+    <section class="screen screen--route" data-screen="route">
+      <div class="route-map" id="routeMapBox">
+        <svg class="map__svg" id="svgS4" preserveAspectRatio="xMidYMid slice"></svg>
+        <div class="route-top">
+          <button class="route-top__x" data-back aria-label="닫기"><svg class="i24"><use href="#ic-x"/></svg></button>
+          <span class="route-top__from" id="routeFrom">제주시청</span>
+          <svg class="i16 route-top__chev"><use href="#ic-chev"/></svg>
+          <span class="route-top__to" id="routeTo">제주국제공항</span>
+        </div>
+        <button class="map-pill map-pill--route" id="btnRecommend"><svg class="i22"><use href="#ic-swap"/></svg>추천경로</button>
+      </div>
+
+      <div class="sheet sheet--route">
+        <div class="grab"></div>
+        <div class="seg">
+          <button class="seg__btn is-on">모든 호출</button>
+          <button class="seg__btn">원하는 시간으로 호출</button>
+        </div>
+        <div class="route-addr">
+          <div class="route-addr__row"><i class="dot dot--origin"></i><span id="routeAddrFrom">제주시청</span></div>
+          <div class="route-addr__row"><i class="dot dot--dest"></i><span id="routeAddrTo">제주국제공항</span></div>
+        </div>
+        <div class="opts" id="opts"></div>
+      </div>
+      <div class="cta-wrap">
+        <button class="cta" id="ctaCall">일반 호출하기</button>
+      </div>
+    </section>
+
+    <!-- ═══════════  S1 · 광고 팝업  ═══════════ -->
+    <div class="ad" id="adPopup" hidden>
+      <div class="ad__dim" id="adDim"></div>
+      <div class="ad__wrap">
+        <div class="ad__card">
+          <div class="ad__body">
+            <div class="ad__title">제주형<br>스마트폰 활용</div>
+            <svg class="ad__book" viewBox="0 0 300 190">
+              <g transform="rotate(-7 150 95)">
+                <rect x="36" y="34" width="228" height="132" rx="5" fill="#5FBBD0"/>
+                <rect x="44" y="28" width="220" height="132" rx="5" fill="#7FD2E4"/>
+                <text x="68" y="66" font-size="22" font-weight="800" fill="#fff">제주형</text>
+                <text x="68" y="94" font-size="22" font-weight="800" fill="#fff">스마트폰 활용</text>
+                <text x="68" y="142" font-size="14" font-weight="700" fill="#fff">-기초편-</text>
+                <rect x="176" y="46" width="68" height="102" rx="10" fill="#fff" stroke="#D5EAF0" stroke-width="2"/>
+                <rect x="182" y="54" width="56" height="64" rx="5" fill="#DCF1F7"/>
+                <circle cx="194" cy="66" r="5" fill="#2FBF4B"/><circle cx="210" cy="66" r="5" fill="#FEE500"/><circle cx="226" cy="66" r="5" fill="#7B8794"/>
+                <circle cx="194" cy="82" r="5" fill="#E8402A"/><circle cx="210" cy="82" r="5" fill="#2F6BFF"/><circle cx="226" cy="82" r="5" fill="#38B44A"/>
+                <circle cx="150" cy="126" r="16" fill="#CFCFCF"/><ellipse cx="150" cy="113" rx="20" ry="6.5" fill="#C4C4C4"/>
+                <path d="M134 160c0-10 7-18 16-18s16 8 16 18z" fill="#CFCFCF"/>
+              </g>
+            </svg>
+            <div class="ad__ad"><b class="ad-badge">AD</b> Touchjeju 광고입니다.</div>
+          </div>
+          <div class="ad__actions">
+            <button class="ad__act" id="adShare">친구에게 공유</button>
+            <button class="ad__act" id="adMore">자세히 보기</button>
+          </div>
+        </div>
+        <button class="ad__close" id="adClose" aria-label="광고 닫기"><svg class="i26"><use href="#ic-x"/></svg></button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
