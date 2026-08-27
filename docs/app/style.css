@@ -242,18 +242,20 @@ svg[class^="i"],svg[class*=" i"]{ display:block; fill:none; }
   width:12px; height:12px; background:#26282C;
   transform:translateX(-50%) rotate(45deg); border-radius:2px;
 }
-.pin__flag{ width:40px; height:46px; margin-top:2px; transition:transform .18s ease; }
-.pin__flag svg{ width:100%; height:100%; display:block; }
-.pin__shadow{
-  width:16px; height:5px; margin-top:-3px; border-radius:50%;
-  background:rgba(0,0,0,.28); filter:blur(1px);
-  transition:transform .18s ease, opacity .18s ease;
+/* 말풍선 아래로 내려오는 가는 대와 지점을 찍는 점 (tp-04) */
+.pin__stem{ width:3px; height:26px; background:#26282C; }
+.pin__dot{
+  width:11px; height:11px; margin-top:-2px; border-radius:50%;
+  background:#26282C;
+  transition:transform .18s ease;
 }
-.pin.is-drag .pin__flag{ transform:translateY(-10px); }
-.pin.is-drag .pin__shadow{ transform:scale(.6); opacity:.45; }
-.pin.is-drop .pin__flag{ animation:pinDrop .25s cubic-bezier(.3,1.5,.5,1); }
+/* 드래그 중에는 말풍선+대가 살짝 뜨고, 점은 제자리에서 작아진다 */
+.pin__bubble,.pin__stem{ transition:transform .18s ease; }
+.pin.is-drag .pin__bubble,.pin.is-drag .pin__stem{ transform:translateY(-9px); }
+.pin.is-drag .pin__dot{ transform:scale(.62); }
+.pin.is-drop .pin__bubble,.pin.is-drop .pin__stem{ animation:pinDrop .25s cubic-bezier(.3,1.5,.5,1); }
 @keyframes pinDrop{
-  0%{ transform:translateY(-10px); }
+  0%{ transform:translateY(-9px); }
   55%{ transform:translateY(3px); }
   100%{ transform:translateY(0); }
 }
@@ -500,3 +502,41 @@ svg[class^="i"],svg[class*=" i"]{ display:block; fill:none; }
 .chip{ white-space:nowrap; padding:0 14px; }
 .chips{ overflow-x:auto; scrollbar-width:none; }
 .chips::-webkit-scrollbar{ height:0; }
+
+/* ═══════  image/ 캡처 대조 후 세부 보정  ═══════ */
+
+/* tp-04 바텀시트 — 구분선은 시트 안쪽 폭 전체, 점은 조금 작게, 칩은 조금 크게 */
+.sheet{ padding-top:14px; }
+.sheet__line{ margin-left:0; }
+.dot--origin{ width:9px; height:9px; border-width:2px; }
+.dot--dest{ width:8px; height:8px; }
+.sheet__row{ gap:14px; height:54px; }
+.chips{ gap:10px; margin-top:12px; }
+.chip{ height:50px; border-radius:14px; font-size:16.5px; padding:0 16px; gap:7px; background:#F2F3F5; }
+
+/* tp-02 홈 — 검색 필드와 탭이 실제보다 작았다 */
+.home-search{ height:60px; }
+.home-search__q{ font-size:19.5px; }
+.hs-act{ font-size:16.5px; }
+.home-ad{ border-radius:11px; }
+.home-tabs{ gap:20px; }
+.home-tab{ font-size:19px; }
+
+/* tp-09 호출 옵션 — 이름과 요금이 같은 줄, 설명은 그 아래 전체 폭 */
+.opt{ align-items:flex-start; padding:15px 10px; }
+.opt__ico{ width:54px; height:34px; margin-top:1px; }
+.opt__body{ flex:1; min-width:0; display:block; }
+.opt__top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.opt__name{ font-size:16.5px; font-weight:700; }
+.opt__fare{ font-size:16.5px; font-weight:600; white-space:nowrap; }
+.opt__fare small{ font-size:16.5px; font-weight:600; color:inherit; margin-right:4px; }
+.opt__desc{ margin-top:4px; font-size:14.5px; white-space:normal; overflow:visible; }
+.opt + .opt{ margin-top:0; border-top:1px solid var(--line); }
+.opt.is-on + .opt, .opt:has(+ .opt.is-on){ border-top-color:transparent; }
+
+/* tp-09 세그먼트 — 선택된 알약에 옅은 테두리 */
+.seg__btn.is-on{ border:1px solid #E6E7EA; }
+
+/* tp-02 프로모션 카드 — 두 줄 다 한 줄 말줄임 */
+.promo__sub,.promo__title{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.promo{ padding:12px 10px 0; }

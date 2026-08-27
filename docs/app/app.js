@@ -16,7 +16,11 @@ var PIN_FOLLOWS_DRAG = true;
 var PPM = 1.15;          // S2 지도 배율 (화면 px / 실제 m)
 var PAN_LIMIT = 400;     // 출발 핀을 현위치에서 최대 몇 m 까지 옮길 수 있나
 var S2_CELL = 46;        // 도로 격자 한 칸 (m)
-var TAXI_COUNT = 5;      // 요구사항 2-3: 핀 반경 안에 4~6대 유지
+// tp-04 실제 화면에는 지도를 돌아다니는 택시가 없고, 출발 지점에 택시가
+// 도로 방향으로 서 있다. 그래서 대수를 줄이고 주행은 끈다.
+// (요구사항 2-3 의 "천천히 앞으로 움직인다"를 되살리려면 TAXI_DRIVES = true)
+var TAXI_COUNT = 3;
+var TAXI_DRIVES = false;
 
 var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -321,7 +325,7 @@ function makeMap(o) {
   }
 
   // ── POI
-  var poiN = o.buildings ? Math.round(blocks.length / 4) : Math.round(blocks.length / 14);
+  var poiN = o.buildings ? Math.round(blocks.length / 2.2) : Math.round(blocks.length / 12);
   var used = {};
   for (var pi = 0; pi < poiN; pi++) {
     var b = blocks[Math.floor(rnd() * blocks.length)];
@@ -433,16 +437,21 @@ function buildS2Map() {
 /* ── 4-1. 도로에 맞춰 회전하는 주변 택시 (요구사항 2-3) ── */
 
 var taxis = [];
-// 기본 방향은 +x (코가 오른쪽). rotate(선분 각도) 를 그대로 걸면 도로와 나란해진다.
+// 위에서 내려다본 카카오T 블루 택시 (tp-04 의 출발 지점 마커와 같은 모양).
+// 기본 방향은 +x (코가 오른쪽) — rotate(선분 각도) 를 그대로 걸면 도로와 나란해진다.
 var TAXI_SVG =
-  '<ellipse cx="1.6" cy="2.2" rx="13" ry="6" fill="rgba(0,0,0,.15)"/>' +
-  '<path d="M-12.6 -5.6 L6.5 -6.2 Q12.8 -6.2 12.8 0 Q12.8 6.2 6.5 6.2 L-12.6 5.6 Q-14.2 5.6 -14.2 3.8 L-14.2 -3.8 Q-14.2 -5.6 -12.6 -5.6 Z" fill="#F4F5F7" stroke="#22252A" stroke-width="1"/>' +
-  '<path d="M2 -4.7 Q8.2 -4.4 10.2 0 Q8.2 4.4 2 4.7 Z" fill="#39404A"/>' +
-  '<rect x="-8.8" y="-4.5" width="5.6" height="9" rx="1.5" fill="#5B636E"/>' +
-  '<rect x="-13.4" y="-6" width="8.4" height="2.7" rx="1.1" fill="#FEE500"/>' +
-  '<rect x="-13.4" y="3.3" width="8.4" height="2.7" rx="1.1" fill="#FEE500"/>' +
-  '<rect x="-2.6" y="-3" width="4.8" height="6" rx="1.3" fill="#FEE500" stroke="#22252A" stroke-width=".7"/>' +
-  '<circle cx="11.6" cy="-3.4" r="1.2" fill="#FFF3B0"/><circle cx="11.6" cy="3.4" r="1.2" fill="#FFF3B0"/>';
+  // 바닥 그림자
+  '<rect x="-17" y="-7.4" width="36" height="17" rx="7" fill="rgba(0,0,0,.16)"/>' +
+  // 흰 테두리 → 검은 외곽선 → 파란 차체
+  '<rect x="-18" y="-8.6" width="36" height="17.2" rx="6.6" fill="#fff"/>' +
+  '<rect x="-16.6" y="-7.4" width="33.2" height="14.8" rx="5.6" fill="#3F5AC6" stroke="#1D1F24" stroke-width="1.5"/>' +
+  // 앞유리 / 뒷유리 (진한 유리색)
+  '<path d="M4.6 -5.6 Q10 -5.2 12.4 0 Q10 5.2 4.6 5.6 Z" fill="#2A3350"/>' +
+  '<path d="M-9.4 -5.6 Q-12.6 -4.6 -13.4 0 Q-12.6 4.6 -9.4 5.6 Z" fill="#2A3350"/>' +
+  // 지붕 패널 — 위아래로 파란 차체가 남도록 안쪽에만
+  '<rect x="-8" y="-4.4" width="12.6" height="8.8" rx="2.2" fill="#EEF1F6"/>' +
+  // 노란 갓등 (지붕을 가로지른다)
+  '<rect x="-3.2" y="-3.4" width="4.4" height="6.8" rx="1.6" fill="#FFCE00"/>';
 
 function angDiff(a, b) { var d = (a - b + 540) % 360 - 180; return d; }
 
@@ -456,27 +465,41 @@ function pickNext(node, avoid) {
 function placeTaxis() {
   var pw = pinWorld();
   var nodes = s2Map.nodes;
-  // 핀에서 60~260m 사이의 노드를 후보로 모은다
+  // 출발 지점 가까이(35~150m)에 있는 도로 위 지점만 후보로 모은다
   var cand = [];
   for (var i = 0; i < nodes.length; i++) {
     var d = distM(nodes[i], pw);
-    if (d > 55 && d < 265 && s2Map.adj[i].length) cand.push(i);
+    if (d > 35 && d < 150 && s2Map.adj[i].length) cand.push(i);
   }
   if (!cand.length) cand = nodes.map(function (_, i) { return i; });
 
   taxiG.innerHTML = '';
   taxis = [];
+
+  // 첫 대는 tp-04 처럼 출발 지점에 붙인다 — 핀에서 가장 가까운 도로 선분 위,
+  // 핀에 제일 가까운 점에 스냅한다.
+  var near = nearestEdge(pw);
+
   for (var t = 0; t < TAXI_COUNT; t++) {
-    var a = cand[Math.floor(Math.random() * cand.length)];
-    var b = pickNext(a, -1);
+    var a, b, at;
+    if (t === 0 && near) {
+      a = near.from; b = near.to;
+      // 말풍선 대 바로 밑이 아니라 도로를 따라 20m 정도 옆에 세운다 (tp-04)
+      var segLen = distM(nodes[near.from], nodes[near.to]) || 1;
+      at = clamp(near.t - 20 / segLen, 0.08, 0.92);
+    } else {
+      a = cand[Math.floor(Math.random() * cand.length)];
+      b = pickNext(a, -1);
+      at = 0.25 + Math.random() * 0.5;
+    }
     // 요구사항 2-3(5): 선분의 양방향 중 하나를 랜덤으로 (반대 차선 표현)
-    if (Math.random() < 0.5) { var tmp = a; a = b; b = tmp; }
+    if (Math.random() < 0.5) { var tmp = a; a = b; b = tmp; at = 1 - at; }
     var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     g.innerHTML = TAXI_SVG;
     taxiG.appendChild(g);
     var A = nodes[a], B = nodes[b];
     taxis.push({
-      el: g, from: a, to: b, t: Math.random(),
+      el: g, from: a, to: b, t: at,
       speed: 7 + Math.random() * 5,                 // m/s
       angle: Math.atan2(B.y - A.y, B.x - A.x) * 180 / Math.PI,
       target: 0
@@ -486,10 +509,32 @@ function placeTaxis() {
   }
 }
 
+// 한 점에서 가장 가까운 도로 선분과, 그 선분 위의 최근접 위치(0~1)
+function nearestEdge(p) {
+  var nodes = s2Map.nodes, adj = s2Map.adj, best = null, bd = Infinity;
+  for (var i = 0; i < nodes.length; i++) {
+    var A = nodes[i];
+    if (Math.abs(A.x - p.x) > 220 || Math.abs(A.y - p.y) > 220) continue;
+    for (var k = 0; k < adj[i].length; k++) {
+      var j = adj[i][k];
+      if (j < i) continue;                    // 선분마다 한 번만
+      var B = nodes[j];
+      var vx = B.x - A.x, vy = B.y - A.y;
+      var L2 = vx * vx + vy * vy;
+      if (!L2) continue;
+      var t = clamp(((p.x - A.x) * vx + (p.y - A.y) * vy) / L2, 0.12, 0.88);
+      var dx = A.x + vx * t - p.x, dy = A.y + vy * t - p.y;
+      var d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = { from: i, to: j, t: t }; }
+    }
+  }
+  return best;
+}
+
 function drawTaxi(tx) {
   var A = s2Map.nodes[tx.from], B = s2Map.nodes[tx.to];
   var x = lerp(A.x, B.x, tx.t), y = lerp(A.y, B.y, tx.t);
-  tx.el.setAttribute('transform', 'translate(' + x.toFixed(2) + ',' + y.toFixed(2) + ') rotate(' + tx.angle.toFixed(1) + ')');
+  tx.el.setAttribute('transform', 'translate(' + x.toFixed(2) + ',' + y.toFixed(2) + ') rotate(' + tx.angle.toFixed(1) + ') scale(1.18)');
 }
 
 var lastT = 0;
@@ -501,7 +546,8 @@ function tick(now) {
   if (!dt) return;
 
   var pw = pinWorld();
-  var moving = !REDUCED && stack[stack.length - 1] === 'taxi';
+  var moving = TAXI_DRIVES && !REDUCED && stack[stack.length - 1] === 'taxi';
+  if (!moving) return;   // 서 있을 때는 배치할 때 그린 그대로 둔다
 
   for (var i = 0; i < taxis.length; i++) {
     var tx = taxis[i];
@@ -882,15 +928,18 @@ function drawRouteMap() {
 
 function renderOptions() {
   var html = OPTIONS.map(function (op) {
+    // tp-09: 이름과 요금이 같은 줄에 있고, 설명은 그 아래로 폭 전체를 쓴다
     var right = op.mul === null
-      ? '<span class="opt__fare" style="font-size:14px;color:#8A8F99">날짜 지정</span>'
+      ? '<span class="opt__fare" style="color:#8A8F99">날짜 지정</span>'
       : '<span class="opt__fare"><small>예상</small>' + won(fareFor(trip.km, op.mul)) + '</span>';
     var chip = op.key === 'resv'
       ? '<span class="opt__chip"><svg><use href="#ic-clock"/></svg>10분~2주 뒤 출발</span>' : '';
     return '<button class="opt' + (op.key === selected ? ' is-on' : '') + '" data-opt="' + op.key + '">' +
       '<span class="opt__ico"><svg viewBox="0 0 48 32"><use href="#' + op.ico + '"/></svg></span>' +
-      '<span class="opt__txt"><span class="opt__name">' + op.name + '</span>' +
-      (chip || '<span class="opt__desc">' + op.desc + '</span>') + '</span>' + right + '</button>';
+      '<span class="opt__body">' +
+        '<span class="opt__top"><span class="opt__name">' + op.name + '</span>' + right + '</span>' +
+        (chip || '<span class="opt__desc">' + op.desc + '</span>') +
+      '</span></button>';
   }).join('');
   $('#opts').innerHTML = html;
   updateCta();
