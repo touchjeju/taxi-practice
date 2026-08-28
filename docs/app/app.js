@@ -338,16 +338,16 @@ function fetchDirections(o, d) {
     .then(function (js) {
       var rt = js && js.routes && js.routes[0];
       if (!rt || rt.result_code !== 0) throw new Error(rt ? rt.result_msg : '경로 없음');
-      var path = [];
+      var coords = [];   // [[lat,lng], …] — 지도 SDK 없이도 쓸 수 있게 원시 좌표로
       (rt.sections || []).forEach(function (sec) {
         (sec.roads || []).forEach(function (rd) {
           for (var i = 0; i + 1 < rd.vertexes.length; i += 2) {
-            path.push(new K.LatLng(rd.vertexes[i + 1], rd.vertexes[i]));
+            coords.push([rd.vertexes[i + 1], rd.vertexes[i]]);
           }
         });
       });
       return {
-        path: path,
+        coords: coords,
         km: rt.summary.distance / 1000,
         min: Math.max(1, Math.round(rt.summary.duration / 60)),
         fare: (rt.summary.fare && rt.summary.fare.taxi) || 0
@@ -370,31 +370,30 @@ function markerEl(html, cls) {
 }
 
 function drawRoute() {
-  if (!K || !trip) return;
+  if (!trip) return;
   var box = $('#routeMapBox');
   if (!box.offsetWidth) { setTimeout(drawRoute, 60); return; }
 
-  if (!mapS4) {
-    mapS4 = new K.Map($('#routeCanvas'), { center: LL(trip.from), level: 6 });
+  if (K) {
+    if (!mapS4) mapS4 = new K.Map($('#routeCanvas'), { center: LL(trip.from), level: 6 });
+    mapS4.relayout();
+    clearRoute();
+    paint([LL(trip.from), LL(trip.to)]);   // 응답 전에도 화면이 비지 않도록 임시 직선
   }
-  mapS4.relayout();
-  clearRoute();
 
-  var straight = [LL(trip.from), LL(trip.to)];
-  paint(straight);   // 응답이 오기 전에도 화면이 비지 않도록 임시 직선
-
+  // 지도 SDK 가 없어도 거리·소요시간·택시요금은 실제 길찾기 값을 쓴다
   fetchDirections(trip.from, trip.to).then(function (r) {
-    if (!r.path.length) throw new Error('빈 경로');
-    trip.path = r.path;
+    if (!r.coords.length) throw new Error('빈 경로');
     trip.km = r.km;
     trip.eta = r.min;
     if (r.fare) trip.fare = r.fare;
-    clearRoute();
-    paint(r.path);
     renderOptions();
     updateDetail();
+    if (!K) return;
+    clearRoute();
+    paint(r.coords.map(function (c) { return new K.LatLng(c[0], c[1]); }));
   }).catch(function (err) {
-    // 길찾기 API를 못 쓰면 직선 경로 + 자체 예상요금으로 계속 진행한다
+    // 길찾기를 못 쓰면 직선 거리 + 자체 예상요금으로 계속 진행한다
     if (window.console) console.warn('길찾기 실패:', err && err.message);
   });
 
@@ -622,7 +621,7 @@ function start() {
   renderIdle();
   setOrigin('제주시청');
   if (K) initS2Map();
-  else toast('지도를 불러오지 못했어요.\n(카카오 개발자 콘솔에 이 주소가 등록되어 있어야 해요)');
+  else $('#phone').classList.add('no-map');   // 지도 자리에 안내 문구만 남긴다
 }
 
 // 개발용 — ?debug 로 열었을 때만 화면을 직접 열어볼 수 있게 열어둔다

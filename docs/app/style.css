@@ -275,7 +275,7 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .route-top__to{flex:1}
 .route-top__chev{color:#B6BAC1}
 .map-pill--route{
-  background:#fff;color:var(--cta);left:12px;top:auto;
+  display:none;background:#fff;color:var(--cta);left:12px;top:auto;
   bottom:calc(var(--sheetH,420px) + 14px);
   box-shadow:0 3px 12px rgba(0,0,0,.18);font-size:16.5px;
 }
@@ -448,3 +448,16 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 
 /* 카카오 지도 로고/저작권은 그대로 두되 살짝 줄인다 */
 .map__canvas .map_copyright,.map__canvas a[href*="kakao"]{opacity:.9}
+
+/* 카카오 지도 SDK 를 못 불러왔을 때 (도메인 미등록 / 카카오맵 제품 OFF) */
+.no-map .map__canvas{background:#EDEEF0}
+.no-map .map__canvas::after{
+  content:"지도를 불러오지 못했어요\A카카오 개발자 콘솔에서 카카오맵을 켜고\A이 주소를 등록하면 바로 보입니다";
+  position:absolute;left:0;right:0;top:38%;white-space:pre;text-align:center;
+  color:#9BA0A8;font-size:14px;line-height:1.8;
+}
+.no-map .pin{display:none}
+
+/* 추천경로 버튼은 tp-09 처럼 목록에서는 시트에 가려 안 보이고,
+   tp-10 처럼 호출 상세를 열었을 때만 지도 아래쪽에 나타난다 */
+.screen--route.has-detail .map-pill--route{display:flex}
