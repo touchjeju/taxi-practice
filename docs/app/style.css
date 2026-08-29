@@ -14,6 +14,7 @@
   --cta:#2064E0;          /* 파란 버튼 */
   --red:#E8402A;          /* 도착 뱃지 / 도착 점 */
   --dark:#2C2F35;         /* 검은 말풍선 */
+  --pin:#262C38;          /* 지도 위 출발/도착 마커 */
   --radius:16px;
 }
 
@@ -180,20 +181,17 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 /* 출발 핀 — 지도 한가운데 고정 */
 .pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;pointer-events:none}
 .pin__bubble{
-  position:absolute;left:50%;bottom:26px;transform:translateX(-50%);
-  padding:9px 15px;border-radius:9px;background:var(--dark);color:#fff;
-  font-size:17px;font-weight:800;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.25);
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+  width:46px;height:46px;border-radius:5px;background:var(--pin);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;font-weight:800;letter-spacing:-.5px;white-space:nowrap;
 }
-.pin__bubble::after{content:"";position:absolute;left:50%;bottom:-6px;width:13px;height:13px;background:var(--dark);transform:translateX(-50%) rotate(45deg);border-radius:2px}
-.pin__stem{position:absolute;left:50%;bottom:8px;width:3px;height:20px;margin-left:-1.5px;background:var(--dark);border-radius:2px}
-.pin__dot{
-  position:absolute;left:50%;bottom:0;width:15px;height:15px;margin-left:-7.5px;border-radius:50%;
-  background:#fff;border:4px solid #1B1D22;box-shadow:0 1px 4px rgba(0,0,0,.3)
-}
+.pin__stem{position:absolute;left:50%;bottom:0;width:2.5px;height:14px;margin-left:-1.25px;background:var(--pin)}
+.pin__dot{position:absolute;left:50%;bottom:-2.5px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--pin)}
 /* 택시는 핀(출발점) 중심에 겹쳐두고, JS 가 도로 방향에 맞춰 뒤로 밀어 회전시킨다.
    기본값은 동쪽(오른쪽) 진행 — 도로 방향을 못 구했을 때의 모습. */
 .pin__taxi{
-  position:absolute;left:50%;bottom:-6.5px;margin-left:-26px;width:52px;height:28px;
+  position:absolute;left:50%;bottom:-14px;margin-left:-26px;width:52px;height:28px;
   transform-origin:50% 50%;transform:translate(-44px,0) rotate(0deg);
   transition:transform .4s cubic-bezier(.22,.61,.36,1);
 }
@@ -291,12 +289,16 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 /* 지도 위 마커(카카오맵 커스텀 오버레이) */
 .mk{position:relative;pointer-events:none;font-weight:800}
 .mk--from .mk__bubble{
-  display:flex;align-items:center;gap:5px;padding:9px 13px;border-radius:9px;
-  background:var(--dark);color:#fff;font-size:17px;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.25);
+  display:flex;align-items:center;justify-content:center;gap:4px;height:40px;padding:0 8px;border-radius:4px;
+  background:var(--pin);color:#fff;font-size:17px;letter-spacing:-.5px;white-space:nowrap;
 }
-.mk--from .mk__bubble::after{content:"";position:absolute;left:50%;bottom:12px;width:12px;height:12px;background:var(--dark);transform:translateX(-50%) rotate(45deg)}
 .mk__stem{position:absolute;left:50%;top:100%;margin-left:-1.5px;width:3px;height:15px;background:#1B1D22}
-.mk__ring{position:absolute;left:50%;top:calc(100% + 13px);width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#fff;border:3.5px solid #1B1D22}
+.mk--from .mk__stem{margin-left:-1.25px;width:2.5px;height:17px;background:var(--pin)}
+.mk__ring{
+  position:absolute;left:50%;top:calc(100% + 17px);width:10px;height:10px;margin-left:-5px;
+  border-radius:50%;background:#fff;border:2px solid var(--pin);
+}
+.mk__ring::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:var(--pin)}
 .mk--to .mk__eta{display:flex;align-items:stretch;border-radius:7px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.22);white-space:nowrap}
 .mk--to .mk__eta b{background:var(--red);color:#fff;font-size:16px;padding:8px 11px;letter-spacing:-.3px}
 .mk--to .mk__eta span{display:flex;align-items:center;gap:4px;background:#fff;color:#17171B;font-size:16px;padding:8px 12px}
