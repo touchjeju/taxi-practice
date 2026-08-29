@@ -125,14 +125,72 @@ function initS2Map() {
     origin.lat = c.getLat(); origin.lng = c.getLng();
     btnLocate.classList.toggle('is-moved', haversine(origin, myPos) > 25);
     resolveOriginName();
+    updateTaxiHeading();
   });
 }
 var meOverlay = null;
 
-var nameTimer = null;
+/* ── 택시 아이콘 방향 ──────────────────────────────────────────────
+   출발점 앞 도로에서 택시가 "어느 쪽에서 오는지"를 보여준다.  근처 한 점에서
+   출발점까지 실제 길찾기를 돌린 뒤, 도착 직전 구간의 방위각을 진행 방향으로
+   쓴다.  경로를 못 구하면 기본값(동쪽)을 그대로 둔다. */
+var taxiEl = document.querySelector(".pin__taxi");
+var TAXI_BACK = 44;          // 핀 뒤로 물러나 있는 거리(px)
+var headTimer = null, headFrom = null, headSeq = 0;
+
+function bearing(a, b) {
+  var t = Math.PI / 180;
+  var y = Math.sin((b.lng - a.lng) * t) * Math.cos(b.lat * t);
+  var x = Math.cos(a.lat * t) * Math.sin(b.lat * t) -
+          Math.sin(a.lat * t) * Math.cos(b.lat * t) * Math.cos((b.lng - a.lng) * t);
+  return (Math.atan2(y, x) / t + 360) % 360;
+}
+
+/* 방위각 deg(북=0, 시계방향)로 진행하는 모습으로 택시를 놓는다.
+   화면에서 진행 방향 = (sin, -cos) 이므로 뒤쪽은 그 반대. */
+function placeTaxi(deg) {
+  if (!taxiEl) return;
+  var r = deg * Math.PI / 180;
+  var dx = -TAXI_BACK * Math.sin(r), dy = TAXI_BACK * Math.cos(r);
+  taxiEl.style.transform =
+    "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) rotate(" + (deg - 90).toFixed(1) + "deg)";
+}
+
+/* 출발점으로 접근하는 길을 만들기 위한 기준점 — 현위치가 쓸 만하면 그걸,
+   아니면 북쪽으로 700m 떨어진 가상의 점을 쓴다. */
+function approachFrom(o) {
+  var d = haversine(o, myPos);
+  if (d > 250 && d < 20000) return { lat: myPos.lat, lng: myPos.lng };
+  return { lat: o.lat + 0.0063, lng: o.lng };
+}
+
+function updateTaxiHeading() {
+  clearTimeout(headTimer);
+  headTimer = setTimeout(function () {
+    var o = { lat: origin.lat, lng: origin.lng };
+    if (headFrom && haversine(headFrom, o) < 30) return;   // 거의 안 움직였으면 그대로
+    headFrom = o;
+    var seq = ++headSeq;
+    fetchDirections(approachFrom(o), o).then(function (r) {
+      if (seq !== headSeq) return;                          // 그 사이 또 움직였다
+      var c = r.coords, end = c[c.length - 1];
+      if (!end) return;
+      for (var i = c.length - 2; i >= 0; i--) {             // 15m 이상 떨어진 점까지 되짚어
+        var pt = { lat: c[i][0], lng: c[i][1] };
+        if (haversine(pt, { lat: end[0], lng: end[1] }) >= 15) {
+          placeTaxi(bearing(pt, { lat: end[0], lng: end[1] }));
+          return;
+        }
+      }
+    }).catch(function () { /* 기본 방향 유지 */ });
+  }, 420);
+}
+
+var nameTimer = null, pinnedName = null;
 function resolveOriginName() {
   clearTimeout(nameTimer);
   nameTimer = setTimeout(function () {
+    if (pinnedName) { setOrigin(pinnedName); pinnedName = null; return; }
     if (haversine(origin, CITYHALL) < 70) { setOrigin('제주시청'); return; }
     if (!geocoder) { setOrigin('선택한 위치'); return; }
     geocoder.coord2Address(origin.lng, origin.lat, function (res, status) {
@@ -162,9 +220,8 @@ btnLocate.addEventListener('click', function () {
 $('#btnReserve').addEventListener('click', function () {
   toast('예약 호출은 이 연습에 포함되어 있지 않아요.');
 });
-$('#rowOrigin').addEventListener('click', function () {
-  toast('출발지는 지도를 움직여서 정할 수 있어요.');
-});
+$('#rowOrigin').addEventListener('click', function () { openSearch('origin'); });
+$('#srchOriginRow').addEventListener('click', function () { openSearch('origin'); });
 $('#rowDest').addEventListener('click', openSearch);
 $$('.chip[data-fav]').forEach(function (b) {
   b.addEventListener('click', function () { chooseDest(FAVS[b.dataset.fav]); });
@@ -176,7 +233,13 @@ var srchInput = $('#srchInput'), srchBody = $('#srchBody'), srchForm = $('#srchF
     srchClear = $('#srchClear'), srchMic = $('#srchMic'), srchTools = $('#srchTools');
 var recents = [], lastResults = [], sugTimer = null;
 
-function openSearch() {
+var srchMode = 'dest';                 // 'dest' | 'origin'
+function openSearch(mode) {
+  srchMode = mode === 'origin' ? 'origin' : 'dest';
+  var isO = srchMode === 'origin';
+  screens.search.classList.toggle('is-origin', isO);
+  srchInput.placeholder = isO ? '출발지 검색' : '도착지 검색';
+  $('#srchDot').className = 'dot ' + (isO ? 'dot--origin' : 'dot--dest');
   srchInput.value = '';
   renderIdle();
   push('search');
@@ -258,7 +321,7 @@ function search(q) {
           '<div class="res__name">' + highlight(p.name, q) + '</div>' +
           '<div class="res__addr">' + esc(p.addr) + '<em>' + p.km.toFixed(2) + 'km</em></div>' +
         '</div>' +
-        '<button class="res__btn" data-pick="' + i + '">도착</button>' +
+        '<button class="res__btn" data-pick="' + i + '">' + (srchMode === 'origin' ? '출발' : '도착') + '</button>' +
       '</div>';
     }).join('');
   }, { location: LL(origin), radius: 20000, size: 15 });
@@ -274,18 +337,38 @@ srchClear.addEventListener('click', function () {
   srchInput.value = ''; renderIdle(); srchInput.focus();
 });
 srchMic.addEventListener('click', function () { toast('음성 검색은 이 연습에 포함되어 있지 않아요.'); });
-$('#srchHere').addEventListener('click', function () { toast('출발지는 지도 화면에서 정할 수 있어요.'); });
+$('#srchHere').addEventListener('click', function () {
+  if (srchMode !== 'origin') { toast('출발지 줄을 누르면 출발지를 바꿀 수 있어요.'); return; }
+  chooseOrigin({ name: '위치 확인 중...', lat: myPos.lat, lng: myPos.lng });
+  pinnedName = null;
+});
 $('#srchMap').addEventListener('click', function () { toast('지도에서 찾기는 이 연습에 포함되어 있지 않아요.'); });
 srchBody.addEventListener('click', function (e) {
   var s = e.target.closest('[data-sug]');
   if (s) { search(s.dataset.sug); return; }
+  var pick = srchMode === 'origin' ? chooseOrigin : chooseDest;
   var p = e.target.closest('[data-pick]');
-  if (p) { chooseDest(lastResults[+p.dataset.pick]); return; }
+  if (p) { pick(lastResults[+p.dataset.pick]); return; }
   var r = e.target.closest('[data-recent]');
-  if (r) { chooseDest(recents[+r.dataset.recent]); return; }
+  if (r) { pick(recents[+r.dataset.recent]); return; }
 });
-$$('.srch-tool[data-fav]').forEach(function (b) {
-  b.addEventListener('click', function () { chooseDest(FAVS[b.dataset.fav]); });
+
+/* 검색으로 고른 출발지 — 지도를 그리로 옮기고 택시 화면으로 돌아간다 */
+function chooseOrigin(place) {
+  if (!place) return;
+  origin.lat = place.lat; origin.lng = place.lng;
+  pinnedName = place.name;
+  setOrigin(place.name);
+  pop();
+  setTimeout(function () {
+    if (mapS2) { mapS2.setCenter(LL(origin)); mapS2.relayout(); }
+    updateTaxiHeading();
+  }, 60);
+}
+$('.srch-tool[data-fav]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    (srchMode === 'origin' ? chooseOrigin : chooseDest)(FAVS[b.dataset.fav]);
+  });
 });
 
 /* ───────────────────────── 4. S4 · 경로 + 호출 목록 ───────────────────────── */
@@ -513,7 +596,7 @@ $('#ctaCall').addEventListener('click', function () {
 
 var paySel = null;
 onEnter.pay = function () {
-  paySel = payMethod;
+  paySel = payMethod || 'kakaopay';   // 처음 열 때도 카카오페이가 골라져 있다
   syncPay();
 };
 
@@ -599,19 +682,33 @@ function askLocation() {
     return;
   }
   askedLocation = true;
-  navigator.geolocation.getCurrentPosition(function (pos) {
-    var p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    if (haversine(p, CITYHALL) > 30000) {
-      toast('현위치가 제주 밖이라 제주시청을 기준으로 안내해요.');
+
+  // 첫 좌표는 출발지까지 옮기고, 이후 갱신은 파란 점만 따라가게 한다.
+  var first = true;
+  function apply(pos) {
+    var q = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    myPos = q;
+    if (meOverlay) meOverlay.setPosition(LL(q));
+    if (!first) {
+      if (mapS2) btnLocate.classList.toggle('is-moved', haversine(origin, myPos) > 25);
       return;
     }
-    myPos = p;
-    origin.lat = p.lat; origin.lng = p.lng;
-    if (mapS2) { mapS2.setCenter(LL(p)); meOverlay.setPosition(LL(p)); }
+    first = false;
+    origin.lat = q.lat; origin.lng = q.lng;
+    if (mapS2) { mapS2.setCenter(LL(q)); }
     resolveOriginName();
-  }, function () {
-    toast('위치를 확인할 수 없어 제주시청을 기준으로 안내해요.');
-  }, { timeout: 6000, maximumAge: 300000 });
+    updateTaxiHeading();
+  }
+  function fail(err) {
+    toast(err && err.code === 1
+      ? '위치 권한이 꺼져 있어 제주시청을 기준으로 안내해요.'
+      : '위치를 확인할 수 없어 제주시청을 기준으로 안내해요.');
+  }
+
+  var opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+  navigator.geolocation.getCurrentPosition(apply, fail, opts);
+  // 걸어 다녀도 파란 점이 따라오도록 계속 지켜본다
+  try { navigator.geolocation.watchPosition(apply, function () {}, opts); } catch (err) {}
 }
 
 /* ───────────────────────── 9. 시작 ───────────────────────── */
