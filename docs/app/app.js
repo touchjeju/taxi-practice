@@ -222,7 +222,7 @@ $('#btnReserve').addEventListener('click', function () {
 });
 $('#rowOrigin').addEventListener('click', function () { openSearch('origin'); });
 $('#srchOriginRow').addEventListener('click', function () { openSearch('origin'); });
-$('#rowDest').addEventListener('click', openSearch);
+$('#rowDest').addEventListener('click', function () { openSearch('dest'); });
 $$('.chip[data-fav]').forEach(function (b) {
   b.addEventListener('click', function () { chooseDest(FAVS[b.dataset.fav]); });
 });
@@ -365,7 +365,7 @@ function chooseOrigin(place) {
     updateTaxiHeading();
   }, 60);
 }
-$('.srch-tool[data-fav]').forEach(function (b) {
+$$('.srch-tool[data-fav]').forEach(function (b) {
   b.addEventListener('click', function () {
     (srchMode === 'origin' ? chooseOrigin : chooseDest)(FAVS[b.dataset.fav]);
   });
