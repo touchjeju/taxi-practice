@@ -4,3 +4,4 @@
 !docs/**
 !firebase.json
 !.firebaserc
+!deploy.ps1
