@@ -2,3 +2,5 @@
 !.gitignore
 !docs/
 !docs/**
+!firebase.json
+!.firebaserc
