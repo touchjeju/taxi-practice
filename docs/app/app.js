@@ -589,7 +589,7 @@ $('#btnRider').addEventListener('click', function () { toast('탑승자 변경�
 $('#btnCoupon').addEventListener('click', function () { push('pay'); });
 $('#btnPay').addEventListener('click', function () { push('pay'); });
 $('#ctaCall').addEventListener('click', function () {
-  toast(trip.to.name + '까지 ' + picked.name + '\n' + won(fareOf(picked)) + ' 예상으로 호출했어요.\n(연습이라 실제로 배차되지는 않아요)');
+  startRide();
 });
 
 /* ───────────────────────── 6. 결제수단 시트 ───────────────────────── */
@@ -711,6 +711,216 @@ function askLocation() {
   try { navigator.geolocation.watchPosition(apply, function () {}, opts); } catch (err) {}
 }
 
+/* ───────────────────── 8.5. S6 · 호출 요청 → 배차 완료 → 취소 ─────────────────────
+   연습 종류는 주소의 flow 값으로 정한다.
+     call   … 호출하기까지 (배차가 잡히면 끝)
+     cancel … 호출하기 버튼에서 시작해 호출을 취소하기까지
+     all    … 홈에서 취소까지 한번에                                          */
+
+var FLOW = (location.search.match(/[?&]flow=(\w+)/) || [])[1] || 'all';
+
+var rideScreen = screens.ride;
+var mapS6 = null, rideMarks = [], taxiOv = null, taxiTimer = null;
+var waitTimer = null, matchedAt = null, reason = null;
+
+function hhmm(d) { return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+function sheetH() { var s = $('#rideSheet'); return s ? s.offsetHeight : 404; }
+
+/* 홈 화면까지 한 번에 되돌아간다 (뒤로가기 기록도 같이 정리된다) */
+function goHome(then) {
+  var back = stack.length - 1;
+  if (back <= 0) { if (then) then(); return; }
+  var once = function () {
+    window.removeEventListener('popstate', once);
+    setTimeout(then || function () {}, 80);
+  };
+  window.addEventListener('popstate', once);
+  history.go(-back);
+}
+
+function clearRideMarks() {
+  rideMarks.forEach(function (m) { m.setMap(null); });
+  rideMarks = [];
+}
+function stopTaxi() {
+  clearInterval(taxiTimer); taxiTimer = null;
+  if (taxiOv) { taxiOv.setMap(null); taxiOv = null; }
+}
+/* 지도 위 택시 — 출발 핀 옆에 쓰는 SVG 를 그대로 복사해 쓴다 */
+function taxiSvgHTML() {
+  var n = document.querySelector('.pin__taxi').cloneNode(true);
+  n.setAttribute('class', 'mk__car');
+  n.removeAttribute('style');
+  return n.outerHTML;
+}
+
+function drawRideMap() {
+  if (!K) return;
+  if (!$('#rideMapBox').offsetWidth) { setTimeout(drawRideMap, 60); return; }
+  if (!mapS6) mapS6 = new K.Map($('#rideCanvas'), { center: LL(origin), level: 4 });
+  mapS6.relayout();
+  clearRideMarks();
+
+  var waiting = rideScreen.classList.contains('is-wait');
+  mapS6.setLevel(waiting ? 5 : 3);
+  mapS6.setCenter(LL(origin));
+  if (waiting) {
+    rideMarks.push(new K.CustomOverlay({
+      map: mapS6, position: LL(origin), zIndex: 5, yAnchor: 1.55,
+      content: markerEl('<div class="mk__bubble">출발</div><div class="mk__stem"></div><div class="mk__ring"></div>', 'mk--from')
+    }));
+  } else {
+    rideMarks.push(new K.CustomOverlay({
+      map: mapS6, position: LL(origin), zIndex: 5, yAnchor: .85,
+      content: markerEl('<div class="mk__tag">탑승 위치</div><div class="mk__dot"></div>', 'mk--pick')
+    }));
+  }
+}
+
+/* 배차된 택시가 실제 도로를 따라 탑승 위치로 다가온다 */
+function runTaxi() {
+  stopTaxi();
+  if (!K || !mapS6) return;
+  var o = { lat: origin.lat, lng: origin.lng };
+  fetchDirections(approachFrom(o), o).then(function (r) {
+    var c = r.coords;
+    if (!c || c.length < 4) return;
+    var i = Math.floor(c.length * 0.55);          // 몇 백 미터 앞에서 오는 모습부터
+    var el = markerEl('<div class="mk__tag">곧 도착</div>' + taxiSvgHTML(), 'mk--soon');
+    taxiOv = new K.CustomOverlay({
+      map: mapS6, position: new K.LatLng(c[i][0], c[i][1]), zIndex: 6, yAnchor: .74, content: el
+    });
+
+    var b = new K.LatLngBounds();
+    b.extend(new K.LatLng(c[i][0], c[i][1]));
+    b.extend(LL(origin));
+    mapS6.setBounds(b, 96, 60, sheetH() + 30, 60);
+
+    taxiTimer = setInterval(function () {
+      if (++i >= c.length) { stopTaxi(); return; }
+      var p = { lat: c[i][0], lng: c[i][1] }, q = { lat: c[i - 1][0], lng: c[i - 1][1] };
+      taxiOv.setPosition(new K.LatLng(p.lat, p.lng));
+      var car = el.querySelector('.mk__car');
+      if (car) car.style.transform = 'rotate(' + (bearing(q, p) - 90).toFixed(1) + 'deg)';
+    }, 900);
+  }).catch(function () { /* 길을 못 구하면 택시는 그리지 않는다 */ });
+}
+
+/* ── 호출하기 → 요청 중 ── */
+function startRide() {
+  matchedAt = null;
+  rideScreen.classList.add('is-wait');
+  rideScreen.classList.remove('is-up');
+  $('#waitFrom').textContent = trip ? trip.from.name : origin.name;
+  $('#waitTo').textContent = trip ? trip.to.name : '';
+  push('ride');
+}
+
+/* ── 기사 배차 완료 ── */
+function matchDriver() {
+  if (!rideScreen.classList.contains('is-wait')) return;
+  clearTimeout(waitTimer);
+  rideScreen.classList.remove('is-wait');
+  matchedAt = new Date();
+  updateRideInfo();
+  drawRideMap();
+  runTaxi();
+  toast('배차가 완료됐어요.\n택시가 탑승 위치로 오고 있어요.');
+  // 잠시 뒤 기사가 출발하면 안내 문구가 바뀐다 (취소하기 3 캡처)
+  setTimeout(function () { $('#rideH1').textContent = '지금 탑승 위치로 출발'; }, 12000);
+  if (FLOW === 'call') setTimeout(function () {
+    finish('택시가 탑승 위치로 오고 있어요.\n택시 호출 연습을 마쳤어요.');
+  }, 2600);
+}
+
+function updateRideInfo() {
+  $('#rideFrom').textContent = trip ? trip.from.name : origin.name;
+  $('#rideTo').textContent = trip ? trip.to.name : '';
+  $('#ridePayName').textContent = PAY_LABEL[payMethod] || '직접결제';
+  $('#ridePayFare').textContent = won(fareOf(picked));
+}
+
+onEnter.ride = function () {
+  drawRideMap();
+  clearTimeout(waitTimer);
+  waitTimer = setTimeout(matchDriver, 6500);      // 기다리면 저절로 배차된다
+};
+onLeave.ride = function () { clearTimeout(waitTimer); stopTaxi(); };
+
+/* 요청 중에는 화면 아무 곳이나 누르면 바로 배차된다 */
+rideScreen.addEventListener('click', function (e) {
+  if (!rideScreen.classList.contains('is-wait')) return;
+  if (e.target.closest('button')) return;
+  matchDriver();
+});
+
+/* 시트 올리기 / 내리기 */
+function toggleUp(force) {
+  var up = force === undefined ? !rideScreen.classList.contains('is-up') : force;
+  rideScreen.classList.toggle('is-up', up);
+  if (up) $('#rideBody').scrollTop = 0;
+}
+$('#rideGrab').addEventListener('click', function () { toggleUp(); });
+(function () {
+  var sheet = $('#rideSheet'), y0 = null;
+  sheet.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; }, { passive: true });
+  sheet.addEventListener('touchmove', function (e) {
+    if (y0 === null) return;
+    var dy = e.touches[0].clientY - y0, up = rideScreen.classList.contains('is-up');
+    if (dy < -40 && !up) { toggleUp(true); y0 = null; }
+    else if (dy > 40 && up && $('#rideBody').scrollTop <= 0) { toggleUp(false); y0 = null; }
+  }, { passive: true });
+  sheet.addEventListener('touchend', function () { y0 = null; });
+})();
+
+$('#rideHome').addEventListener('click', function () {
+  toast('지금은 호출이 진행 중이에요.\n그만두려면 [호출취소]를 누르세요.');
+});
+$('#rideLocate').addEventListener('click', function () {
+  if (mapS6) mapS6.panTo(LL(origin));
+});
+$('#btnDrvMsg').addEventListener('click', function () { toast('기사님께 보내는 메시지는 이 연습에 포함되어 있지 않아요.'); });
+$('#btnDrvCall').addEventListener('click', function () { toast('연습이라 실제로 전화가 걸리지는 않아요.'); });
+$('#btnRideRoute').addEventListener('click', function () { toast('경로 변경은 이 연습에 포함되어 있지 않아요.'); });
+
+/* ── 호출 취소 ── */
+function openCancel() {
+  reason = null;
+  $('#cxSelText').textContent = '호출 취소 사유를 선택해 주세요.';
+  $('#cxSel').classList.remove('is-set');
+  $('#cxGo').disabled = true;
+  $$('.rs__item').forEach(function (n) { n.classList.remove('is-on'); });
+  $('#cxTime').textContent = hhmm(matchedAt || new Date());
+  push('cancel');
+}
+$('#btnCancel').addEventListener('click', openCancel);
+$('#btnCancelTop').addEventListener('click', openCancel);
+$('#cxSel').addEventListener('click', function () { push('reason'); });
+$('#rsList').addEventListener('click', function (e) {
+  var b = e.target.closest('.rs__item');
+  if (!b) return;
+  reason = b.textContent;
+  $$('.rs__item').forEach(function (n) { n.classList.toggle('is-on', n === b); });
+  $('#cxSelText').textContent = reason;
+  $('#cxSel').classList.add('is-set');
+  $('#cxGo').disabled = false;
+  pop();
+});
+$('#cxGo').addEventListener('click', function () {
+  if (!reason) return;
+  stopTaxi();
+  clearTimeout(waitTimer);
+  goHome(function () { finish('택시 호출을 취소했어요.\n(사유 : ' + reason + ')'); });
+});
+
+/* ── 연습 완료 ── */
+function finish(text) {
+  $('#doneText').textContent = text;
+  push('done');
+}
+$('#doneAgain').addEventListener('click', function () { location.reload(); });
+$('#doneHome').addEventListener('click', function () { location.href = '../'; });
+
 /* ───────────────────────── 9. 시작 ───────────────────────── */
 
 function start() {
@@ -719,16 +929,26 @@ function start() {
   setOrigin('제주시청');
   if (K) initS2Map();
   else $('#phone').classList.add('no-map');   // 지도 자리에 안내 문구만 남긴다
+  if (FLOW === 'cancel') startFromCall();
+}
+
+/* 취소 연습은 [호출하기] 버튼에서 시작한다 — 제주시청 → 제주국제공항이 미리 잡혀 있다 */
+function startFromCall() {
+  picked = OPTS[1];
+  chooseDest(FAVS.airport);
+  push('detail');
 }
 
 // 개발용 — ?debug 로 열었을 때만 화면을 직접 열어볼 수 있게 열어둔다
 if (/[?&]debug/.test(location.search)) {
-  window.__app = { push: push, pop: pop, chooseDest: chooseDest, setOrigin: setOrigin, stack: stack };
+  window.__app = { push: push, pop: pop, chooseDest: chooseDest, setOrigin: setOrigin, stack: stack,
+                   startRide: startRide, matchDriver: matchDriver, toggleUp: toggleUp, openCancel: openCancel };
 }
 
 window.addEventListener('resize', function () {
   if (mapS2) mapS2.relayout();
   if (mapS4) { mapS4.relayout(); fitRoute(lastBounds); }
+  if (mapS6) mapS6.relayout();
 });
 
 if (window.kakao && window.kakao.maps && window.kakao.maps.load) {

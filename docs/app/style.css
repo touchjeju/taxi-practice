@@ -471,3 +471,140 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 /* 추천경로 버튼은 tp-09 처럼 목록에서는 시트에 가려 안 보이고,
    tp-10 처럼 호출 상세를 열었을 때만 지도 아래쪽에 나타난다 */
 .screen--route.has-detail .map-pill--route{display:flex}
+
+/* ══════════════════════════════════════════════════════════
+   S6 · 호출 요청 → 배차 완료 (취소하기 1 ~ 3)
+   ══════════════════════════════════════════════════════════ */
+.screen--ride{background:#DCE9F5}
+.ride-map{position:absolute;inset:0}
+.map-back--home{color:#17171B}
+.ride-topx{
+  position:absolute;right:14px;top:14px;height:48px;padding:0 22px;border-radius:999px;
+  background:#fff;color:#17171B;font-size:18px;font-weight:800;letter-spacing:-.5px;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:5;
+}
+.ride-locate{position:absolute;right:14px;top:-66px;bottom:auto;z-index:6;transition:opacity .2s}
+.screen--ride.is-up .ride-locate{opacity:0;pointer-events:none}
+
+.sheet--ride{height:404px;display:flex;flex-direction:column;padding:0;
+  transition:height .3s cubic-bezier(.22,.61,.36,1)}
+.screen--ride.is-wait .sheet--ride{height:330px}
+.screen--ride.is-up .sheet--ride{height:calc(100% - 76px)}
+.grab-btn{display:block;width:100%;padding:0 0 4px;flex:none}
+.grab-btn .grab{display:block;margin:9px auto 0}
+
+.ride-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ride-body::-webkit-scrollbar{display:none}
+.ride-h1{margin:10px 20px 0;font-size:24px;font-weight:800;line-height:1.34;letter-spacing:-.8px}
+.screen--ride.is-wait .ride-on,
+.screen--ride.is-wait .ride-ad{display:none}
+.screen--ride:not(.is-wait) .ride-wait{display:none}
+.ride-more{display:none}
+.screen--ride.is-up .ride-more{display:block}
+
+/* 출발 → 도착 두 줄 */
+.trip{margin:20px 20px 0}
+.trip__row{display:flex;align-items:center;gap:14px;font-size:19px;font-weight:700;color:#3F434B}
+.trip__bar{width:1px;height:16px;margin:2px 0 2px 5px;background:#D8DAE0}
+.trip--big{margin:14px 0 0}
+.trip--big .trip__row{font-size:20px;color:var(--ink)}
+
+/* 기사 카드 */
+.drv{display:flex;align-items:center;gap:14px;padding:20px 20px 0;border-top:1px solid var(--line);margin-top:16px}
+.drv__face{width:62px;height:62px;border-radius:50%;flex:none;background:#2C3350}
+.drv__txt{min-width:0}
+.drv__top{display:flex;align-items:baseline;gap:7px}
+.drv__plate{font-size:21px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}
+.drv__stars{font-size:16px;letter-spacing:-1.5px}
+.drv__div{width:1px;height:15px;background:#D8DAE0;align-self:center}
+.drv__car{font-size:19px;color:#3F434B;white-space:nowrap}
+.drv__name{margin-top:4px;font-size:19px;color:#6E727A}
+.drv-acts{display:flex;gap:10px;padding:14px 20px 18px}
+.drv-msg{flex:1;display:flex;align-items:center;gap:10px;height:52px;padding:0 14px;
+  border-radius:10px;background:#F4F5F7;color:#9BA0A8;font-size:18px;font-weight:700;
+  white-space:nowrap;overflow:hidden}
+.drv-msg svg{color:#C3C7CE;flex:none}
+.drv-call{width:68px;height:52px;border-radius:10px;border:1px solid #E2E4E8;color:#17171B;
+  display:flex;align-items:center;justify-content:center;flex:none}
+
+/* 시트를 올렸을 때 나오는 운행/결제 정보 */
+.ride-more{border-top:10px solid #F1F2F4}
+.ride-gap{height:10px;background:#F1F2F4}
+.ride-sec{padding:20px 20px 18px}
+.ride-sec__t{margin:0;font-size:21px;font-weight:800;letter-spacing:-.5px}
+.ride-line{height:1px;background:var(--line);margin:16px 0}
+.ride-row{display:flex;align-items:center;gap:12px;min-height:44px}
+.ride-row__ico{color:#4A4E57}
+.ride-row__t{font-size:19px;font-weight:700;color:#3F434B}
+.ride-row__t--sub{font-size:15px;font-weight:600;color:#8B9099}
+.ride-row__v{margin-left:auto;font-size:20px;font-weight:800}
+.ride-mini{margin-left:auto;height:40px;padding:0 16px;border-radius:8px;border:1px solid #DDE0E4;
+  font-size:17px;font-weight:700;color:#3F434B}
+.ride-cancelbtn{display:block;width:calc(100% - 40px);height:56px;margin:18px 20px 26px;
+  border-radius:9px;border:1px solid #DDE0E4;background:#fff;color:#4A4E57;font-size:19px;font-weight:800}
+
+/* 시트 맨 아래 광고 */
+.ride-ad{margin-top:auto;display:flex;align-items:flex-end;gap:12px;
+  padding:14px 18px 16px;border-top:1px solid var(--line);background:#FAFAFB;flex:none}
+.ride-ad__txt{flex:1;min-width:0}
+.ride-ad .home-ad__title{white-space:normal;font-size:17px}
+.ride-ad__art{width:98px;height:70px;border-radius:8px;object-fit:cover;flex:none}
+
+/* 지도 위 — 다가오는 택시 / 탑승 위치 */
+.mk__tag{padding:8px 12px;border-radius:7px;font-size:16px;font-weight:800;
+  letter-spacing:-.4px;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.22)}
+.mk--soon .mk__tag{background:#fff;color:#17171B}
+.mk--soon .mk__car{display:block;width:50px;height:28px;margin:5px auto 0}
+.mk--pick .mk__tag{background:var(--blue);color:#fff}
+.mk--pick .mk__dot{width:17px;height:17px;margin:6px auto 0;border-radius:50%;
+  background:var(--blue);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.28)}
+
+/* ══════════════════════════════════════════════════════════
+   S7 · 호출 취소 안내 + 사유 선택 (취소하기 4 ~ 6)
+   ══════════════════════════════════════════════════════════ */
+.screen--cancel{background:#fff;display:flex;flex-direction:column}
+.cx-body{flex:1;min-height:0;overflow-y:auto;padding:52px 24px 0;scrollbar-width:none}
+.cx-body::-webkit-scrollbar{display:none}
+.cx-h1{margin:0;font-size:30px;font-weight:800;line-height:1.42;letter-spacing:-1px}
+.cx-h1 em{font-style:normal;color:var(--red)}
+.cx-list{margin:24px 0 0;padding:0;list-style:none}
+.cx-list li{position:relative;margin-top:11px;padding-left:17px;font-size:17px;line-height:1.45;
+  font-weight:600;color:#8B9099}
+.cx-list li::before{content:"·";position:absolute;left:5px;top:-1px;font-size:20px}
+.cx-sel{display:flex;align-items:center;gap:10px;width:100%;height:66px;margin-top:34px;
+  padding:0 20px;border-radius:10px;background:#F4F5F7;text-align:left}
+.cx-sel__t{flex:1;min-width:0;font-size:17.5px;font-weight:700;color:#4A4E57;letter-spacing:-.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-sel.is-set .cx-sel__t{color:var(--ink);font-weight:800}
+.cx-sel__chev{color:#6E727A}
+.cx-btns{display:flex;gap:12px;padding:12px 20px 22px;flex:none}
+.cx-back{flex:1;height:60px;border-radius:9px;border:1px solid #DDE0E4;background:#fff;
+  font-size:19px;font-weight:800;color:#3F434B}
+.cx-go{flex:1.4;height:60px;border-radius:9px;background:#D8342B;color:#fff;font-size:19px;font-weight:800}
+.cx-go:disabled{background:#EDEEF0;color:#B0B4BB}
+
+.rs__dim{position:absolute;inset:0;background:rgba(20,22,26,.5)}
+.rs__sheet{position:absolute;left:0;right:0;bottom:0;max-height:84%;display:flex;flex-direction:column;
+  background:#fff;border-radius:20px 20px 0 0;padding:24px 0 22px}
+.rs__title{margin:0;text-align:center;font-size:23px;font-weight:800;letter-spacing:-.5px}
+.rs__list{margin-top:10px;overflow-y:auto;scrollbar-width:none}
+.rs__list::-webkit-scrollbar{display:none}
+.rs__item{display:block;width:100%;padding:17px 24px;text-align:left;font-size:20px;font-weight:700;color:#3F434B}
+.rs__item.is-on{color:var(--cta)}
+
+/* ══════════════════════════════════════════════════════════
+   연습 완료 안내
+   ══════════════════════════════════════════════════════════ */
+.done__dim{position:absolute;inset:0;background:rgba(20,22,26,.55)}
+.done__card{position:absolute;left:24px;right:24px;top:50%;transform:translateY(-50%);
+  background:#fff;border-radius:20px;padding:30px 22px 22px;text-align:center;
+  box-shadow:0 14px 40px rgba(0,0,0,.28)}
+.done__mark{width:66px;height:66px;margin:0 auto 16px;border-radius:50%;background:#EAF1FF;color:var(--cta);
+  display:flex;align-items:center;justify-content:center}
+.done__title{margin:0;font-size:24px;font-weight:800;letter-spacing:-.6px}
+.done__text{margin:10px 0 22px;font-size:18px;line-height:1.5;color:#4A4E57;white-space:pre-line}
+.done__btns{display:flex;gap:10px}
+.done__again{flex:1;height:54px;border-radius:9px;border:1px solid #DDE0E4;background:#fff;
+  font-size:18px;font-weight:800;color:#3F434B}
+.done__home{flex:1;height:54px;border-radius:9px;background:var(--cta);color:#fff;font-size:18px;font-weight:800}
