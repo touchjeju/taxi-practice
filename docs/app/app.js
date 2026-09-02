@@ -1108,9 +1108,12 @@ function hintSpot() {
     case 'air':     return one('#airSearch',  '[항공권 검색]을 누르세요');
     case 'airlist': return one('#alList .al-item', '타고 갈 비행기를 누르세요');
     case 'airsel':  return one('#airGo',      '[예매하기]를 누르세요');
+    case 'airad':   return one('.screen--airad .ad__close', '[X]를 눌러 광고를 닫으세요');
     case 'airbook':
-      if (!chosenPax) return one('#airPickBtn', '[탑승객을 선택하세요]를 누르세요');
+      if (!chosenPax)  return one('#airPickBtn',  '[탑승객을 선택하세요]를 누르세요');
+      if (!paxDone)    return one('#abPickDone',  '[선택 완료]를 누르세요');
       if (!$('#airEmail').value.trim()) return one('#airEmail', '이메일 주소를 적으세요');
+      if (!cardSet)    return one('#airCardBtn', '[결제카드 정보입력]을 누르세요');
       return one('#airPay', '[결제하기]를 누르세요');
     case 'airpax':  return savedPax ? one('.air-back', '저장됐어요. 뒤로 가서 고르세요')
                                     : one('#airPaxAdd', '[탑승객 추가]를 누르세요');
@@ -1246,28 +1249,35 @@ $('#srchInput').addEventListener('input', function () {
 
 /* ───────────────────── 8.7. 항공권 예매 연습 ─────────────────────
    image/기타 기능 캡처(항공 32장)를 그대로 옮겼다.
-   흐름: 항공 → 편 목록 → 선택한 항공권 → 예매하기 → (탑승객 저장 → 동의 →
-         정보 입력 → 선택) → 이메일 → 결제카드 정보입력 → 완료                */
+   항공 → (허츠 광고) → 편 목록 → 여정 상세 → 예매하기
+     ├ 탑승객: 저장 목록 → 동의 → 정보 입력 → 선택 → 선택 완료
+     ├ 이메일
+     └ 결제카드 정보입력 → 완료
+   → [결제하기] → 끝                                                        */
 
 var FLIGHTS = [
-  { logo: 'oz', time: '06:30 - 07:45', air: '아시아나항공', code: 'OZ8900', seat: '특가석',
-    pay: '카카오 T 결제 외 1개', price: 65900, left: '' },
-  { logo: 'tw', time: '07:50 - 09:05', air: '티웨이항공', code: 'TW1802', seat: '할인석',
-    pay: '일반 카드결제 외 1개', price: 66420, left: '' },
-  { logo: 'tw', time: '09:50 - 11:05', air: '티웨이항공', code: 'TW1804', seat: '할인석',
-    pay: '일반 카드결제 외 1개', price: 66420, left: '2석남음' }
+  { logo: 'oz', img: 'air-oz', time: '06:30 - 07:45', dep: '06:30', arr: '07:45',
+    air: '아시아나항공', code: 'OZ8900', seat: '특가석', pay: '카카오 T 결제 외 1개',
+    price: 65900, bag: '무료위탁수하물 : 20Kg (공동운항편 제외)', left: '' },
+  { logo: 'tw', img: 'air-tw', time: '07:50 - 09:05', dep: '07:50', arr: '09:05',
+    air: '티웨이항공', code: 'TW1802', seat: '할인석', pay: '일반 카드결제 외 1개',
+    price: 66420, bag: '무료위탁수하물 : 15Kg', left: '' },
+  { logo: 'tw', img: 'air-tw', time: '09:50 - 11:05', dep: '09:50', arr: '11:05',
+    air: '티웨이항공', code: 'TW1804', seat: '할인석', pay: '일반 카드결제 외 1개',
+    price: 66420, bag: '무료위탁수하물 : 15Kg', left: '2석남음' }
 ];
 
 var savedPax = null;      // 저장 목록에 넣은 탑승객
 var chosenPax = null;     // 예매하기에서 고른 탑승객
-var afSex = null;         // 정보 입력 화면에서 고른 성별
-var cardOwner = null, cardInst = '일시불';
+var paxDone = false;      // [선택 완료] 까지 눌렀는지
+var afSex = null;
+var cardOwner = null, cardInst = '일시불', cardSet = false;
 
 /* ── 편 목록 ── */
 function renderFlights() {
   $('#alList').innerHTML = FLIGHTS.map(function (f, i) {
     return '<button class="al-item" data-fl="' + i + '">' +
-      '<div class="al-time"><i class="al-logo al-logo--' + f.logo + '"></i>' + f.time + '</div>' +
+      '<div class="al-time"><img class="al-logo" src="img/' + f.img + '.png" alt="">' + f.time + '</div>' +
       '<div class="al-sub">CJU-GMP · ' + f.air + '<b class="al-seat">' + f.seat + '</b></div>' +
       '<div class="al-pay">' + f.pay + '<b class="al-price">' + won(f.price) + '</b></div>' +
       '<div class="al-note">1인 편도 가격' + (f.left ? ' <em>' + f.left + '</em>' : '') + '</div>' +
@@ -1280,47 +1290,74 @@ $('#alList').addEventListener('click', function (e) {
   var b = e.target.closest('[data-fl]');
   if (!b) return;
   var f = FLIGHTS[+b.dataset.fl];
-  $('#asGoWhen').textContent = '26.09.05(토) │ ' + f.time;
-  $('#asGoAir').textContent = f.air + ' ' + f.code;
-  $('#asGoFare').textContent = won(f.price);
+  $('#ajGoFrom').textContent = '26.09.05(토) ' + f.dep;
+  $('#ajGoTo').textContent   = '26.09.05(토) ' + f.arr;
+  $('#ajGoName').textContent = f.air + ' ' + f.code + '편';
+  $('#ajGoLogo').src = 'img/' + f.img + '.png';
   $('#asTotal').textContent = won(f.price + 27700);
   push('airsel');
 });
-
+$('#ajRule').addEventListener('click', function () { toast('운임 규정은 이 연습에 포함되어 있지 않아요.'); });
 $('#airGo').addEventListener('click', function () { push('airbook'); });
 
-/* ── 예매하기 ── */
+/* ── 예매하기 · 탑승객 ── */
 $('#airPaxList').addEventListener('click', function () { push('airpax'); });
 $('#airPickBtn').addEventListener('click', function () {
   if (!savedPax) { toast('먼저 탑승객을 저장해 주세요.'); push('airpax'); return; }
   openAirSheet('탑승객 선택', [savedPax.ko + ' / ' + savedPax.en, '새로운 탑승객 입력'], function (i) {
-    if (i === 0) {
-      chosenPax = savedPax;
-      $('#airPickText').textContent = savedPax.ko + ' / ' + savedPax.en;
-      $('#airPickBtn').classList.add('is-set');
-      pop();
-    } else { pop(); setTimeout(function () { push('airpax'); }, 120); }
+    if (i === 0) { pop(); setTimeout(function () { setChosen(savedPax); }, 60); }
+    else { pop(); setTimeout(function () { push('airpax'); }, 120); }
   });
 });
+function setChosen(p) {
+  chosenPax = p;
+  $('#airPickText').textContent = p.ko + ' / ' + p.en;
+  $('#airPickBtn').classList.add('is-set');
+  $('#roLastKo').textContent  = p.lastKo;
+  $('#roFirstKo').textContent = p.firstKo;
+  $('#roBirth').textContent   = p.birth;
+  $('#roSex').textContent     = p.sex;
+  $('#abRo').hidden = false;
+}
+$('#abPickDone').addEventListener('click', function () {
+  paxDone = true;
+  $('#abSumKo').textContent  = chosenPax.ko;
+  $('#abSumSub').textContent = chosenPax.birth + ' │ ' + chosenPax.sex + ' │ 대한민국';
+  $('#abSum').hidden = false;
+  $('#abAcc').classList.add('is-done');
+  toast('탑승객을 정했어요.');
+});
+
+/* ── 예매하기 · 이메일 ── */
 $('#airEmail').addEventListener('input', function () {
   this.parentNode.classList.remove('is-bad');
+  $('#airEmailErr').hidden = true;
 });
+
+/* ── 예매하기 · 결제카드 ── */
+$('#airCardBtn').addEventListener('click', function () { push('aircard'); });
+
 $('#airPay').addEventListener('click', function () {
-  if (!chosenPax) { toast('탑승객을 먼저 선택해 주세요.'); hintShow(); return; }
+  if (!paxDone) {
+    toast(chosenPax ? '[선택 완료]를 눌러 주세요.' : '탑승객을 먼저 선택해 주세요.');
+    hintShow(); return;
+  }
   var v = $('#airEmail').value.trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
     $('#airEmail').parentNode.classList.add('is-bad');
-    toast('이메일 주소를 다시 한 번 확인해주세요.');
-    hintShow();
-    return;
+    $('#airEmailErr').textContent = v ? '이메일 주소를 다시 한 번 확인해주세요.' : '이메일을 입력해주세요.';
+    $('#airEmailErr').hidden = false;
+    hintShow(); return;
   }
-  push('aircard');
+  if (!cardSet) { toast('결제카드를 먼저 등록해 주세요.'); hintShow(); return; }
+  goHome(function () {
+    finish('항공권을 예매했어요.\n제주 → 김포, ' + chosenPax.ko + ' 님\n항공권 예매 연습을 마쳤어요.');
+  });
 });
 
 /* ── 탑승객 저장 목록 ── */
 function renderPaxList() {
-  var wrap = screens.airpax;
-  wrap.classList.toggle('has-pax', !!savedPax);
+  screens.airpax.classList.toggle('has-pax', !!savedPax);
   $('#airPaxCards').innerHTML = savedPax ?
     '<div class="ap-card">' +
       '<div class="ap-card__top"><span class="ap-card__ko">' + esc(savedPax.ko) + '</span>' +
@@ -1352,10 +1389,28 @@ onLeave.airagree = function () {
 /* ── 탑승객 정보 입력 ── */
 var AF = ['#afLastKo', '#afFirstKo', '#afLastEn', '#afFirstEn', '#afBirth'];
 function afCheck() {
-  var ok = afSex && AF.every(function (s) { return $(s).value.trim(); });
-  $('#afDone').disabled = !ok;
+  $('#afDone').disabled = !(afSex && AF.every(function (s) { return $(s).value.trim(); }));
 }
-AF.forEach(function (s) { $(s).addEventListener('input', afCheck); });
+AF.forEach(function (sel) {
+  var el = $(sel);
+  el.addEventListener('input', function () {
+    el.parentNode.classList.remove('is-bad');
+    var e = el.parentNode.parentNode.querySelector('.af-err');
+    if (e) e.remove();
+    afCheck();
+  });
+  /* 캡처처럼 비워 둔 채 넘어가면 빨갛게 알려 준다 */
+  el.addEventListener('blur', function () {
+    if (el.value.trim()) return;
+    el.parentNode.classList.add('is-bad');
+    if (!el.parentNode.parentNode.querySelector('.af-err')) {
+      var p = document.createElement('p');
+      p.className = 'af-err';
+      p.textContent = '입력해주세요.';
+      el.parentNode.parentNode.appendChild(p);
+    }
+  });
+});
 $$('.af-sex__b').forEach(function (b) {
   b.addEventListener('click', function () {
     afSex = b.dataset.sex;
@@ -1363,16 +1418,15 @@ $$('.af-sex__b').forEach(function (b) {
     afCheck();
   });
 });
-/* 영문칸은 자동으로 대문자가 된다 */
 [$('#afLastEn'), $('#afFirstEn')].forEach(function (el) {
   el.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
 });
 $('#afDone').addEventListener('click', function () {
   savedPax = {
+    lastKo: $('#afLastKo').value.trim(), firstKo: $('#afFirstKo').value.trim(),
     ko: $('#afLastKo').value.trim() + $('#afFirstKo').value.trim(),
     en: $('#afLastEn').value.trim() + ' ' + $('#afFirstEn').value.trim(),
-    birth: $('#afBirth').value.trim(),
-    sex: afSex
+    birth: $('#afBirth').value.trim(), sex: afSex
   };
   renderPaxList();          // pop 으로 돌아갈 때는 onEnter 가 안 도니 여기서 다시 그린다
   pop();
@@ -1386,8 +1440,7 @@ function openAirSheet(title, items, onPick, current) {
   $('#airSheetTitle').textContent = title;
   $('#airSheetList').innerHTML = items.map(function (t, i) {
     var on = (current !== undefined && current === i) ? ' is-on' : '';
-    return '<button class="as-opt' + on + '" data-i="' + i + '">' + esc(t) +
-           (on ? '<i>✓</i>' : '') + '</button>';
+    return '<button class="as-opt' + on + '" data-i="' + i + '">' + esc(t) + (on ? '<i>✓</i>' : '') + '</button>';
   }).join('');
   airSheetPick = onPick;
   push('airsheet');
@@ -1420,7 +1473,7 @@ $('#acPw').addEventListener('input', function () {
   acCheck();
 });
 $('#acOwner').addEventListener('click', function () {
-  var name = chosenPax ? (chosenPax.ko + ' / ' + chosenPax.en) : '양지원 / YANG JIWON';
+  var name = chosenPax ? (chosenPax.ko + ' / ' + chosenPax.en) : (savedPax ? savedPax.ko + ' / ' + savedPax.en : '양지원 / YANG JIWON');
   openAirSheet('카드 명의자 선택', [name], function () {
     cardOwner = name;
     $('#acOwnerText').textContent = name;
@@ -1437,9 +1490,23 @@ $('#acInst').addEventListener('click', function () {
   }, INSTALL.indexOf(cardInst));
 });
 $('#acDone').addEventListener('click', function () {
-  goHome(function () {
-    finish('항공권을 예매했어요.\n제주 → 김포, ' + (chosenPax ? chosenPax.ko : '') + ' 님\n항공권 예매 연습을 마쳤어요.');
-  });
+  cardSet = true;
+  var n = $('#acNum').value.replace(/\D/g, '');
+  $('#airCardText').textContent = '카드 ' + n.slice(0, 4) + ' **** **** ' + n.slice(12) + ' · ' + cardInst;
+  $('#airCardBtn').classList.add('is-set');
+  pop();
+  toast('결제카드를 등록했어요.');
+});
+
+/* ── 허츠 렌터카 광고 (항공 화면에 들어가면 한 번) ── */
+var hertzShown = false;
+onEnter.air = function () {
+  if (hertzShown) return;
+  hertzShown = true;
+  setTimeout(function () { push('airad'); }, 420);
+};
+$('#hertzMore').addEventListener('click', function () {
+  pop(); toast('광고 자세히 보기는 이 연습에 포함되어 있지 않아요.');
 });
 
 /* ───────────────────────── 9. 시작 ───────────────────────── */

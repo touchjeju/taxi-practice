@@ -825,7 +825,7 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .screen--airsel{background:#F4F5F7;display:flex;flex-direction:column}
 .as-head{background:#fff;flex:none}
 .as-head .air-back{height:56px;padding:0 14px;color:var(--ink)}
-.as-body{flex:1;overflow-y:auto;padding:0 14px 16px;background:#fff}
+
 .as-h1{margin:6px 0 16px;font-size:26px;font-weight:500;letter-spacing:-.8px}
 .as-card{border:1px solid var(--line2);border-radius:14px;padding:16px 18px;margin-bottom:12px}
 .as-tagrow{display:flex;align-items:center}
@@ -959,3 +959,53 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
   font-size:18px;font-weight:500;color:#3F434B}
 .ag-ok{flex:1;height:58px;border-radius:9px;background:var(--cta);color:#fff;font-size:18px;font-weight:500}
 .ag-ok:disabled{background:#F1F2F4;color:#B6BAC1}
+
+/* ───────────── 선택한 항공권 = 여정 상세 (캡처 _01~_03) ───────────── */
+.screen--airsel{background:#F4F5F7;display:flex;flex-direction:column}
+.aj-head{display:flex;align-items:center;gap:10px;height:58px;padding:0 62px 0 14px;background:#fff;flex:none}
+.aj-head b{flex:1;text-align:center;font-size:21px;font-weight:500;letter-spacing:-.5px}
+.aj-head .air-back{color:var(--ink)}
+.aj-body{flex:1;overflow-y:auto;padding:12px 14px 18px}
+.aj-leg{background:#fff;border-radius:14px;padding:18px;margin-bottom:10px}
+.aj-leg__t{font-size:20px;font-weight:500;letter-spacing:-.5px}
+.aj-leg__dur{margin-top:6px;font-size:15px;color:#8B9099}
+.aj-leg__dur b{font-weight:500;color:#4A4E57}
+.aj-point{display:flex;gap:12px;padding:16px 0 0}
+.aj-dot{width:13px;height:13px;margin-top:6px;border-radius:50%;border:3px solid #B6BAC1;background:#fff;flex:none}
+.aj-dot--end{border-color:#E8402A}
+.aj-point b{display:block;font-size:20px;font-weight:500;letter-spacing:-.5px}
+.aj-point span{display:block;margin-top:5px;font-size:17px;color:var(--ink)}
+.aj-point em{display:block;margin-top:4px;font-size:15px;font-style:normal;color:#8B9099}
+.aj-mid{margin:14px 0 0 25px;padding:14px 16px;border-radius:10px;background:#F4F5F7}
+.aj-mid__r{display:flex;gap:10px;padding:5px 0;font-size:15.5px;line-height:1.45;color:#4A4E57}
+.aj-mid__r--air{align-items:center;padding-bottom:8px}
+.aj-mid__r--air img{width:22px;height:22px;object-fit:contain;flex:none}
+.aj-mid__r--air b{font-size:16.5px;font-weight:500;color:var(--ink)}
+.aj-k{flex:none;color:#8B9099}
+.aj-v{flex:1;min-width:0}
+.aj-rule{display:block;width:100%;height:60px;border-radius:12px;background:#fff;
+  font-size:17px;font-weight:500;color:#3F434B}
+
+/* ───────────── 예매하기 — 탑승객 아코디언 ───────────── */
+.ab-acc__head{display:flex;align-items:center;font-size:18px;font-weight:500;letter-spacing:-.5px}
+.ab-acc__head svg{margin-left:auto;color:#8B9099}
+.ab-ro{margin-top:18px}
+.af-field--ro{background:#F7F8F9;color:#4A4E57}
+.ab-tip{margin:-12px 2px 18px;font-size:14px;color:#8B9099;letter-spacing:-.4px}
+.ab-sum b{display:block;font-size:19px;font-weight:500;letter-spacing:-.5px}
+.ab-sum span{display:block;margin-top:8px;font-size:15.5px;color:#6E727A}
+.ab-acc.is-done .ab-acc__open{display:none}
+.ab-acc.is-done .ab-sum{display:block !important}
+.ab-err{margin:8px 2px 0;font-size:14.5px;color:#E8402A;letter-spacing:-.4px}
+.ab-cardbtn{display:flex;align-items:center;width:100%;height:60px;padding:0 16px;
+  border:1px solid var(--cta);border-radius:10px;background:#fff;
+  font-size:17px;font-weight:500;color:var(--cta);text-align:left}
+.ab-cardbtn.is-set{border-color:var(--line2);color:var(--ink)}
+.ab-cardbtn span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ab-cardbtn svg{color:#9BA0A8;flex:none}
+.ab-body .af-two{margin-bottom:18px}
+.ab-body .af-lab{font-size:15px}
+
+/* 탑승객 정보 입력 오류 */
+.af-field.is-bad{border-color:#E8402A}
+.af-err{margin:-14px 2px 18px;font-size:14.5px;color:#E8402A;letter-spacing:-.4px}

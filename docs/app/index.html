@@ -555,27 +555,43 @@
       <div class="al-list" id="alList"></div>
     </section>
 
-    <!-- ═══════════  A3 · 선택한 항공권  ═══════════ -->
+    <!-- ═══════════  A3 · 선택한 항공권 (여정 상세)  ═══════════ -->
     <section class="screen screen--airsel" data-screen="airsel">
-      <div class="as-head"><button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button></div>
-      <div class="as-body">
-        <h1 class="as-h1">선택한 항공권</h1>
-        <div class="as-card">
-          <div class="as-tagrow"><em class="as-tag">가는편</em><button class="as-change">변경</button></div>
-          <div class="as-route" id="asGoRoute">제주 CJU → 김포 GMP</div>
-          <div class="as-when" id="asGoWhen">26.09.05(토) │ 06:25 - 07:40</div>
-          <div class="as-line2" id="asGoAir">아시아나항공 OZ8900</div>
-          <div class="as-line2">무료위탁수하물 : 20Kg (공동운항편 제외)</div>
-          <div class="as-fare" id="asGoFare">60,900원</div>
+      <div class="aj-head"><button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button><b>선택한 항공권</b></div>
+      <div class="aj-body">
+        <div class="aj-leg">
+          <div class="aj-leg__t">가는편</div>
+          <div class="aj-leg__dur">총 <b id="ajGoDur">1시간 15분</b> 소요</div>
+          <div class="aj-point"><i class="aj-dot"></i>
+            <div><b>제주 CJU</b><span id="ajGoFrom">26.09.05(토) 06:25</span><em>제주 국제공항</em></div>
+          </div>
+          <div class="aj-mid">
+            <div class="aj-mid__r aj-mid__r--air"><img id="ajGoLogo" src="img/air-oz.png" alt=""><b id="ajGoName">아시아나항공 OZ8900편</b></div>
+            <div class="aj-mid__r"><span class="aj-k">수하물 규정</span><span class="aj-v">무료위탁수하물 : 20Kg (공동운항편 제외)</span></div>
+            <div class="aj-mid__r"><span class="aj-v" id="ajGoFly">1시간 15분 비행</span></div>
+            <div class="aj-mid__r"><span class="aj-v">일반석 (JB)</span></div>
+          </div>
+          <div class="aj-point"><i class="aj-dot aj-dot--end"></i>
+            <div><b>김포 GMP</b><span id="ajGoTo">26.09.05(토) 07:40</span><em>김포 국제공항</em></div>
+          </div>
         </div>
-        <div class="as-card">
-          <div class="as-tagrow"><em class="as-tag">오는편</em><button class="as-change">변경</button></div>
-          <div class="as-route">김포 GMP → 제주 CJU</div>
-          <div class="as-when">26.09.15(화) │ 06:15 - 07:30</div>
-          <div class="as-line2">제주항공 7C0101</div>
-          <div class="as-line2">무료위탁수하물 : 15Kg</div>
-          <div class="as-fare">27,700원</div>
+        <div class="aj-leg">
+          <div class="aj-leg__t">오는편</div>
+          <div class="aj-leg__dur">총 <b>1시간 15분</b> 소요</div>
+          <div class="aj-point"><i class="aj-dot"></i>
+            <div><b>김포 GMP</b><span>26.09.15(화) 06:15</span><em>김포 국제공항</em></div>
+          </div>
+          <div class="aj-mid">
+            <div class="aj-mid__r aj-mid__r--air"><img src="img/air-tw.png" alt=""><b>제주항공 7C0101편</b></div>
+            <div class="aj-mid__r"><span class="aj-k">수하물 규정</span><span class="aj-v">무료위탁수하물 : 15Kg</span></div>
+            <div class="aj-mid__r"><span class="aj-v">1시간 15분 비행</span></div>
+            <div class="aj-mid__r"><span class="aj-v">일반석 (JB)</span></div>
+          </div>
+          <div class="aj-point"><i class="aj-dot aj-dot--end"></i>
+            <div><b>제주 CJU</b><span>26.09.15(화) 07:30</span><em>제주 국제공항</em></div>
+          </div>
         </div>
+        <button class="aj-rule" id="ajRule">운임 및 취소/환불 규정</button>
       </div>
       <div class="as-foot">
         <div class="as-total"><b id="asTotal">88,600원</b><span>1명 총 결제금액</span></div>
@@ -593,23 +609,57 @@
         <div class="ab-note">항공권을 확보하려면 즉시 결제해주세요.</div>
         <div class="ab-sec">
           <div class="ab-sec__head"><b>탑승객 정보</b><button class="ab-mini" id="airPaxList">저장 목록</button></div>
-          <div class="ab-acc">
-            <div class="ab-acc__head">성인 1</div>
-            <button class="ab-pick" id="airPickBtn">
-              <svg class="i20"><use href="#ic-person"/></svg>
-              <span id="airPickText">탑승객을 선택하세요</span>
-              <svg class="i16"><use href="#ic-chevdown"/></svg>
-            </button>
+          <div class="ab-acc" id="abAcc">
+            <div class="ab-acc__head">성인 1<svg class="i20"><use href="#ic-chevdown"/></svg></div>
+            <div class="ab-acc__open" id="abOpen">
+              <button class="ab-pick" id="airPickBtn">
+                <svg class="i20"><use href="#ic-person"/></svg>
+                <span id="airPickText">탑승객을 선택하세요</span>
+                <svg class="i16"><use href="#ic-chevdown"/></svg>
+              </button>
+              <div class="ab-ro" id="abRo" hidden>
+                <label class="af-lab">국적</label>
+                <div class="af-field af-field--ro">대한민국</div>
+                <div class="af-two">
+                  <div><label class="af-lab">한글 성</label><div class="af-field af-field--ro" id="roLastKo"></div></div>
+                  <div><label class="af-lab">한글 이름</label><div class="af-field af-field--ro" id="roFirstKo"></div></div>
+                </div>
+                <p class="ab-tip">국내선 예매 시 한글 이름이 필요합니다.</p>
+                <div class="af-two">
+                  <div><label class="af-lab">생년월일</label><div class="af-field af-field--ro" id="roBirth"></div></div>
+                  <div><label class="af-lab">성별</label><div class="af-field af-field--ro" id="roSex"></div></div>
+                </div>
+                <button class="af-done" id="abPickDone">선택 완료</button>
+              </div>
+            </div>
+            <div class="ab-sum" id="abSum" hidden><b id="abSumKo"></b><span id="abSumSub"></span></div>
           </div>
           <p class="ab-warn">· 실제 탑승객 여권 정보와 일치하지 않으면 탑승이 거절 될 수 있으며, <em>예매 완료 후 탑승객 정보 변경은 불가능합니다.</em></p>
         </div>
         <div class="ab-sec">
           <div class="ab-sec__head"><b>이메일 주소</b></div>
           <div class="ab-field"><input id="airEmail" type="email" inputmode="email" autocomplete="off" placeholder="ID@kakao.com"></div>
-          <p class="ab-warn">· 발권 후, 항공사의 예약 확정 안내 및 스케줄 변경, 항공편 지연·결항 등에 대한 중요 안내가 이메일로 발송됩니다.</p>
+          <p class="ab-err" id="airEmailErr" hidden>이메일을 입력해주세요.</p>
+          <p class="ab-warn">· 발권 후, 항공사의 예약 확정 안내 및 스케줄 변경, 항공편 지연·결항 등에 대한 중요 안내 시 사용됩니다.<br>· <em>예매 완료 후 이메일 수정이 불가합니다.</em></p>
+        </div>
+        <div class="ab-sec">
+          <div class="ab-sec__head"><b>결제카드</b></div>
+          <button class="ab-cardbtn" id="airCardBtn"><span id="airCardText">결제카드 정보입력</span><svg class="i16"><use href="#ic-chev"/></svg></button>
         </div>
       </div>
       <div class="ab-foot"><button class="as-go" id="airPay">결제하기</button></div>
+    </section>
+
+    <!-- ═══════════  A10 · 허츠 렌터카 광고  ═══════════ -->
+    <section class="screen screen--overlay screen--airad" data-screen="airad">
+      <div class="ad__dim" data-back></div>
+      <div class="ad__wrap">
+        <div class="ad__card">
+          <img class="ad__img" src="img/ad-hertz.jpg" alt="허츠 렌터카 최대 15% 할인 광고">
+          <div class="ad__actions"><button class="ad__act" id="hertzMore">자세히 보기</button></div>
+        </div>
+        <button class="ad__close" data-back aria-label="광고 닫기"><svg class="i26"><use href="#ic-x"/></svg></button>
+      </div>
     </section>
 
     <!-- ═══════════  A5 · 탑승객 저장 목록  ═══════════ -->
