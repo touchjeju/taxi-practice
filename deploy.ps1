@@ -19,7 +19,15 @@ Copy-Item 'menu\index.html' 'docs\index.html' -Force
 Copy-Item 'menu\img\*' 'docs\img\' -Force -Recurse
 Copy-Item 'app\index.html', 'app\style.css', 'app\app.js' 'docs\app\' -Force
 Copy-Item 'app\img\*' 'docs\app\img\' -Force -Recurse
-Write-Host '[1/3] 메뉴와 앱을 docs 폴더로 복사했습니다.' -ForegroundColor Green
+# style.css / app.js 뒤에 버전 표시를 붙인다.
+# 이게 없으면 폰이 새 index.html 과 옛 app.js 를 섞어 받아서 앱이 통째로 죽는다.
+$ver = Get-Date -Format 'yyyyMMddHHmm'
+$p = 'docs\app\index.html'
+$t = [IO.File]::ReadAllText($p, [Text.Encoding]::UTF8)
+$t = $t -replace 'href="style\.css(\?v=\d+)?"', ('href="style.css?v=' + $ver + '"')
+$t = $t -replace 'src="app\.js(\?v=\d+)?"', ('src="app.js?v=' + $ver + '"')
+[IO.File]::WriteAllText($p, $t, (New-Object Text.UTF8Encoding $false))
+Write-Host ('[1/3] 메뉴와 앱을 docs 폴더로 복사했습니다. (버전 ' + $ver + ')') -ForegroundColor Green
 
 # 옛 스크린샷 튜토리얼은 standalone 파일이 새로 빌드돼 있을 때만 따라 올라간다
 if (Test-Path '택시연습하기-standalone.html') {
