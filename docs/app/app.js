@@ -757,11 +757,29 @@ document.addEventListener('click', function (e) {
 });
 
 /* ── 전체 서비스 보기 ── */
+/* 전체 서비스 화면의 목록 — 홈 탭보다 훨씬 많다(캡처 _05~_08 순서 그대로) */
+var ALL_SVCS = {
+  move: [['taxi','택시','svc-taxi'],['taxical','택시예약','svc-taxical'],['rentcar','렌터카','svc-rentcar'],
+         ['bike','바이크','svc-bike'],['kickboard','킥보드','svc-kickboard'],['bike30','바이크30분','svc-bike30'],
+         ['train','기차','svc-train'],['intercity','시외버스','svc-intercity'],['arex','공항철도','svc-arex'],
+         ['booking','예약하기','svc-booking'],['mobility','교통약자','svc-mobility'],['shuttle','셔틀','svc-shuttle'],
+         ['buscharter','버스대절','svc-buscharter'],['autodrive','서울자율','svc-autodrive'],['drt','DRT','svc-drt']],
+  drive: [['daeri','대리','svc-daeri'],['parking','주차','svc-parking'],['navi','내비','svc-navi'],
+          ['carwash','출장세차','svc-carwash'],['inspect','자동차검사','svc-inspect'],['evcharge','전기차충전','svc-evcharge'],
+          ['carsell','내차팔기','svc-carsell'],['carbuy','내차사기','svc-carbuy'],['escooter','E스쿠터','svc-escooter'],
+          ['monthrent','한달렌트','svc-monthrent'],['subsidy','보조금조회','svc-subsidy'],['carins','내차보험','svc-carins']],
+  send: [['quickship','퀵·배송','svc-quickship'],['quick','퀵','svc-quick'],['bigcargo','큰짐배송','svc-bigcargo'],
+         ['pickup','방문택배','svc-pickup'],['cvspost','편의점택배','svc-cvspost']],
+  abroad: [['abroadcall','해외차량호출','svc-abroadcall'],['abroadcar','해외렌터카','svc-abroadcar'],['air','항공','svc-air'],
+           ['guamtaxi','괌택시','svc-guamtaxi'],['guamleisure','괌레저','svc-guamleisure'],['leisure','레저/티켓','svc-leisure'],
+           ['icnair','인천공항','svc-icnair'],['jpair','일본공항픽업','svc-jpair'],['usim','유심/이심','svc-usim'],
+           ['travelins','여행자보험','svc-travelins']]
+};
 var ALL_CAT = { move: '이동할 때', drive: '운전할 때', send: '물건보낼 때', abroad: '해외갈 때' };
 function renderAllGrid(key) {
-  var t = HOME_TABS[key] || HOME_TABS.move;
+  var list = ALL_SVCS[key] || ALL_SVCS.move;
   $('#allCatName').textContent = ALL_CAT[key] || ALL_CAT.move;
-  $('#allGrid').innerHTML = t.svcs.map(function (v) {
+  $('#allGrid').innerHTML = list.map(function (v) {
     return '<button class="svc" data-svc="' + v[0] + '">' +
       '<img src="img/' + v[2] + '.png" alt=""><span>' + esc(v[1]) + '</span></button>';
   }).join('');

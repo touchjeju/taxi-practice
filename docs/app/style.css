@@ -690,7 +690,8 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
    전체 서비스 보기 · 알림 · 이용기록  (image/기타 기능 캡처)
    ══════════════════════════════════════════════════════════ */
 .screen--all{background:#fff;display:flex;flex-direction:column}
-.all-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 82px}
+.all-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 82px;
+  display:flex;flex-direction:column}
 .all-home{display:flex;align-items:center;height:52px;padding:0 16px;color:#17171B}
 .all-h1{margin:6px 0 0;padding:0 20px;font-size:19px;font-weight:500;letter-spacing:-.5px}
 .all-perks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:14px 14px 18px}
@@ -698,17 +699,19 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .perk img{width:52px;height:52px;border-radius:13px;object-fit:cover}
 .perk span{font-size:14.5px;font-weight:500;color:#2B2E34;letter-spacing:-.5px}
 
-.all-body{display:flex;gap:0;border-top:1px solid var(--line);min-height:0}
-.all-rail{width:112px;flex:none;background:#F4F5F7;padding:10px 8px;display:flex;flex-direction:column;gap:4px}
+/* 왼쪽 분류 막대의 회색이 아래까지 이어지도록 남는 높이를 채운다 */
+.all-body{display:flex;gap:0;border-top:1px solid var(--line);flex:1 0 auto}
+.all-rail{width:124px;flex:none;background:#F4F5F7;padding:12px 8px;display:flex;flex-direction:column;gap:6px}
 .all-cat{
-  padding:13px 10px;border-radius:10px;text-align:left;font-size:16px;font-weight:500;
+  padding:16px 12px;border-radius:12px;text-align:left;font-size:18px;font-weight:500;
   color:#4A4E57;letter-spacing:-.5px;line-height:1.25;
 }
 .all-cat.is-on{background:#fff;color:var(--ink);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .all-panel{flex:1;min-width:0;padding:14px 10px 20px}
 .all-panel__t{margin:0 0 6px;padding:0 6px;font-size:19px;font-weight:500;letter-spacing:-.5px}
-.all-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 2px}
-.all-grid .svc{padding:6px 0}
+.all-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 2px}
+.all-grid .svc{padding:6px 0;gap:5px}
+.all-grid .svc img{width:64px;height:54px}
 
 /* ───────────── 알림 ───────────── */
 .screen--noti{background:#fff;display:flex;flex-direction:column}
@@ -723,15 +726,15 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
   background:#fff;font-size:16px;font-weight:500;color:#3F434B;letter-spacing:-.5px;
 }
 .nchip.is-on{background:#1F2126;border-color:#1F2126;color:#fff}
-.noti-ad{display:flex;align-items:flex-end;gap:12px;margin:0 16px;padding:12px 14px;
-  border-radius:12px;background:#F4F5F7}
+/* 캡처의 광고는 카드가 아니라 화면 전체 폭 띠다 */
+.noti-ad{display:flex;align-items:flex-end;gap:12px;padding:12px 18px;background:#F4F5F7}
 .noti-ad .home-ad__title{white-space:normal;font-size:16.5px}
 .noti-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:0 24px 100px}
 .noti-empty__ico{
-  width:64px;height:64px;border-radius:16px;background:#F1F2F4;
+  width:78px;height:78px;border-radius:18px;background:#F4F5F7;
   display:flex;align-items:center;justify-content:center;
 }
-.noti-empty__ico .tico{width:30px;height:30px;font-size:19px;background:#C3C7CE}
+.noti-empty__ico .tico{width:36px;height:36px;font-size:23px;background:#C9CDD3}
 .noti-empty p{margin:0;text-align:center;font-size:17px;line-height:1.6;color:#9BA0A8;letter-spacing:-.5px}
 
 /* ───────────── 이용기록 ───────────── */
