@@ -596,6 +596,13 @@ $('#btnRider').addEventListener('click', function () { toast('탑승자 변경�
 $('#btnCoupon').addEventListener('click', function () { push('pay'); });
 $('#btnPay').addEventListener('click', function () { push('pay'); });
 $('#ctaCall').addEventListener('click', function () {
+  /* 진짜 카카오 T 도 결제수단이 없으면 호출이 되지 않는다(캡처 tp-10 의 다음 단계가
+     [결제수단 등록] 이다). 그냥 막기만 하면 왜 안 되는지 모르니 힌트까지 켜 준다. */
+  if (!payMethod) {
+    toast('결제수단을 먼저 등록해 주세요.');
+    hintShow();
+    return;
+  }
   startRide();
 });
 
@@ -630,13 +637,14 @@ $('#payCard').addEventListener('click', function (e) {
 });
 $('#miniCoupon').addEventListener('click', function () { toast('사용할 수 있는 쿠폰이 없어요.'); });
 $('#miniPoint').addEventListener('click', function () { toast('보유 포인트가 0P 예요.'); });
-$('#payApply').addEventListener('click', function () {
-  payMethod = paySel;
-  var lab = $('#payLabel'), btn = $('#btnPay');
-  lab.textContent = PAY_LABEL[payMethod];
+/* 결제수단을 정하고 상세 화면의 [결제수단 등록] 자리를 바꿔 준다 */
+function setPayMethod(key) {
+  payMethod = key;
+  var btn = $('#btnPay');
+  $('#payLabel').textContent = PAY_LABEL[key];
   btn.classList.add('is-set');
   var ico = btn.querySelector('svg,img');
-  if (payMethod === 'other') {
+  if (key === 'other') {
     var img = document.createElement('img');
     img.src = 'img/pay-direct.png'; img.alt = '';
     if (ico) btn.replaceChild(img, ico);
@@ -646,6 +654,10 @@ $('#payApply').addEventListener('click', function () {
     svg.innerHTML = '<use href="#ic-plus"/>';
     btn.replaceChild(svg, ico);
   }
+}
+
+$('#payApply').addEventListener('click', function () {
+  setPayMethod(paySel);
   pop();
   toast(PAY_LABEL[payMethod] + '(으)로 결제수단을 설정했어요.');
 });
@@ -1103,6 +1115,7 @@ function start() {
 /* 취소 연습은 [호출하기] 버튼에서 시작한다 — 제주시청 → 제주국제공항이 미리 잡혀 있다 */
 function startFromCall() {
   picked = OPTS[1];
+  setPayMethod('kakaopay');          // 취소 연습은 결제수단 등록을 건너뛴다
   chooseDest(FAVS.airport);
   push('detail');
 }
