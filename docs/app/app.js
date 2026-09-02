@@ -649,6 +649,11 @@ var adShown = false;
 $('#adShare').addEventListener('click', function () { pop(); toast('친구에게 공유했어요.'); });
 $('#adMore').addEventListener('click', function () { pop(); toast('광고 자세히 보기는 이 연습에 포함되어 있지 않아요.'); });
 
+/* ── S0 · 시작 광고 (앱을 열면 한 번, tp-01 캡처) ──
+   [다시 보지 않기] 도 이 연습 안에서만 유효하다 — 다시 시작하면 또 보인다.  */
+$('#ad0Never').addEventListener('click', function () { pop(); toast('이번 연습에서는 다시 보이지 않아요.'); });
+$('#ad0Close').addEventListener('click', function () { pop(); });
+
 /* ───────────────────────── 8. 홈 → 택시 ───────────────────────── */
 
 function openTaxi() {
@@ -921,6 +926,161 @@ function finish(text) {
 $('#doneAgain').addEventListener('click', function () { location.reload(); });
 $('#doneHome').addEventListener('click', function () { location.href = '../'; });
 
+/* ───────────────────── 8.6. 힌트 — 모를 때 누르는 버튼 ─────────────────────
+   오른쪽 위 [?] 를 누르면 지금 눌러야 할 자리에 빨간 사각형이 나타난다.
+   맞게 누르면 표시가 곧바로 사라진다 — 다음 화면은 다시 스스로 해 보라고.
+   눌러야 할 곳이 밀어야 보이는 자리면 사각형 대신 화살표로 알려 준다.        */
+
+var phoneEl  = $('#phone');
+var hintBtn  = $('#hintBtn'),  hintLayer = $('#hintLayer');
+var hintRing = $('#hintRing'), hintArrow = $('#hintArrow'), hintSay = $('#hintSay');
+var hintTarget = null, hintScreen = null, hintText = '', hintRaf = 0, hintTimer = null;
+
+function hintTop() { return stack[stack.length - 1]; }
+
+/* 지금 화면에서 눌러야 할 곳 — 없으면 null */
+function hintSpot() {
+  var one = function (sel, say) { var el = $(sel); return el ? { el: el, say: say } : null; };
+  switch (hintTop()) {
+    case 'home':   return one('#svcTaxi',        '[택시]를 누르세요');
+    case 'ad0':    return one('#ad0Close',      '[닫기]를 눌러 광고를 닫으세요');
+    case 'ad':     return one('.ad__close',      '[X]를 눌러 광고를 닫으세요');
+    case 'taxi':   return one('#rowDest',        '[어디로 갈까요?]를 누르세요');
+    case 'search':
+      if (!$('#srchInput').value.trim()) return one('#srchInput', '여기에 가려는 곳을 적으세요');
+      return one('#srchBody .sug', '찾는 곳을 누르세요') || one('#srchInput', '여기에 가려는 곳을 적으세요');
+    case 'route':  return one('#opts .opt',      '부르고 싶은 택시를 누르세요');
+    case 'detail': return payMethod ? one('#ctaCall', '[호출하기]를 누르세요')
+                                    : one('#btnPay',  '[결제수단 등록]을 누르세요');
+    case 'pay':    return $('#payApply').disabled ? one('#payCard .pm', '결제수단을 하나 고르세요')
+                                                  : one('#payApply',    '[적용]을 누르세요');
+    case 'ride':
+      if (rideScreen.classList.contains('is-wait'))
+        return { say: '기사님을 찾는 중이에요.\n잠시 기다려 주세요.' };
+      if (FLOW === 'call') return { say: '잘하셨어요!\n택시가 오고 있어요.' };
+      return one('#btnCancelTop', '[호출취소]를 누르세요');
+    case 'cancel': return $('#cxGo').disabled ? one('#cxSel', '취소하는 이유를 고르세요')
+                                              : one('#cxGo',  '[호출 취소하기]를 누르세요');
+    case 'reason': return one('#rsList .rs__item', '이유를 하나 누르세요');
+    case 'done':   return one('#doneHome',       '연습이 끝났어요');
+  }
+  return null;
+}
+
+/* 밀어야 보이는 자리인지 — 스크롤되는 부모를 찾아 그 안에 들어와 있는지 본다 */
+function hintScrollBox(el) {
+  for (var n = el.parentElement; n && n !== phoneEl; n = n.parentElement) {
+    var ov = getComputedStyle(n).overflowY;
+    if ((ov === 'auto' || ov === 'scroll') && n.scrollHeight > n.clientHeight + 4) return n;
+  }
+  return null;
+}
+
+/* 말풍선을 (x,y) 에 놓되 화면 밖으로 나가지 않게 민다 */
+function hintSayAt(x, y) {
+  var p = phoneEl.getBoundingClientRect(), w = hintSay.offsetWidth, h = hintSay.offsetHeight;
+  hintSay.style.left = Math.max(10, Math.min(p.width  - w - 10, x - w / 2)) + 'px';
+  hintSay.style.top  = Math.max(10, Math.min(p.height - h - 10, y - h / 2)) + 'px';
+}
+
+function hintDraw() {
+  var p = phoneEl.getBoundingClientRect();
+
+  if (!hintTarget) {                       // 기다리기만 하면 되는 화면 — 말만 띄운다
+    hintRing.hidden = true; hintArrow.hidden = true;
+    hintSay.textContent = hintText;
+    hintSayAt(p.width / 2, p.height / 2);
+    return;
+  }
+
+  var r = hintTarget.getBoundingClientRect();
+  var box = hintScrollBox(hintTarget), out = 0;
+  if (box) {
+    var b = box.getBoundingClientRect();
+    if (r.bottom > b.bottom - 6) out = 1;        // 위로 밀어 올려야 보인다
+    else if (r.top < b.top + 6)  out = -1;       // 아래로 내려야 보인다
+  }
+
+  if (out) {                                     // 스크롤 — 화살표
+    var ab = (box || phoneEl).getBoundingClientRect();
+    var cx = ab.left - p.left + ab.width / 2;
+    var cy = out > 0 ? ab.bottom - p.top - 60 : ab.top - p.top + 60;
+    hintRing.hidden = true;
+    hintArrow.hidden = false;
+    hintArrow.classList.toggle('is-up', out < 0);
+    hintArrow.style.left = cx + 'px';
+    hintArrow.style.top  = cy + 'px';
+    hintSay.textContent = out > 0 ? '아래에 있어요\n화면을 밀어 올리세요'
+                                  : '위에 있어요\n화면을 끌어 내리세요';
+    hintSayAt(cx, out > 0 ? cy - 62 : cy + 62);
+    return;
+  }
+
+  hintArrow.hidden = true;                       // 화면 안 — 빨간 사각형
+  hintRing.hidden = false;
+  var PAD = 6;
+  hintRing.style.left   = (r.left - p.left - PAD) + 'px';
+  hintRing.style.top    = (r.top  - p.top  - PAD) + 'px';
+  hintRing.style.width  = (r.width  + PAD * 2) + 'px';
+  hintRing.style.height = (r.height + PAD * 2) + 'px';
+  hintSay.textContent = hintText;
+  var lower = (r.top - p.top) < 130;             // 위쪽 자리면 말풍선을 아래에 붙인다
+  hintSayAt(r.left - p.left + r.width / 2,
+            lower ? r.bottom - p.top + 42 : r.top - p.top - 42);
+}
+
+function hintTick() {
+  if (hintLayer.hidden) return;
+  if (hintTop() !== hintScreen) { hintHide(); return; }     // 화면이 넘어가면 스스로
+  if (hintTarget && !phoneEl.contains(hintTarget)) {        // 목록이 다시 그려졌으면 다시 찾는다
+    var s = hintSpot();
+    if (!s || !s.el) { hintHide(); return; }
+    hintTarget = s.el; hintText = s.say || '';
+  }
+  hintDraw();
+  hintRaf = requestAnimationFrame(hintTick);
+}
+
+function hintShow() {
+  var spot = hintSpot();
+  if (!spot) { toast('이 화면에서는 알려 드릴 게 없어요.'); return; }
+  hintTarget = spot.el || null;
+  hintText   = spot.say || '';
+  hintScreen = hintTop();
+  hintLayer.hidden = false;
+  hintBtn.classList.add('is-on');
+  hintDraw();
+  cancelAnimationFrame(hintRaf);
+  hintRaf = requestAnimationFrame(hintTick);
+  clearTimeout(hintTimer);
+  if (!hintTarget) hintTimer = setTimeout(hintHide, 3400);  // 기다리는 화면은 저절로 사라진다
+}
+
+function hintHide() {
+  cancelAnimationFrame(hintRaf); hintRaf = 0;
+  clearTimeout(hintTimer);
+  hintLayer.hidden = true;
+  hintRing.hidden = true;
+  hintArrow.hidden = true;
+  hintBtn.classList.remove('is-on');
+  hintTarget = null; hintScreen = null;
+}
+
+hintBtn.addEventListener('click', function () {
+  if (hintLayer.hidden) hintShow(); else hintHide();
+});
+
+/* 맞게 눌렀으면 표시를 거둔다 — 다음 화면은 다시 스스로 */
+document.addEventListener('click', function (e) {
+  if (hintLayer.hidden || !hintTarget) return;
+  if (e.target === hintTarget || hintTarget.contains(e.target)) hintHide();
+}, true);
+
+/* 검색창은 글자를 적기 시작하면 거둔다 */
+$('#srchInput').addEventListener('input', function () {
+  if (!hintLayer.hidden && hintTarget === this) hintHide();
+});
+
 /* ───────────────────────── 9. 시작 ───────────────────────── */
 
 function start() {
@@ -930,6 +1090,7 @@ function start() {
   if (K) initS2Map();
   else $('#phone').classList.add('no-map');   // 지도 자리에 안내 문구만 남긴다
   if (FLOW === 'cancel') startFromCall();
+  else setTimeout(function () { push('ad0'); }, 500);   // 앱을 열면 시작 광고가 한 번 뜬다
 }
 
 /* 취소 연습은 [호출하기] 버튼에서 시작한다 — 제주시청 → 제주국제공항이 미리 잡혀 있다 */

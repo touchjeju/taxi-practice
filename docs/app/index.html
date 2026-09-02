@@ -438,6 +438,20 @@
       </div>
     </section>
 
+    <!-- ═══════════  S0 · 시작 광고 (앱을 열면 한 번, tp-01 캡처)  ═══════════ -->
+    <section class="screen screen--overlay screen--ad0" data-screen="ad0">
+      <div class="ad__dim" data-back></div>
+      <div class="ad0__wrap">
+        <div class="ad0__bar">
+          <button class="ad0__never" id="ad0Never" type="button"><svg class="i20"><use href="#ic-check"/></svg>다시 보지 않기</button>
+          <button class="ad0__close" id="ad0Close" type="button">닫기</button>
+        </div>
+        <div class="ad0__card">
+          <img class="ad0__img" src="img/ad-book.jpg" alt="제주형 스마트폰 활용 교재 광고">
+        </div>
+      </div>
+    </section>
+
     <!-- ═══════════  S1 · 광고 팝업  ═══════════ -->
     <section class="screen screen--overlay screen--ad" data-screen="ad">
       <div class="ad__dim" data-back></div>
@@ -452,6 +466,17 @@
         <button class="ad__close" data-back aria-label="광고 닫기"><svg class="i26"><use href="#ic-x"/></svg></button>
       </div>
     </section>
+
+
+    <!-- ═══════════  모를 때 누르는 힌트  ═══════════ -->
+    <button class="hint-btn" id="hintBtn" type="button" aria-label="힌트 보기">?</button>
+    <div class="hint-layer" id="hintLayer" hidden>
+      <div class="hint-ring" id="hintRing" hidden></div>
+      <div class="hint-arrow" id="hintArrow" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="hint-say" id="hintSay"></div>
+    </div>
 
     <div class="toast" id="toast"></div>
   </div>

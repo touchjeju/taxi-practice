@@ -83,7 +83,8 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
   background-image:linear-gradient(#fff,#fff),linear-gradient(100deg,#8B5CF6,#3B82F6 55%,#2F6BFF);
   background-origin:border-box;background-clip:padding-box,border-box;
 }
-.home-search__q{flex:1;font-size:22px;font-weight:800;color:#3F434B}
+.home-search__q{flex:1;min-width:0;font-size:22px;font-weight:800;color:#3F434B;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .home-search__acts{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800}
 .hs-act{display:flex;align-items:center;gap:5px}
 .hs-div{width:1px;height:19px;background:#D8DAE0}
@@ -93,9 +94,11 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
   background:#F1F2F4;border-radius:13px;overflow:hidden;
 }
 .home-ad__txt{flex:1;min-width:0}
-.home-ad__from{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6E727A}
+.home-ad__from{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6E727A;
+  min-width:0;white-space:nowrap;overflow:hidden}
 .ad-avatar{width:17px;height:17px;border-radius:5px;background:#E7B77A url("img/ad-char.png") -3px -1px/28px auto no-repeat;flex:none}
-.home-ad__title{margin:4px 0 6px;font-size:17.5px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}
+.home-ad__title{margin:4px 0 6px;font-size:17.5px;font-weight:800;letter-spacing:-.6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .home-ad__meta{display:flex;align-items:center;gap:5px;font-size:12px;color:#8B9099}
 .ad-badge{
   display:inline-flex;align-items:center;justify-content:center;height:15px;padding:0 5px;
@@ -444,7 +447,7 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 /* ══════════════════════════════════════════════════════════
    광고 팝업 (tp-03)
    ══════════════════════════════════════════════════════════ */
-.ad__dim{position:absolute;inset:0;background:rgba(20,22,26,.55)}
+.ad__dim{position:absolute;inset:0;background:rgba(0,0,0,.6)}   /* 캡처에서 잰 값 */
 .ad__wrap{position:absolute;left:0;right:0;top:50%;transform:translateY(-48%);display:flex;flex-direction:column;align-items:center;gap:20px}
 .ad__card{width:min(76%,300px);border-radius:14px;overflow:hidden;background:#fff}
 .ad__img{display:block;width:100%}
@@ -608,3 +611,70 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .done__again{flex:1;height:54px;border-radius:9px;border:1px solid #DDE0E4;background:#fff;
   font-size:18px;font-weight:800;color:#3F434B}
 .done__home{flex:1;height:54px;border-radius:9px;background:var(--cta);color:#fff;font-size:18px;font-weight:800}
+
+/* ══════════════════════════════════════════════════════════
+   모를 때 누르는 힌트 — 오른쪽 위 [?] 버튼과 빨간 표시
+   ══════════════════════════════════════════════════════════ */
+.hint-btn{
+  position:absolute;right:10px;top:10px;width:44px;height:44px;border-radius:50%;
+  background:#F7DA00;color:#282D4B;font-size:27px;font-weight:800;line-height:44px;
+  text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.28);z-index:60;
+}
+.hint-btn.is-on{background:var(--red);color:#fff}
+
+/* [?] 버튼이 가리지 않도록 오른쪽 위를 조금 비워 둔다.
+   좁은 폰(360px 이하)에서는 이 여백을 주면 "어디로 갈까요?" 가 두 줄로 깨진다.
+   그런 폰에서는 여백을 걷고, [?] 가 [회사] 위에 살짝 겹치는 쪽을 택한다. */
+@media (min-width:384px){ .home-search{padding-right:54px} }
+.ride-topx{right:64px}
+
+.hint-layer{position:absolute;inset:0;z-index:59;pointer-events:none}
+
+/* 눌러야 할 자리 — 조금 둥근 빨간 사각형, 숨을 쉬듯 커졌다 작아진다 */
+.hint-ring{
+  position:absolute;border-radius:14px;
+  background:rgba(232,64,42,.20);border:3px solid rgba(232,64,42,.92);
+  animation:hint-beat 1.3s ease-in-out infinite;
+}
+@keyframes hint-beat{
+  0%,100%{transform:scale(1);      box-shadow:0 0 0 2px rgba(232,64,42,.30)}
+  50%    {transform:scale(1.035);  box-shadow:0 0 0 14px rgba(232,64,42,0)}
+}
+
+/* 스크롤해야 보이는 자리 — 밀어야 할 쪽으로 화살표가 까딱거린다 */
+.hint-arrow{
+  position:absolute;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;
+  background:rgba(232,64,42,.92);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.28);animation:hint-bob 1.1s ease-in-out infinite;
+}
+.hint-arrow svg{width:30px;height:30px}
+.hint-arrow.is-up svg{transform:rotate(180deg)}
+@keyframes hint-bob{0%,100%{transform:translateY(-5px)}50%{transform:translateY(5px)}}
+
+.hint-say{
+  position:absolute;max-width:76%;padding:9px 14px;border-radius:12px;
+  background:rgba(24,26,30,.92);color:#fff;font-size:16px;font-weight:700;line-height:1.35;
+  white-space:pre-line;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.3);
+}
+
+/* ══════════════════════════════════════════════════════════
+   S0 · 시작 광고 — tp-01 캡처 그대로.
+   화면 아래에 붙은 카드 + 그 위에 [다시 보지 않기] [닫기] 글자줄.
+   (캡처에서 잰 값: 좌우 여백 26px, 아래 18px, 글자줄 간격 17px, 글자 22px)
+   ══════════════════════════════════════════════════════════ */
+.ad0__wrap{
+  position:absolute;left:26px;right:26px;top:18px;bottom:18px;
+  display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none;
+}
+.ad0__bar{flex:none;pointer-events:auto;
+  display:flex;align-items:center;justify-content:space-between;padding:0 2px 17px}
+.ad0__never,.ad0__close{
+  display:flex;align-items:center;gap:8px;
+  font-size:22px;font-weight:700;letter-spacing:-.5px;color:rgba(255,255,255,.72);
+}
+.ad0__never svg{width:20px;height:20px;color:rgba(255,255,255,.72)}
+/* 화면이 짧으면 카드가 스스로 작아진다 — [닫기] 줄이 화면 밖으로 밀리지 않도록 */
+.ad0__card{flex:0 1 auto;min-height:0;align-self:center;max-width:100%;pointer-events:auto;
+  border-radius:12px;overflow:hidden;background:#fff;display:flex}
+.ad0__img{display:block;width:auto;height:auto;max-width:100%;max-height:100%}
