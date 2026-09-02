@@ -523,7 +523,7 @@
             <i class="air-swap"><svg class="i22"><use href="#ic-swap"/></svg></i>
             <div class="air-port"><b>IN</b><span>도착</span></div>
           </div>
-          <button class="air-row" id="airDate"><svg class="i22"><use href="#ic-cal"/></svg><span class="air-row__ph">가는날 - 오는날</span></button>
+          <button class="air-row" id="airDate"><svg class="i22"><use href="#ic-cal"/></svg><span class="air-row__ph" id="airDateText">가는날 - 오는날</span></button>
           <div class="air-row air-row--last">
             <svg class="i22"><use href="#ic-person"/></svg><span>성인 1명, 일반석</span>
             <label class="air-direct"><i class="air-box"></i>직항</label>
@@ -533,8 +533,12 @@
       </div>
       <div class="air-body">
         <div class="air-promo">
-          <div class="air-promo__txt"><b>괌 인기 액티비티<br>최대 31% 할인!</b><span>~9/30 사용건까지 당일…</span></div>
-          <i class="air-promo__pct">31%</i>
+          <div class="air-promo__txt">
+            <div class="home-ad__from"><i class="ad-avatar"></i>터치제주 오픈채팅에서 확인</div>
+            <b>제주형 스마트폰 안내서 출시</b>
+            <div class="home-ad__meta"><b class="ad-badge">AD</b> Touchjeju 광고입니다.</div>
+          </div>
+          <img class="air-promo__art" src="img/ad-thumb.jpg" alt="" aria-hidden="true">
         </div>
         <h3 class="air-h3">카카오 T 항공 특가 컨텐츠</h3>
         <div class="air-tags"><button class="air-tag is-on">인기 여행지</button><button class="air-tag">미식 여행</button><button class="air-tag">중국 여행</button></div>
@@ -546,7 +550,7 @@
       <div class="al-head">
         <button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button>
         <div class="al-title">제주 CJU <i>⇆</i> 김포 GMP<button class="al-change">변경</button></div>
-        <div class="al-date">26.09.05(토) - 26.09.15(화) │ 1명 · 일반석</div>
+        <div class="al-date" id="alDate">26.09.05(토) - 26.09.15(화) │ 1명 · 일반석</div>
         <div class="al-chips">
           <button class="al-chip al-chip--ico"><svg class="i20"><use href="#ic-swap"/></svg></button>
           <button class="al-chip">시각</button><button class="al-chip">항공사</button>
@@ -650,12 +654,28 @@
       <div class="ab-foot"><button class="as-go" id="airPay">결제하기</button></div>
     </section>
 
-    <!-- ═══════════  A10 · 허츠 렌터카 광고  ═══════════ -->
+    <!-- ═══════════  A11 · 날짜 선택 (가는날 - 오는날)  ═══════════ -->
+    <section class="screen screen--airdate" data-screen="airdate">
+      <div class="ad-head2">
+        <button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button>
+        <b>날짜 선택</b>
+      </div>
+      <div class="dp-sel">
+        <div class="dp-sel__b" id="dpGoBox"><span>가는날</span><b id="dpGoText">날짜를 고르세요</b></div>
+        <i class="dp-sel__ar"></i>
+        <div class="dp-sel__b" id="dpBackBox"><span>오는날</span><b id="dpBackText">날짜를 고르세요</b></div>
+      </div>
+      <div class="dp-week"><i>일</i><i>월</i><i>화</i><i>수</i><i>목</i><i>금</i><i>토</i></div>
+      <div class="dp-body" id="dpBody"></div>
+      <div class="dp-foot"><button class="af-done" id="dpDone" disabled>선택 완료</button></div>
+    </section>
+
+    <!-- ═══════════  A10 · 광고 (터치제주)  ═══════════ -->
     <section class="screen screen--overlay screen--airad" data-screen="airad">
       <div class="ad__dim" data-back></div>
       <div class="ad__wrap">
         <div class="ad__card">
-          <img class="ad__img" src="img/ad-hertz.jpg" alt="허츠 렌터카 최대 15% 할인 광고">
+          <img class="ad__img" src="img/ad-book.jpg" alt="제주형 스마트폰 활용 교재 광고">
           <div class="ad__actions"><button class="ad__act" id="hertzMore">자세히 보기</button></div>
         </div>
         <button class="ad__close" data-back aria-label="광고 닫기"><svg class="i26"><use href="#ic-x"/></svg></button>

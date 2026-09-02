@@ -693,7 +693,7 @@ var HOME_TABS = {
   send: { two: true, promo: { sub: '고민없이 접수하는', title: '퀵 AI 사진 접수', art: 'promo-send.png', tone: 'send' },
     svcs: [['quick', '퀵', 'svc-quick'], ['bigcargo', '큰짐배송', 'svc-bigcargo'],
            ['pickup', '방문택배', 'svc-pickup'], ['cvspost', '편의점택배', 'svc-cvspost']] },
-  abroad: { promo: { sub: '허츠 최대 15% …', title: '지금 확인하기!', art: 'promo-abroad.png', tone: 'abroad' },
+  abroad: { promo: { sub: '터치제주 광고', title: '스마트폰 교재', art: 'promo-touch.png', tone: 'touch' },
     svcs: [['abroadcall', '해외차량호출', 'svc-abroadcall'], ['abroadcar', '해외렌터카', 'svc-abroadcar'], ['guamtaxi', '괌택시', 'svc-guamtaxi'],
            ['air', '항공', 'svc-air'], ['jpair', '일본공항픽업', 'svc-jpair'], ['guamleisure', '괌레저', 'svc-guamleisure']] }
 };
@@ -1105,7 +1105,11 @@ function hintSpot() {
     case 'all':    return one('.screen--all .home-nav [data-nav="home"]',  '[홈]을 눌러 돌아가세요');
     case 'noti':   return one('.screen--noti .home-nav [data-nav="home"]', '[홈]을 눌러 돌아가세요');
     case 'uselog': return one('.ul-back', '왼쪽 위 화살표를 눌러 돌아가세요');
-    case 'air':     return one('#airSearch',  '[항공권 검색]을 누르세요');
+    case 'air':     return dpFrom && dpTo ? one('#airSearch', '[항공권 검색]을 누르세요')
+                                        : one('#airDate',   '[가는날 - 오는날]을 눌러 날짜를 고르세요');
+    case 'airdate': return !dpFrom ? one('.dp-cell:not(:disabled)', '가는날을 누르세요')
+                        : !dpTo   ? one('.dp-cell:not(:disabled)', '오는날을 누르세요')
+                                  : one('#dpDone', '[선택 완료]를 누르세요');
     case 'airlist': return one('#alList .al-item', '타고 갈 비행기를 누르세요');
     case 'airsel':  return one('#airGo',      '[예매하기]를 누르세요');
     case 'airad':   return one('.screen--airad .ad__close', '[X]를 눌러 광고를 닫으세요');
@@ -1290,8 +1294,8 @@ $('#alList').addEventListener('click', function (e) {
   var b = e.target.closest('[data-fl]');
   if (!b) return;
   var f = FLIGHTS[+b.dataset.fl];
-  $('#ajGoFrom').textContent = '26.09.05(토) ' + f.dep;
-  $('#ajGoTo').textContent   = '26.09.05(토) ' + f.arr;
+  $('#ajGoFrom').textContent = TRIP.from + ' ' + f.dep;
+  $('#ajGoTo').textContent   = TRIP.from + ' ' + f.arr;
   $('#ajGoName').textContent = f.air + ' ' + f.code + '편';
   $('#ajGoLogo').src = 'img/' + f.img + '.png';
   $('#asTotal').textContent = won(f.price + 27700);
@@ -1498,7 +1502,78 @@ $('#acDone').addEventListener('click', function () {
   toast('결제카드를 등록했어요.');
 });
 
-/* ── 허츠 렌터카 광고 (항공 화면에 들어가면 한 번) ── */
+
+/* ── 날짜 선택 (가는날 - 오는날) ──
+   2026년 9월·10월 두 달을 보여 준다. 가는날을 먼저 고르고 오는날을 고르면
+   사이가 파랗게 이어진다. 지난 날짜는 누를 수 없다.                        */
+var DP_DAY = ['일', '월', '화', '수', '목', '금', '토'];
+var dpFrom = null, dpTo = null;                 // 'YYYY-M-D'
+var TRIP = { from: '26.09.05(토)', to: '26.09.15(화)' };   // 편 목록·여정에 쓰는 값
+var DP_TODAY = new Date(2026, 8, 3);            // 연습 기준일 (2026.09.03)
+
+function dpKey(y, m, d) { return y + '-' + m + '-' + d; }
+function dpNum(k) { var a = k.split('-'); return (+a[0]) * 10000 + (+a[1]) * 100 + (+a[2]); }
+function dpLabel(k) {
+  var a = k.split('-'), y = +a[0], m = +a[1], d = +a[2];
+  var w = DP_DAY[new Date(y, m - 1, d).getDay()];
+  return String(y).slice(2) + '.' + ('0' + m).slice(-2) + '.' + ('0' + d).slice(-2) + '(' + w + ')';
+}
+
+function renderCalendar() {
+  var html = '', base = new Date(2026, 8, 1);
+  for (var k = 0; k < 2; k++) {
+    var y = base.getFullYear(), m = base.getMonth() + k;
+    var yy = y + Math.floor(m / 12), mm = (m % 12) + 1;
+    var first = new Date(yy, mm - 1, 1), last = new Date(yy, mm, 0).getDate();
+    html += '<div class="dp-month">' + yy + '년 ' + mm + '월</div><div class="dp-grid">';
+    for (var b = 0; b < first.getDay(); b++) html += '<div></div>';
+    for (var d = 1; d <= last; d++) {
+      var key = dpKey(yy, mm, d), n = dpNum(key);
+      var past = new Date(yy, mm - 1, d) < DP_TODAY;
+      var cls = 'dp-cell' + (new Date(yy, mm - 1, d).getDay() === 0 ? ' sun' : '');
+      if (dpFrom && dpTo) {
+        var a = dpNum(dpFrom), z = dpNum(dpTo);
+        if (n > a && n < z) cls += ' mid';
+        if (n === a && a !== z) cls += ' edge edge--s';
+        if (n === z && a !== z) cls += ' edge edge--e';
+      }
+      if (key === dpFrom || key === dpTo) cls += ' pick';
+      html += '<button class="' + cls + '" data-d="' + key + '"' + (past ? ' disabled' : '') +
+              '><span>' + d + '</span></button>';
+    }
+    html += '</div>';
+  }
+  $('#dpBody').innerHTML = html;
+  $('#dpGoText').textContent   = dpFrom ? dpLabel(dpFrom) : '날짜를 고르세요';
+  $('#dpBackText').textContent = dpTo   ? dpLabel(dpTo)   : '날짜를 고르세요';
+  $('#dpGoBox').classList.toggle('is-on', !dpFrom);
+  $('#dpBackBox').classList.toggle('is-on', !!dpFrom && !dpTo);
+  $('#dpDone').disabled = !(dpFrom && dpTo);
+}
+
+$('#airDate').addEventListener('click', function () { renderCalendar(); push('airdate'); });
+
+$('#dpBody').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-d]');
+  if (!b || b.disabled) return;
+  var key = b.dataset.d;
+  if (!dpFrom || dpTo) { dpFrom = key; dpTo = null; }        // 새로 고르기 시작
+  else if (dpNum(key) < dpNum(dpFrom)) { dpFrom = key; }     // 가는날보다 앞이면 가는날을 바꾼다
+  else { dpTo = key; }
+  renderCalendar();
+});
+
+$('#dpDone').addEventListener('click', function () {
+  TRIP.from = dpLabel(dpFrom);
+  TRIP.to   = dpLabel(dpTo);
+  $('#airDateText').textContent = TRIP.from + ' - ' + TRIP.to;
+  $('#airDateText').classList.remove('air-row__ph');
+  $('#alDate').textContent = TRIP.from + ' - ' + TRIP.to + ' │ 1명 · 일반석';
+  pop();
+  toast('날짜를 정했어요.');
+});
+
+/* ── 광고 (항공 화면에 들어가면 한 번) — 터치제주 광고로 바꿨다 ── */
 var hertzShown = false;
 onEnter.air = function () {
   if (hertzShown) return;
