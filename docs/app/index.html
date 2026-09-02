@@ -67,27 +67,16 @@
           <img class="home-ad__art" src="img/ad-char.png" alt="" aria-hidden="true">
         </div>
 
-        <div class="home-tabs">
-          <button class="home-tab is-on">이동할 때</button>
-          <button class="home-tab">운전할 때</button>
-          <button class="home-tab">물건보낼 때</button>
-          <button class="home-tab">해외결제</button>
+        <div class="home-tabs" id="homeTabs">
+          <button class="home-tab is-on" data-tab="move">이동할 때</button>
+          <button class="home-tab" data-tab="drive">운전할 때</button>
+          <button class="home-tab" data-tab="send">물건보낼 때</button>
+          <button class="home-tab" data-tab="abroad">해외갈 때</button>
         </div>
 
         <div class="home-card">
-          <div class="home-grid">
-            <div class="promo">
-              <div class="promo__sub">블루파트너스 이…</div>
-              <div class="promo__title">무료로 이용하…</div>
-              <img class="promo__art" src="img/promo.jpg" alt="" aria-hidden="true">
-            </div>
-            <button class="svc" id="svcTaxi"><img src="img/svc-taxi.png" alt=""><span>택시</span></button>
-            <button class="svc"><img src="img/svc-taxical.png" alt=""><span>택시예약</span></button>
-            <button class="svc"><img src="img/svc-rentcar.png" alt=""><span>렌터카</span></button>
-            <button class="svc"><img src="img/svc-bike.png" alt=""><span>바이크</span></button>
-            <button class="svc"><img src="img/svc-bike30.png" alt=""><span>바이크30분</span></button>
-            <button class="svc"><img src="img/svc-trainbus.png" alt=""><span>기차/버스</span></button>
-          </div>
+          <!-- 서비스 격자는 탭에 따라 app.js 가 그린다 -->
+          <div class="home-grid" id="homeGrid"></div>
           <button class="home-more">전체 서비스 보기</button>
         </div>
 
@@ -106,11 +95,11 @@
       </div>
 
       <nav class="home-nav">
-        <button><svg class="i23"><use href="#ic-grid"/></svg><span>전체…</span></button>
-        <button><svg class="i23"><use href="#ic-biz"/></svg><span>비즈…</span></button>
-        <button class="is-on"><svg class="i23"><use href="#ic-navhome"/></svg><span>홈</span></button>
-        <button class="has-dot"><svg class="i23"><use href="#ic-bell"/></svg><span>이용/…</span></button>
-        <button class="has-dot"><svg class="i23"><use href="#ic-person"/></svg><span>내 정보</span></button>
+        <button data-nav="all"><svg class="i23"><use href="#ic-grid"/></svg><span>전체…</span></button>
+        <button data-nav="biz"><svg class="i23"><use href="#ic-biz"/></svg><span>비즈…</span></button>
+        <button data-nav="home" class="is-on"><svg class="i23"><use href="#ic-navhome"/></svg><span>홈</span></button>
+        <button data-nav="noti" class="has-dot"><svg class="i23"><use href="#ic-bell"/></svg><span>이용/…</span></button>
+        <button data-nav="me" class="has-dot"><svg class="i23"><use href="#ic-person"/></svg><span>내 정보</span></button>
       </nav>
     </section>
 
@@ -438,6 +427,84 @@
           <button class="pay__cancel" data-back>취소</button>
           <button class="pay__apply" id="payApply" disabled>적용</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ═══════════  전체 서비스 보기 (하단 [전체…])  ═══════════ -->
+    <section class="screen screen--all" data-screen="all">
+      <div class="all-scroll">
+        <button class="all-home" data-back aria-label="홈으로"><svg class="i27"><use href="#ic-home"/></svg></button>
+        <h2 class="all-h1">함께 사용하면 득이 되는</h2>
+        <div class="all-perks">
+          <button class="perk"><img src="img/perk-members.png" alt=""><span>멤버스</span></button>
+          <button class="perk"><img src="img/perk-family.png" alt=""><span>가족계정</span></button>
+          <button class="perk"><img src="img/perk-point.png" alt=""><span>포인트</span></button>
+          <button class="perk"><img src="img/perk-event.png" alt=""><span>이벤트</span></button>
+        </div>
+        <div class="all-body">
+          <nav class="all-rail" id="allRail">
+            <button class="all-cat is-on" data-tab="move">이동할 때</button>
+            <button class="all-cat" data-tab="drive">운전할 때</button>
+            <button class="all-cat" data-tab="send">물건보낼 때</button>
+            <button class="all-cat" data-tab="abroad">해외갈 때</button>
+          </nav>
+          <div class="all-panel">
+            <h3 class="all-panel__t" id="allCatName">이동할 때</h3>
+            <div class="all-grid" id="allGrid"></div>
+          </div>
+        </div>
+      </div>
+      <div class="needs-nav"></div>
+    </section>
+
+    <!-- ═══════════  알림 (하단 [이용/…])  ═══════════ -->
+    <section class="screen screen--noti" data-screen="noti">
+      <div class="noti-head">
+        <h1 class="noti-h1">알림</h1>
+        <button class="noti-log" id="btnUseLog">이용기록</button>
+      </div>
+      <div class="noti-chips">
+        <button class="nchip is-on">전체</button>
+        <button class="nchip">이용/예약</button>
+        <button class="nchip">혜택/이벤트</button>
+        <button class="nchip">공지</button>
+      </div>
+      <div class="noti-ad">
+        <div class="ride-ad__txt">
+          <div class="home-ad__from"><i class="ad-avatar"></i>터치제주 오픈채팅에서 확인</div>
+          <div class="home-ad__title">제주형 스마트폰 안내서 출시</div>
+          <div class="home-ad__meta"><b class="ad-badge">AD</b> Touchjeju 광고입니다.</div>
+        </div>
+        <img class="ride-ad__art" src="img/ad-thumb.jpg" alt="" aria-hidden="true">
+      </div>
+      <div class="noti-empty">
+        <i class="noti-empty__ico"><i class="tico">T</i></i>
+        <p>이용중인 서비스와 새로운 알림이<br>이곳에 등록됩니다.<br>(알림은 30일 후, 자동 삭제됩니다.)</p>
+      </div>
+      <div class="needs-nav"></div>
+    </section>
+
+    <!-- ═══════════  이용기록  ═══════════ -->
+    <section class="screen screen--uselog" data-screen="uselog">
+      <div class="ul-head">
+        <button class="ul-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button>
+        <b class="ul-title">이용기록</b>
+        <span class="ul-help"><svg class="i22"><use href="#ic-help"/></svg></span>
+      </div>
+      <div class="ul-tabs">
+        <button class="ul-tab is-on">전체</button>
+        <button class="ul-tab">개인</button>
+        <button class="ul-tab">가족계정</button>
+      </div>
+      <div class="ul-empty">
+        <svg class="ul-empty__ico" viewBox="0 0 48 48" aria-hidden="true">
+          <rect x="6" y="11" width="28" height="4" rx="2" fill="#D5D8DE"/>
+          <rect x="6" y="21" width="20" height="4" rx="2" fill="#D5D8DE"/>
+          <rect x="6" y="31" width="24" height="4" rx="2" fill="#D5D8DE"/>
+          <circle cx="33" cy="31" r="9" fill="none" stroke="#C3C7CE" stroke-width="3.4"/>
+          <path d="M40 38l5 5" stroke="#C3C7CE" stroke-width="3.4" stroke-linecap="round"/>
+        </svg>
+        <p>최근 1년 동안 이용한 기록이 없습니다.</p>
       </div>
     </section>
 

@@ -681,22 +681,123 @@ function openTaxi() {
   if (!adShown) { adShown = true; setTimeout(function () { push('ad'); }, 320); }
   askLocation();
 }
-$('#svcTaxi').addEventListener('click', openTaxi);
+/* ── 홈 화면 서비스 격자 — 탭 4개(image/기타 기능 캡처 그대로) ──
+   아이콘과 배너 그림은 캡처에서 잘라낸 실제 그림이다.                       */
+var HOME_TABS = {
+  move: { promo: { sub: '블루파트너스 이…', title: '무료로 이용하…', art: 'promo.jpg', tone: 'move' },
+    svcs: [['taxi', '택시', 'svc-taxi'], ['taxical', '택시예약', 'svc-taxical'], ['rentcar', '렌터카', 'svc-rentcar'],
+           ['bike', '바이크', 'svc-bike'], ['bike30', '바이크30분', 'svc-bike30'], ['trainbus', '기차/버스', 'svc-trainbus']] },
+  drive: { promo: { sub: '급히 출장세차가 …', title: '오늘 세차됩니다', art: 'promo-drive.png', tone: 'drive' },
+    svcs: [['daeri', '대리', 'svc-daeri'], ['parking', '주차', 'svc-parking'], ['inspect', '자동차검사', 'svc-inspect'],
+           ['carwash', '출장세차', 'svc-carwash'], ['navi', '내비', 'svc-navi'], ['evcharge', '전기차충전', 'svc-evcharge']] },
+  send: { two: true, promo: { sub: '고민없이 접수하는', title: '퀵 AI 사진 접수', art: 'promo-send.png', tone: 'send' },
+    svcs: [['quick', '퀵', 'svc-quick'], ['bigcargo', '큰짐배송', 'svc-bigcargo'],
+           ['pickup', '방문택배', 'svc-pickup'], ['cvspost', '편의점택배', 'svc-cvspost']] },
+  abroad: { promo: { sub: '허츠 최대 15% …', title: '지금 확인하기!', art: 'promo-abroad.png', tone: 'abroad' },
+    svcs: [['abroadcall', '해외차량호출', 'svc-abroadcall'], ['abroadcar', '해외렌터카', 'svc-abroadcar'], ['guamtaxi', '괌택시', 'svc-guamtaxi'],
+           ['air', '항공', 'svc-air'], ['jpair', '일본공항픽업', 'svc-jpair'], ['guamleisure', '괌레저', 'svc-guamleisure']] }
+};
+
+var homeGrid = $('#homeGrid');
+function renderHomeGrid(key) {
+  var t = HOME_TABS[key] || HOME_TABS.move;
+  homeGrid.classList.toggle('home-grid--two', !!t.two);
+  homeGrid.innerHTML =
+    '<div class="promo promo--' + t.promo.tone + '">' +
+      '<div class="promo__sub">' + esc(t.promo.sub) + '</div>' +
+      '<div class="promo__title">' + esc(t.promo.title) + '</div>' +
+      '<img class="promo__art" src="img/' + t.promo.art + '" alt="" aria-hidden="true">' +
+    '</div>' +
+    t.svcs.map(function (v) {
+      return '<button class="svc" data-svc="' + v[0] + '"' + (v[0] === 'taxi' ? ' id="svcTaxi"' : '') + '>' +
+        '<img src="img/' + v[2] + '.png" alt=""><span>' + esc(v[1]) + '</span></button>';
+    }).join('');
+}
+
+$('#homeTabs').addEventListener('click', function (e) {
+  var b = e.target.closest('.home-tab');
+  if (!b) return;
+  $$('.home-tab').forEach(function (n) { n.classList.toggle('is-on', n === b); });
+  renderHomeGrid(b.dataset.tab);
+  /* 고른 탭이 화면 밖으로 잘려 있으면 보이게 밀어 준다 */
+  var bar = $('#homeTabs'), r = b.getBoundingClientRect(), br = bar.getBoundingClientRect();
+  if (r.right > br.right - 6) bar.scrollLeft += r.right - br.right + 14;
+  else if (r.left < br.left + 6) bar.scrollLeft -= br.left - r.left + 14;
+});
+
+homeGrid.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-svc]');
+  if (!b) return;
+  if (b.dataset.svc === 'taxi') openTaxi();
+  else toast('이 연습에서는 [택시]만 사용해요.');
+});
+
 $('#homeSearch').addEventListener('click', openTaxi);
-$$('.svc').forEach(function (b) {
-  if (b.id === 'svcTaxi') return;
-  b.addEventListener('click', function () { toast('이 연습에서는 [택시]만 사용해요.'); });
-});
 $('.home-more').addEventListener('click', function () { toast('이 연습에서는 [택시]만 사용해요.'); });
-$$('.home-nav button').forEach(function (b) {
-  b.addEventListener('click', function () { if (!b.classList.contains('is-on')) toast('이 연습에서는 [택시]만 사용해요.'); });
+/* ── 하단 메뉴 (전체 서비스 · 알림) ──
+   홈 화면의 메뉴 막대를 그대로 복사해 다른 화면에도 붙인다.            */
+var homeNav = document.querySelector('.screen--home .home-nav');
+$$('.needs-nav').forEach(function (slot) { slot.appendChild(homeNav.cloneNode(true)); });
+
+function syncNav() {
+  var top = stack[stack.length - 1];
+  var key = (top === 'all' || top === 'noti') ? top : 'home';
+  $$('.home-nav button').forEach(function (b) { b.classList.toggle('is-on', b.dataset.nav === key); });
+}
+var origRenderStack = renderStack;
+renderStack = function (anim) { origRenderStack(anim); syncNav(); };
+
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('.home-nav button');
+  if (!b) return;
+  var k = b.dataset.nav, top = stack[stack.length - 1];
+  if (k === 'home') { if (top !== 'home') goHome(); return; }
+  if (k === 'all' || k === 'noti') { if (top !== k) push(k); return; }
+  toast('이 연습에서는 [택시]만 사용해요.');
 });
-$$('.home-tab').forEach(function (b) {
+
+/* ── 전체 서비스 보기 ── */
+var ALL_CAT = { move: '이동할 때', drive: '운전할 때', send: '물건보낼 때', abroad: '해외갈 때' };
+function renderAllGrid(key) {
+  var t = HOME_TABS[key] || HOME_TABS.move;
+  $('#allCatName').textContent = ALL_CAT[key] || ALL_CAT.move;
+  $('#allGrid').innerHTML = t.svcs.map(function (v) {
+    return '<button class="svc" data-svc="' + v[0] + '">' +
+      '<img src="img/' + v[2] + '.png" alt=""><span>' + esc(v[1]) + '</span></button>';
+  }).join('');
+}
+$('#allRail').addEventListener('click', function (e) {
+  var b = e.target.closest('.all-cat');
+  if (!b) return;
+  $$('.all-cat').forEach(function (n) { n.classList.toggle('is-on', n === b); });
+  renderAllGrid(b.dataset.tab);
+});
+$('#allGrid').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-svc]');
+  if (!b) return;
+  if (b.dataset.svc === 'taxi') goHome(function () { openTaxi(); });
+  else toast('이 연습에서는 [택시]만 사용해요.');
+});
+onEnter.all = function () { renderAllGrid(($('.all-cat.is-on') || {}).dataset.tab || 'move'); };
+
+/* ── 알림 → 이용기록 ── */
+$('#btnUseLog').addEventListener('click', function () { push('uselog'); });
+$$('.nchip').forEach(function (b) {
   b.addEventListener('click', function () {
-    $$('.home-tab').forEach(function (n) { n.classList.remove('is-on'); });
-    b.classList.add('is-on');
+    $$('.nchip').forEach(function (n) { n.classList.toggle('is-on', n === b); });
   });
 });
+$$('.ul-tab').forEach(function (b) {
+  b.addEventListener('click', function () {
+    $$('.ul-tab').forEach(function (n) { n.classList.toggle('is-on', n === b); });
+  });
+});
+$$('.perk').forEach(function (b) {
+  b.addEventListener('click', function () { toast('이 연습에서는 [택시]만 사용해요.'); });
+});
+
+
+
 
 var askedLocation = false;
 function askLocation() {
@@ -961,7 +1062,8 @@ function hintTop() { return stack[stack.length - 1]; }
 function hintSpot() {
   var one = function (sel, say) { var el = $(sel); return el ? { el: el, say: say } : null; };
   switch (hintTop()) {
-    case 'home':   return one('#svcTaxi',        '[택시]를 누르세요');
+    case 'home':   return one('#svcTaxi', '[택시]를 누르세요') ||
+                          one('.home-tab[data-tab="move"]', '[이동할 때]를 먼저 누르세요');
     case 'ad0':    return one('#ad0Close',      '[닫기]를 눌러 광고를 닫으세요');
     case 'ad':     return one('.ad__close',      '[X]를 눌러 광고를 닫으세요');
     case 'taxi':   return one('#rowDest',        '[어디로 갈까요?]를 누르세요');
@@ -981,6 +1083,9 @@ function hintSpot() {
     case 'cancel': return $('#cxGo').disabled ? one('#cxSel', '취소하는 이유를 고르세요')
                                               : one('#cxGo',  '[호출 취소하기]를 누르세요');
     case 'reason': return one('#rsList .rs__item', '이유를 하나 누르세요');
+    case 'all':    return one('.screen--all .home-nav [data-nav="home"]',  '[홈]을 눌러 돌아가세요');
+    case 'noti':   return one('.screen--noti .home-nav [data-nav="home"]', '[홈]을 눌러 돌아가세요');
+    case 'uselog': return one('.ul-back', '왼쪽 위 화살표를 눌러 돌아가세요');
     case 'done':   return one('#doneHome',       '연습이 끝났어요');
   }
   return null;
@@ -1103,6 +1208,7 @@ $('#srchInput').addEventListener('input', function () {
 /* ───────────────────────── 9. 시작 ───────────────────────── */
 
 function start() {
+  renderHomeGrid('move');
   renderStack(false);
   renderIdle();
   setOrigin('제주시청');

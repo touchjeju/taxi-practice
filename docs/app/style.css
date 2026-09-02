@@ -118,10 +118,15 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 
 .home-card{background:#fff;border-radius:var(--radius);padding:16px 12px 8px;margin-bottom:11px}
 .home-grid{display:grid;grid-template-columns:1.34fr 1fr 1fr 1fr;gap:10px 2px}
+/* [물건보낼 때] 는 배너가 넓고 아이콘이 두 줄뿐이다 */
+.home-grid--two{grid-template-columns:2.45fr 1fr 1fr}
 .promo{
   grid-row:span 2;position:relative;border-radius:12px;overflow:hidden;
   background:linear-gradient(160deg,#EDF3FF,#DCE8FF);padding:11px 9px 0;
 }
+.promo--drive {background:linear-gradient(160deg,#F5F1FE,#EDE7FC)}
+.promo--send  {background:linear-gradient(160deg,#F6F2FE,#EFE9FD)}
+.promo--abroad{background:linear-gradient(160deg,#F3F9E9,#E9F3D9)}
 .promo__sub{font-size:13px;color:#7C818A;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .promo__title{margin-top:3px;font-size:16.5px;font-weight:500;line-height:1.25;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .promo__art{position:absolute;left:0;right:0;bottom:0;width:100%;display:block}
@@ -680,3 +685,65 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .ad0__card{flex:0 1 auto;min-height:0;align-self:center;max-width:100%;pointer-events:auto;
   border-radius:12px;overflow:hidden;background:#fff;display:flex}
 .ad0__img{display:block;width:auto;height:auto;max-width:100%;max-height:100%}
+
+/* ══════════════════════════════════════════════════════════
+   전체 서비스 보기 · 알림 · 이용기록  (image/기타 기능 캡처)
+   ══════════════════════════════════════════════════════════ */
+.screen--all{background:#fff;display:flex;flex-direction:column}
+.all-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 82px}
+.all-home{display:flex;align-items:center;height:52px;padding:0 16px;color:#17171B}
+.all-h1{margin:6px 0 0;padding:0 20px;font-size:19px;font-weight:500;letter-spacing:-.5px}
+.all-perks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:14px 14px 18px}
+.perk{display:flex;flex-direction:column;align-items:center;gap:6px}
+.perk img{width:52px;height:52px;border-radius:13px;object-fit:cover}
+.perk span{font-size:14.5px;font-weight:500;color:#2B2E34;letter-spacing:-.5px}
+
+.all-body{display:flex;gap:0;border-top:1px solid var(--line);min-height:0}
+.all-rail{width:112px;flex:none;background:#F4F5F7;padding:10px 8px;display:flex;flex-direction:column;gap:4px}
+.all-cat{
+  padding:13px 10px;border-radius:10px;text-align:left;font-size:16px;font-weight:500;
+  color:#4A4E57;letter-spacing:-.5px;line-height:1.25;
+}
+.all-cat.is-on{background:#fff;color:var(--ink);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.all-panel{flex:1;min-width:0;padding:14px 10px 20px}
+.all-panel__t{margin:0 0 6px;padding:0 6px;font-size:19px;font-weight:500;letter-spacing:-.5px}
+.all-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 2px}
+.all-grid .svc{padding:6px 0}
+
+/* ───────────── 알림 ───────────── */
+.screen--noti{background:#fff;display:flex;flex-direction:column}
+/* 오른쪽 위 [?] 버튼과 겹치지 않게 비워 둔다 */
+.noti-head{display:flex;align-items:center;justify-content:space-between;padding:16px 64px 6px 20px}
+.noti-h1{margin:0;font-size:26px;font-weight:500;letter-spacing:-.8px}
+.noti-log{font-size:17px;font-weight:500;color:#4A4E57;letter-spacing:-.5px}
+.noti-chips{display:flex;gap:8px;padding:10px 20px 14px;overflow-x:auto;scrollbar-width:none}
+.noti-chips::-webkit-scrollbar{display:none}
+.nchip{
+  flex:none;height:40px;padding:0 16px;border-radius:999px;border:1px solid #E2E4E8;
+  background:#fff;font-size:16px;font-weight:500;color:#3F434B;letter-spacing:-.5px;
+}
+.nchip.is-on{background:#1F2126;border-color:#1F2126;color:#fff}
+.noti-ad{display:flex;align-items:flex-end;gap:12px;margin:0 16px;padding:12px 14px;
+  border-radius:12px;background:#F4F5F7}
+.noti-ad .home-ad__title{white-space:normal;font-size:16.5px}
+.noti-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:0 24px 100px}
+.noti-empty__ico{
+  width:64px;height:64px;border-radius:16px;background:#F1F2F4;
+  display:flex;align-items:center;justify-content:center;
+}
+.noti-empty__ico .tico{width:30px;height:30px;font-size:19px;background:#C3C7CE}
+.noti-empty p{margin:0;text-align:center;font-size:17px;line-height:1.6;color:#9BA0A8;letter-spacing:-.5px}
+
+/* ───────────── 이용기록 ───────────── */
+.screen--uselog{background:#fff;display:flex;flex-direction:column}
+.ul-head{display:flex;align-items:center;gap:10px;height:58px;padding:0 14px}
+.ul-back{display:flex;align-items:center}
+.ul-title{flex:1;text-align:center;font-size:21px;font-weight:500;letter-spacing:-.5px}
+.ul-help{display:flex;color:#8B9099}
+.ul-tabs{display:flex;gap:26px;padding:0 22px;border-bottom:1px solid var(--line)}
+.ul-tab{position:relative;padding:10px 0 14px;font-size:18px;font-weight:500;color:#9BA0A8;letter-spacing:-.5px}
+.ul-tab.is-on{color:var(--ink)}
+.ul-tab.is-on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;background:#1F2126}
+.ul-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#F4F5F7}
+.ul-empty__ico{width:64px;height:64px}
+.ul-empty p{margin:0;font-size:18px;color:#8B9099;letter-spacing:-.5px}
