@@ -508,6 +508,192 @@
       </div>
     </section>
 
+    <!-- ═══════════  A1 · 항공 (검색)  ═══════════ -->
+    <section class="screen screen--air" data-screen="air">
+      <div class="air-top">
+        <div class="air-bar"><button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button><b>항공</b></div>
+        <div class="air-card">
+          <div class="air-kind">
+            <button class="air-kind__b is-on">왕복</button>
+            <button class="air-kind__b">편도</button>
+            <button class="air-kind__b">다구간</button>
+          </div>
+          <div class="air-route">
+            <div class="air-port"><b>SEL</b><span>서울</span></div>
+            <i class="air-swap"><svg class="i22"><use href="#ic-swap"/></svg></i>
+            <div class="air-port"><b>IN</b><span>도착</span></div>
+          </div>
+          <button class="air-row" id="airDate"><svg class="i22"><use href="#ic-cal"/></svg><span class="air-row__ph">가는날 - 오는날</span></button>
+          <div class="air-row air-row--last">
+            <svg class="i22"><use href="#ic-person"/></svg><span>성인 1명, 일반석</span>
+            <label class="air-direct"><i class="air-box"></i>직항</label>
+          </div>
+          <button class="air-search" id="airSearch">항공권 검색</button>
+        </div>
+      </div>
+      <div class="air-body">
+        <div class="air-promo">
+          <div class="air-promo__txt"><b>괌 인기 액티비티<br>최대 31% 할인!</b><span>~9/30 사용건까지 당일…</span></div>
+          <i class="air-promo__pct">31%</i>
+        </div>
+        <h3 class="air-h3">카카오 T 항공 특가 컨텐츠</h3>
+        <div class="air-tags"><button class="air-tag is-on">인기 여행지</button><button class="air-tag">미식 여행</button><button class="air-tag">중국 여행</button></div>
+      </div>
+    </section>
+
+    <!-- ═══════════  A2 · 편 목록  ═══════════ -->
+    <section class="screen screen--airlist" data-screen="airlist">
+      <div class="al-head">
+        <button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button>
+        <div class="al-title">제주 CJU <i>⇆</i> 김포 GMP<button class="al-change">변경</button></div>
+        <div class="al-date">26.09.05(토) - 26.09.15(화) │ 1명 · 일반석</div>
+        <div class="al-chips">
+          <button class="al-chip al-chip--ico"><svg class="i20"><use href="#ic-swap"/></svg></button>
+          <button class="al-chip">시각</button><button class="al-chip">항공사</button>
+        </div>
+      </div>
+      <div class="al-list" id="alList"></div>
+    </section>
+
+    <!-- ═══════════  A3 · 선택한 항공권  ═══════════ -->
+    <section class="screen screen--airsel" data-screen="airsel">
+      <div class="as-head"><button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button></div>
+      <div class="as-body">
+        <h1 class="as-h1">선택한 항공권</h1>
+        <div class="as-card">
+          <div class="as-tagrow"><em class="as-tag">가는편</em><button class="as-change">변경</button></div>
+          <div class="as-route" id="asGoRoute">제주 CJU → 김포 GMP</div>
+          <div class="as-when" id="asGoWhen">26.09.05(토) │ 06:25 - 07:40</div>
+          <div class="as-line2" id="asGoAir">아시아나항공 OZ8900</div>
+          <div class="as-line2">무료위탁수하물 : 20Kg (공동운항편 제외)</div>
+          <div class="as-fare" id="asGoFare">60,900원</div>
+        </div>
+        <div class="as-card">
+          <div class="as-tagrow"><em class="as-tag">오는편</em><button class="as-change">변경</button></div>
+          <div class="as-route">김포 GMP → 제주 CJU</div>
+          <div class="as-when">26.09.15(화) │ 06:15 - 07:30</div>
+          <div class="as-line2">제주항공 7C0101</div>
+          <div class="as-line2">무료위탁수하물 : 15Kg</div>
+          <div class="as-fare">27,700원</div>
+        </div>
+      </div>
+      <div class="as-foot">
+        <div class="as-total"><b id="asTotal">88,600원</b><span>1명 총 결제금액</span></div>
+        <button class="as-go" id="airGo">예매하기</button>
+      </div>
+    </section>
+
+    <!-- ═══════════  A4 · 예매하기  ═══════════ -->
+    <section class="screen screen--airbook" data-screen="airbook">
+      <div class="ab-head">
+        <button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button>
+        <b class="ab-title">예매하기</b><span class="ab-detail">상세일정</span>
+      </div>
+      <div class="ab-body">
+        <div class="ab-note">항공권을 확보하려면 즉시 결제해주세요.</div>
+        <div class="ab-sec">
+          <div class="ab-sec__head"><b>탑승객 정보</b><button class="ab-mini" id="airPaxList">저장 목록</button></div>
+          <div class="ab-acc">
+            <div class="ab-acc__head">성인 1</div>
+            <button class="ab-pick" id="airPickBtn">
+              <svg class="i20"><use href="#ic-person"/></svg>
+              <span id="airPickText">탑승객을 선택하세요</span>
+              <svg class="i16"><use href="#ic-chevdown"/></svg>
+            </button>
+          </div>
+          <p class="ab-warn">· 실제 탑승객 여권 정보와 일치하지 않으면 탑승이 거절 될 수 있으며, <em>예매 완료 후 탑승객 정보 변경은 불가능합니다.</em></p>
+        </div>
+        <div class="ab-sec">
+          <div class="ab-sec__head"><b>이메일 주소</b></div>
+          <div class="ab-field"><input id="airEmail" type="email" inputmode="email" autocomplete="off" placeholder="ID@kakao.com"></div>
+          <p class="ab-warn">· 발권 후, 항공사의 예약 확정 안내 및 스케줄 변경, 항공편 지연·결항 등에 대한 중요 안내가 이메일로 발송됩니다.</p>
+        </div>
+      </div>
+      <div class="ab-foot"><button class="as-go" id="airPay">결제하기</button></div>
+    </section>
+
+    <!-- ═══════════  A5 · 탑승객 저장 목록  ═══════════ -->
+    <section class="screen screen--airpax" data-screen="airpax">
+      <div class="ap-head"><button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button></div>
+      <div class="ap-titlerow"><h1 class="ap-h1">탑승객 저장 목록</h1><button class="ap-edit">편집</button></div>
+      <div class="ap-wrap">
+        <button class="ap-add" id="airPaxAdd"><svg class="i22"><use href="#ic-plus"/></svg>탑승객 추가</button>
+        <div class="ap-list" id="airPaxCards"></div>
+        <div class="ap-empty" id="airPaxEmpty">
+          <i class="ap-empty__ico"><svg class="i30"><use href="#ic-person"/></svg></i>
+          <p>탑승객을 미리 저장하고 다음엔<br>편하게 선택만 하세요!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════  A6 · 탑승객 정보 입력  ═══════════ -->
+    <section class="screen screen--airform" data-screen="airform">
+      <div class="ap-head"><button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button></div>
+      <div class="af-body">
+        <h1 class="ap-h1">탑승객 정보</h1>
+        <div class="af-note">탑승객 정보는 신분증/여권 정보와 동일해야 합니다.</div>
+        <label class="af-lab">국적</label>
+        <div class="af-select">대한민국<svg class="i20"><use href="#ic-chevdown"/></svg></div>
+        <div class="af-two">
+          <div><label class="af-lab">한글 성</label><div class="af-field"><input id="afLastKo" placeholder="홍" autocomplete="off"></div></div>
+          <div><label class="af-lab">한글 이름</label><div class="af-field"><input id="afFirstKo" placeholder="길동" autocomplete="off"></div></div>
+        </div>
+        <div class="af-two">
+          <div><label class="af-lab">영문 성</label><div class="af-field"><input id="afLastEn" placeholder="HONG" autocomplete="off"></div></div>
+          <div><label class="af-lab">영문 이름</label><div class="af-field"><input id="afFirstEn" placeholder="GILDONG" autocomplete="off"></div></div>
+        </div>
+        <div class="af-two">
+          <div><label class="af-lab">생년월일</label><div class="af-field"><input id="afBirth" inputmode="numeric" placeholder="YYYY.MM.DD" autocomplete="off"></div></div>
+          <div><label class="af-lab">성별</label>
+            <div class="af-sex"><button class="af-sex__b" data-sex="남자">남자</button><button class="af-sex__b" data-sex="여자">여자</button></div>
+          </div>
+        </div>
+        <button class="af-done" id="afDone" disabled>입력 완료</button>
+      </div>
+    </section>
+
+    <!-- ═══════════  A7 · 결제카드 정보입력  ═══════════ -->
+    <section class="screen screen--aircard" data-screen="aircard">
+      <div class="ac-head"><b>결제카드 정보입력</b><button class="ac-x" data-back aria-label="닫기"><svg class="i26"><use href="#ic-x"/></svg></button></div>
+      <div class="ac-body">
+        <div class="ac-labrow"><label class="af-lab">카드번호</label><label class="ac-chk"><i class="air-box"></i>법인카드</label></div>
+        <div class="af-field af-field--card"><input id="acNum" inputmode="numeric" placeholder="0000 - 0000 - 0000 - 0000" autocomplete="off"></div>
+        <div class="af-two">
+          <div><label class="af-lab">유효기간</label><div class="af-field"><input id="acExp" inputmode="numeric" placeholder="MM / YY" autocomplete="off"></div></div>
+          <div><label class="af-lab">카드 비밀번호</label><div class="af-field"><input id="acPw" inputmode="numeric" type="password" placeholder="앞 2자리" autocomplete="off"></div></div>
+        </div>
+        <div class="ac-labrow"><label class="af-lab">카드 명의자</label><label class="ac-chk"><i class="air-box"></i>직접입력</label></div>
+        <button class="af-select af-select--btn" id="acOwner"><span id="acOwnerText">명의자 선택</span><svg class="i20"><use href="#ic-chevdown"/></svg></button>
+        <label class="af-lab">할부 개월 수</label>
+        <button class="af-select af-select--btn" id="acInst"><span id="acInstText">일시불</span><svg class="i20"><use href="#ic-chevdown"/></svg></button>
+      </div>
+      <div class="ac-foot"><button class="af-done" id="acDone" disabled>완료</button></div>
+    </section>
+
+    <!-- ═══════════  A8 · 아래에서 올라오는 선택 시트  ═══════════ -->
+    <section class="screen screen--overlay screen--airsheet" data-screen="airsheet">
+      <div class="rs__dim" data-back></div>
+      <div class="as-sheet">
+        <h2 class="as-sheet__t" id="airSheetTitle">탑승객 선택</h2>
+        <div class="as-sheet__list" id="airSheetList"></div>
+        <button class="as-close" data-back>닫기</button>
+      </div>
+    </section>
+
+    <!-- ═══════════  A9 · 탑승객 정보 저장 동의  ═══════════ -->
+    <section class="screen screen--overlay screen--airagree" data-screen="airagree">
+      <div class="rs__dim" data-back></div>
+      <div class="ag-sheet">
+        <h2 class="ag-title">탑승객 정보 저장 동의</h2>
+        <button class="ag-all" id="agAll"><i class="air-box"></i>모두 확인, 동의합니다</button>
+        <div class="ag-row"><span>[필수] 탑승객 정보 등록을 위한 개인정보 수집 및 이용 동의</span><em>보기</em></div>
+        <div class="ag-btns">
+          <button class="ag-cancel" data-back>취소</button>
+          <button class="ag-ok" id="agOk" disabled>동의</button>
+        </div>
+      </div>
+    </section>
+
     <!-- ═══════════  S0 · 시작 광고 (앱을 열면 한 번, tp-01 캡처)  ═══════════ -->
     <section class="screen screen--overlay screen--ad0" data-screen="ad0">
       <div class="ad__dim" data-back></div>

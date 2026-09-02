@@ -729,6 +729,7 @@ homeGrid.addEventListener('click', function (e) {
   var b = e.target.closest('[data-svc]');
   if (!b) return;
   if (b.dataset.svc === 'taxi') openTaxi();
+  else if (b.dataset.svc === 'air') push('air');
   else toast('이 연습에서는 [택시]만 사용해요.');
 });
 
@@ -1104,6 +1105,26 @@ function hintSpot() {
     case 'all':    return one('.screen--all .home-nav [data-nav="home"]',  '[홈]을 눌러 돌아가세요');
     case 'noti':   return one('.screen--noti .home-nav [data-nav="home"]', '[홈]을 눌러 돌아가세요');
     case 'uselog': return one('.ul-back', '왼쪽 위 화살표를 눌러 돌아가세요');
+    case 'air':     return one('#airSearch',  '[항공권 검색]을 누르세요');
+    case 'airlist': return one('#alList .al-item', '타고 갈 비행기를 누르세요');
+    case 'airsel':  return one('#airGo',      '[예매하기]를 누르세요');
+    case 'airbook':
+      if (!chosenPax) return one('#airPickBtn', '[탑승객을 선택하세요]를 누르세요');
+      if (!$('#airEmail').value.trim()) return one('#airEmail', '이메일 주소를 적으세요');
+      return one('#airPay', '[결제하기]를 누르세요');
+    case 'airpax':  return savedPax ? one('.air-back', '저장됐어요. 뒤로 가서 고르세요')
+                                    : one('#airPaxAdd', '[탑승객 추가]를 누르세요');
+    case 'airagree':return agreed ? one('#agOk', '[동의]를 누르세요')
+                                   : one('#agAll', '[모두 확인, 동의합니다]를 누르세요');
+    case 'airform': return $('#afDone').disabled ? one('#afLastKo', '빈칸을 채우세요')
+                                                : one('#afDone', '[입력 완료]를 누르세요');
+    case 'airsheet':return one('#airSheetList .as-opt', '하나를 누르세요');
+    case 'aircard':
+      if ($('#acNum').value.replace(/D/g, '').length < 16) return one('#acNum', '카드번호 16자리를 적으세요');
+      if ($('#acExp').value.replace(/D/g, '').length < 4)  return one('#acExp', '유효기간을 적으세요');
+      if ($('#acPw').value.length < 2)  return one('#acPw', '비밀번호 앞 2자리를 적으세요');
+      if (!cardOwner) return one('#acOwner', '[명의자 선택]을 누르세요');
+      return one('#acDone', '[완료]를 누르세요');
     case 'done':   return one('#doneHome',       '연습이 끝났어요');
   }
   return null;
@@ -1223,6 +1244,204 @@ $('#srchInput').addEventListener('input', function () {
   if (!hintLayer.hidden && hintTarget === this) hintHide();
 });
 
+/* ───────────────────── 8.7. 항공권 예매 연습 ─────────────────────
+   image/기타 기능 캡처(항공 32장)를 그대로 옮겼다.
+   흐름: 항공 → 편 목록 → 선택한 항공권 → 예매하기 → (탑승객 저장 → 동의 →
+         정보 입력 → 선택) → 이메일 → 결제카드 정보입력 → 완료                */
+
+var FLIGHTS = [
+  { logo: 'oz', time: '06:30 - 07:45', air: '아시아나항공', code: 'OZ8900', seat: '특가석',
+    pay: '카카오 T 결제 외 1개', price: 65900, left: '' },
+  { logo: 'tw', time: '07:50 - 09:05', air: '티웨이항공', code: 'TW1802', seat: '할인석',
+    pay: '일반 카드결제 외 1개', price: 66420, left: '' },
+  { logo: 'tw', time: '09:50 - 11:05', air: '티웨이항공', code: 'TW1804', seat: '할인석',
+    pay: '일반 카드결제 외 1개', price: 66420, left: '2석남음' }
+];
+
+var savedPax = null;      // 저장 목록에 넣은 탑승객
+var chosenPax = null;     // 예매하기에서 고른 탑승객
+var afSex = null;         // 정보 입력 화면에서 고른 성별
+var cardOwner = null, cardInst = '일시불';
+
+/* ── 편 목록 ── */
+function renderFlights() {
+  $('#alList').innerHTML = FLIGHTS.map(function (f, i) {
+    return '<button class="al-item" data-fl="' + i + '">' +
+      '<div class="al-time"><i class="al-logo al-logo--' + f.logo + '"></i>' + f.time + '</div>' +
+      '<div class="al-sub">CJU-GMP · ' + f.air + '<b class="al-seat">' + f.seat + '</b></div>' +
+      '<div class="al-pay">' + f.pay + '<b class="al-price">' + won(f.price) + '</b></div>' +
+      '<div class="al-note">1인 편도 가격' + (f.left ? ' <em>' + f.left + '</em>' : '') + '</div>' +
+      '</button>';
+  }).join('');
+}
+$('#airSearch').addEventListener('click', function () { renderFlights(); push('airlist'); });
+
+$('#alList').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-fl]');
+  if (!b) return;
+  var f = FLIGHTS[+b.dataset.fl];
+  $('#asGoWhen').textContent = '26.09.05(토) │ ' + f.time;
+  $('#asGoAir').textContent = f.air + ' ' + f.code;
+  $('#asGoFare').textContent = won(f.price);
+  $('#asTotal').textContent = won(f.price + 27700);
+  push('airsel');
+});
+
+$('#airGo').addEventListener('click', function () { push('airbook'); });
+
+/* ── 예매하기 ── */
+$('#airPaxList').addEventListener('click', function () { push('airpax'); });
+$('#airPickBtn').addEventListener('click', function () {
+  if (!savedPax) { toast('먼저 탑승객을 저장해 주세요.'); push('airpax'); return; }
+  openAirSheet('탑승객 선택', [savedPax.ko + ' / ' + savedPax.en, '새로운 탑승객 입력'], function (i) {
+    if (i === 0) {
+      chosenPax = savedPax;
+      $('#airPickText').textContent = savedPax.ko + ' / ' + savedPax.en;
+      $('#airPickBtn').classList.add('is-set');
+      pop();
+    } else { pop(); setTimeout(function () { push('airpax'); }, 120); }
+  });
+});
+$('#airEmail').addEventListener('input', function () {
+  this.parentNode.classList.remove('is-bad');
+});
+$('#airPay').addEventListener('click', function () {
+  if (!chosenPax) { toast('탑승객을 먼저 선택해 주세요.'); hintShow(); return; }
+  var v = $('#airEmail').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+    $('#airEmail').parentNode.classList.add('is-bad');
+    toast('이메일 주소를 다시 한 번 확인해주세요.');
+    hintShow();
+    return;
+  }
+  push('aircard');
+});
+
+/* ── 탑승객 저장 목록 ── */
+function renderPaxList() {
+  var wrap = screens.airpax;
+  wrap.classList.toggle('has-pax', !!savedPax);
+  $('#airPaxCards').innerHTML = savedPax ?
+    '<div class="ap-card">' +
+      '<div class="ap-card__top"><span class="ap-card__ko">' + esc(savedPax.ko) + '</span>' +
+      '<button class="ap-card__fix">수정</button></div>' +
+      '<div class="ap-card__en">' + esc(savedPax.en) + '</div>' +
+      '<div class="ap-card__sub">' + esc(savedPax.birth) + ' │ ' + esc(savedPax.sex) + ' │ 대한민국</div>' +
+    '</div>' : '';
+}
+onEnter.airpax = renderPaxList;
+$('#airPaxAdd').addEventListener('click', function () { push('airagree'); });
+
+/* ── 저장 동의 ── */
+var agreed = false;
+$('#agAll').addEventListener('click', function () {
+  agreed = !agreed;
+  this.querySelector('.air-box').classList.toggle('is-on', agreed);
+  $('#agOk').disabled = !agreed;
+});
+$('#agOk').addEventListener('click', function () {
+  pop();
+  setTimeout(function () { push('airform'); }, 120);
+});
+onLeave.airagree = function () {
+  agreed = false;
+  $('#agAll').querySelector('.air-box').classList.remove('is-on');
+  $('#agOk').disabled = true;
+};
+
+/* ── 탑승객 정보 입력 ── */
+var AF = ['#afLastKo', '#afFirstKo', '#afLastEn', '#afFirstEn', '#afBirth'];
+function afCheck() {
+  var ok = afSex && AF.every(function (s) { return $(s).value.trim(); });
+  $('#afDone').disabled = !ok;
+}
+AF.forEach(function (s) { $(s).addEventListener('input', afCheck); });
+$$('.af-sex__b').forEach(function (b) {
+  b.addEventListener('click', function () {
+    afSex = b.dataset.sex;
+    $$('.af-sex__b').forEach(function (n) { n.classList.toggle('is-on', n === b); });
+    afCheck();
+  });
+});
+/* 영문칸은 자동으로 대문자가 된다 */
+[$('#afLastEn'), $('#afFirstEn')].forEach(function (el) {
+  el.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
+});
+$('#afDone').addEventListener('click', function () {
+  savedPax = {
+    ko: $('#afLastKo').value.trim() + $('#afFirstKo').value.trim(),
+    en: $('#afLastEn').value.trim() + ' ' + $('#afFirstEn').value.trim(),
+    birth: $('#afBirth').value.trim(),
+    sex: afSex
+  };
+  renderPaxList();          // pop 으로 돌아갈 때는 onEnter 가 안 도니 여기서 다시 그린다
+  pop();
+  toast('탑승객을 저장했어요.');
+});
+onEnter.airform = function () { setTimeout(function () { $('#afLastKo').focus(); }, 60); };
+
+/* ── 아래에서 올라오는 선택 시트 (탑승객 / 명의자 / 할부) ── */
+var airSheetPick = null;
+function openAirSheet(title, items, onPick, current) {
+  $('#airSheetTitle').textContent = title;
+  $('#airSheetList').innerHTML = items.map(function (t, i) {
+    var on = (current !== undefined && current === i) ? ' is-on' : '';
+    return '<button class="as-opt' + on + '" data-i="' + i + '">' + esc(t) +
+           (on ? '<i>✓</i>' : '') + '</button>';
+  }).join('');
+  airSheetPick = onPick;
+  push('airsheet');
+}
+$('#airSheetList').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-i]');
+  if (!b || !airSheetPick) return;
+  airSheetPick(+b.dataset.i);
+});
+
+/* ── 결제카드 정보입력 ── */
+function acCheck() {
+  var num = $('#acNum').value.replace(/\D/g, '');
+  $('#acDone').disabled = !(num.length === 16 && $('#acExp').value.replace(/\D/g, '').length === 4 &&
+                            $('#acPw').value.length === 2 && cardOwner);
+}
+$('#acNum').addEventListener('input', function () {
+  var d = this.value.replace(/\D/g, '').slice(0, 16), out = [];
+  for (var i = 0; i < d.length; i += 4) out.push(d.slice(i, i + 4));
+  this.value = out.join(' - ');
+  acCheck();
+});
+$('#acExp').addEventListener('input', function () {
+  var d = this.value.replace(/\D/g, '').slice(0, 4);
+  this.value = d.length > 2 ? d.slice(0, 2) + ' / ' + d.slice(2) : d;
+  acCheck();
+});
+$('#acPw').addEventListener('input', function () {
+  this.value = this.value.replace(/\D/g, '').slice(0, 2);
+  acCheck();
+});
+$('#acOwner').addEventListener('click', function () {
+  var name = chosenPax ? (chosenPax.ko + ' / ' + chosenPax.en) : '양지원 / YANG JIWON';
+  openAirSheet('카드 명의자 선택', [name], function () {
+    cardOwner = name;
+    $('#acOwnerText').textContent = name;
+    acCheck();
+    pop();
+  });
+});
+var INSTALL = ['일시불', '2개월', '3개월', '4개월', '5개월', '6개월', '7개월', '8개월'];
+$('#acInst').addEventListener('click', function () {
+  openAirSheet('할부 선택', INSTALL, function (i) {
+    cardInst = INSTALL[i];
+    $('#acInstText').textContent = cardInst;
+    pop();
+  }, INSTALL.indexOf(cardInst));
+});
+$('#acDone').addEventListener('click', function () {
+  goHome(function () {
+    finish('항공권을 예매했어요.\n제주 → 김포, ' + (chosenPax ? chosenPax.ko : '') + ' 님\n항공권 예매 연습을 마쳤어요.');
+  });
+});
+
 /* ───────────────────────── 9. 시작 ───────────────────────── */
 
 function start() {
@@ -1233,6 +1452,7 @@ function start() {
   if (K) initS2Map();
   else $('#phone').classList.add('no-map');   // 지도 자리에 안내 문구만 남긴다
   if (FLOW === 'cancel') startFromCall();
+  else if (FLOW === 'air') setTimeout(function () { push('air'); }, 200);
   else setTimeout(function () { push('ad0'); }, 500);   // 앱을 열면 시작 광고가 한 번 뜬다
 }
 

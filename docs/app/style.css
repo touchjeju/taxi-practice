@@ -750,3 +750,212 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .ul-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#F4F5F7}
 .ul-empty__ico{width:64px;height:64px}
 .ul-empty p{margin:0;font-size:18px;color:#8B9099;letter-spacing:-.5px}
+
+/* ══════════════════════════════════════════════════════════
+   항공권 예매 연습 (image/기타 기능 캡처 A1~A9)
+   ══════════════════════════════════════════════════════════ */
+.screen--air{background:#F4F5F7;display:flex;flex-direction:column}
+.air-top{background:#3B82F6;padding:0 14px 20px;flex:none}
+.air-bar{display:flex;align-items:center;gap:10px;height:56px;color:#fff}
+.air-bar b{font-size:20px;font-weight:500;letter-spacing:-.5px}
+.air-back{display:flex;align-items:center;color:inherit}
+.air-card{background:#fff;border-radius:14px;padding:0 0 12px;overflow:hidden}
+.air-kind{display:flex;border-bottom:1px solid var(--line)}
+.air-kind__b{flex:1;height:52px;font-size:17px;font-weight:500;color:#8B9099;position:relative}
+.air-kind__b.is-on{color:var(--cta)}
+.air-kind__b.is-on::after{content:"";position:absolute;left:22%;right:22%;bottom:0;height:2.5px;background:var(--cta)}
+.air-route{display:flex;align-items:center;justify-content:space-between;padding:18px 26px 16px;border-bottom:1px solid var(--line)}
+.air-port{display:flex;flex-direction:column;align-items:center;gap:2px}
+.air-port b{font-size:28px;font-weight:500;letter-spacing:-.5px}
+.air-port span{font-size:14px;color:#8B9099}
+.air-swap{width:42px;height:42px;border-radius:10px;border:1px solid #D6E2FB;color:var(--cta);display:flex;align-items:center;justify-content:center;flex:none}
+.air-row{display:flex;align-items:center;gap:12px;width:100%;height:56px;padding:0 20px;
+  border-bottom:1px solid var(--line);font-size:17px;color:var(--ink);text-align:left}
+.air-row--last{border-bottom:0}
+.air-row svg{color:#8B9099;flex:none}
+.air-row__ph{color:#9BA0A8}
+.air-direct{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:16px}
+.air-box{width:20px;height:20px;border-radius:5px;border:2px solid #C3C7CE;flex:none;display:block;position:relative}
+.air-box.is-on{background:var(--cta);border-color:var(--cta)}
+.air-box.is-on::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;
+  border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(42deg)}
+.air-search{display:block;width:calc(100% - 28px);height:54px;margin:14px 14px 0;border-radius:9px;
+  background:var(--cta);color:#fff;font-size:18px;font-weight:500}
+.air-body{flex:1;overflow-y:auto;padding:14px}
+.air-promo{position:relative;display:flex;align-items:center;height:118px;padding:0 18px;
+  border-radius:14px;background:linear-gradient(120deg,#E6F1FF,#D7E9FF)}
+.air-promo__txt b{display:block;font-size:20px;font-weight:500;line-height:1.35;letter-spacing:-.5px}
+.air-promo__txt span{display:block;margin-top:6px;font-size:13.5px;color:#6E727A}
+.air-promo__pct{position:absolute;right:18px;top:18px;width:44px;height:44px;border-radius:50%;
+  background:var(--cta);color:#fff;font-size:14px;font-weight:500;font-style:normal;
+  display:flex;align-items:center;justify-content:center}
+.air-h3{margin:22px 0 12px;font-size:21px;font-weight:500;letter-spacing:-.5px}
+.air-tags{display:flex;gap:8px}
+.air-tag{height:42px;padding:0 16px;border-radius:999px;border:1px solid #E2E4E8;background:#fff;
+  font-size:16px;font-weight:500;color:#3F434B}
+.air-tag.is-on{background:var(--cta);border-color:var(--cta);color:#fff}
+
+/* ───────────── 편 목록 ───────────── */
+.screen--airlist{background:#F4F5F7;display:flex;flex-direction:column}
+.al-head{background:#fff;padding:0 18px 14px;flex:none}
+.al-head .air-back{height:56px;color:var(--ink)}
+.al-title{display:flex;align-items:center;gap:8px;padding-right:56px;font-size:24px;font-weight:500;letter-spacing:-.7px}
+.al-title i{font-style:normal;color:#8B9099}
+.al-change{margin-left:auto;height:36px;padding:0 14px;border-radius:8px;border:1px solid #DDE0E4;
+  font-size:15px;font-weight:500;color:#3F434B}
+.al-date{margin-top:8px;font-size:15px;color:#6E727A}
+.al-chips{display:flex;gap:8px;margin-top:14px}
+.al-chip{height:40px;padding:0 16px;border-radius:999px;border:1px solid #E2E4E8;background:#fff;
+  font-size:15.5px;font-weight:500;color:#3F434B}
+.al-chip--ico{width:44px;padding:0;display:flex;align-items:center;justify-content:center;color:#3F434B}
+.al-list{flex:1;overflow-y:auto;padding:12px 14px 20px}
+.al-item{display:block;width:100%;background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:10px;text-align:left}
+.al-time{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:500;letter-spacing:-.6px}
+.al-logo{width:22px;height:22px;border-radius:5px;flex:none}
+.al-logo--oz{background:linear-gradient(135deg,#E24C4C,#3B6FD4)}
+.al-logo--tw{background:#6E3AB7}
+.al-sub{display:flex;align-items:center;margin-top:8px;font-size:15px;color:#6E727A}
+.al-seat{margin-left:auto;font-size:15px;font-weight:500;color:var(--cta)}
+.al-pay{display:flex;align-items:baseline;margin-top:12px;font-size:15px;color:#6E727A}
+.al-price{margin-left:auto;font-size:23px;font-weight:500;color:var(--ink);letter-spacing:-.6px}
+.al-note{margin-top:4px;text-align:right;font-size:13.5px;color:#9BA0A8}
+.al-note em{font-style:normal;color:#E8402A}
+
+/* ───────────── 선택한 항공권 ───────────── */
+.screen--airsel{background:#F4F5F7;display:flex;flex-direction:column}
+.as-head{background:#fff;flex:none}
+.as-head .air-back{height:56px;padding:0 14px;color:var(--ink)}
+.as-body{flex:1;overflow-y:auto;padding:0 14px 16px;background:#fff}
+.as-h1{margin:6px 0 16px;font-size:26px;font-weight:500;letter-spacing:-.8px}
+.as-card{border:1px solid var(--line2);border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.as-tagrow{display:flex;align-items:center}
+.as-tag{height:28px;padding:0 10px;border-radius:6px;background:#F1F2F4;color:#4A4E57;
+  font-size:14px;font-style:normal;display:inline-flex;align-items:center}
+.as-change{margin-left:auto;height:34px;padding:0 13px;border-radius:8px;border:1px solid #DDE0E4;
+  font-size:15px;font-weight:500;color:#3F434B}
+.as-route{margin-top:12px;font-size:22px;font-weight:500;letter-spacing:-.6px}
+.as-when{margin-top:8px;font-size:16px;color:#6E727A}
+.as-line2{margin-top:10px;font-size:15.5px;color:#4A4E57;line-height:1.45}
+.as-fare{margin-top:14px;text-align:right;font-size:24px;font-weight:500;letter-spacing:-.6px}
+.as-foot{flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px 18px;background:#fff;border-top:1px solid var(--line)}
+.as-total b{display:block;font-size:24px;font-weight:500;letter-spacing:-.6px}
+.as-total span{display:block;margin-top:2px;font-size:14px;color:#8B9099}
+.as-go{margin-left:auto;height:56px;padding:0 34px;border-radius:9px;background:var(--cta);color:#fff;
+  font-size:19px;font-weight:500}
+
+/* ───────────── 예매하기 ───────────── */
+.screen--airbook{background:#fff;display:flex;flex-direction:column}
+.ab-head{display:flex;align-items:center;gap:10px;height:58px;padding:0 62px 0 14px;flex:none}
+.ab-head .air-back{color:var(--ink)}
+.ab-title{flex:1;text-align:center;font-size:21px;font-weight:500;letter-spacing:-.5px}
+.ab-detail{font-size:16px;font-weight:500;color:var(--cta)}
+.ab-body{flex:1;overflow-y:auto;padding:0 16px 16px}
+.ab-note{padding:14px 16px;border-radius:10px;background:#EAF1FF;color:var(--cta);
+  font-size:16px;line-height:1.45;letter-spacing:-.5px}
+.ab-sec{padding:22px 0 4px}
+.ab-sec__head{display:flex;align-items:center;margin-bottom:12px}
+.ab-sec__head b{font-size:20px;font-weight:500;letter-spacing:-.5px}
+.ab-mini{margin-left:auto;height:38px;padding:0 14px;border-radius:8px;border:1px solid #DDE0E4;
+  font-size:15px;font-weight:500;color:#3F434B}
+.ab-acc{border:1px solid var(--line2);border-radius:12px;padding:14px}
+.ab-acc__head{font-size:18px;font-weight:500;letter-spacing:-.5px}
+.ab-pick{display:flex;align-items:center;gap:10px;width:100%;height:56px;margin-top:12px;padding:0 14px;
+  border:1px solid var(--line2);border-radius:10px;background:#fff;font-size:17px;color:var(--cta);text-align:left}
+.ab-pick.is-set{color:var(--ink)}
+.ab-pick span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ab-pick svg{color:#9BA0A8;flex:none}
+.ab-warn{margin:12px 2px 0;font-size:14.5px;line-height:1.55;color:#8B9099;letter-spacing:-.4px}
+.ab-warn em{font-style:normal;color:#E8402A}
+.ab-field{height:56px;padding:0 16px;border:1px solid var(--line2);border-radius:10px;display:flex;align-items:center}
+.ab-field input{width:100%;border:0;outline:0;background:none;font-size:17px;color:var(--ink)}
+.ab-field input::placeholder{color:#9BA0A8}
+.ab-field.is-bad{border-color:#E8402A}
+.ab-foot{flex:none;padding:10px 16px 18px;border-top:1px solid var(--line)}
+.ab-foot .as-go{margin:0;width:100%;padding:0}
+
+/* ───────────── 탑승객 저장 목록 / 정보 ───────────── */
+.screen--airpax,.screen--airform{background:#fff;display:flex;flex-direction:column}
+.ap-head .air-back{height:56px;padding:0 14px;color:var(--ink)}
+.ap-titlerow{display:flex;align-items:center;padding:0 62px 14px 18px}
+.ap-h1{margin:0;font-size:26px;font-weight:500;letter-spacing:-.8px}
+.ap-edit{margin-left:auto;height:38px;padding:0 14px;border-radius:8px;border:1px solid #DDE0E4;
+  font-size:15px;font-weight:500;color:#3F434B}
+.ap-wrap{flex:1;overflow-y:auto;padding:0 18px 20px}
+.ap-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:60px;
+  border:1px solid var(--cta);border-radius:10px;color:var(--cta);font-size:18px;font-weight:500;background:#fff}
+.ap-list{margin-top:14px}
+.ap-card{border:1px solid var(--line2);border-radius:12px;padding:16px 18px;margin-bottom:10px;background:#fff}
+.ap-card__top{display:flex;align-items:center}
+.ap-card__ko{font-size:20px;font-weight:500;letter-spacing:-.5px}
+.ap-card__fix{margin-left:auto;height:34px;padding:0 13px;border-radius:8px;border:1px solid #DDE0E4;
+  font-size:14.5px;font-weight:500;color:#3F434B}
+.ap-card__en{margin-top:6px;font-size:19px;letter-spacing:-.3px}
+.ap-card__sub{margin-top:10px;font-size:15.5px;color:#6E727A}
+.ap-empty{display:flex;flex-direction:column;align-items:center;gap:18px;padding:110px 20px 0}
+.ap-empty__ico{width:74px;height:74px;border-radius:18px;background:#F1F2F4;color:#C3C7CE;
+  display:flex;align-items:center;justify-content:center}
+.ap-empty p{margin:0;text-align:center;font-size:17px;line-height:1.6;color:#9BA0A8;letter-spacing:-.5px}
+.screen--airpax.has-pax .ap-empty{display:none}
+
+.af-body{flex:1;overflow-y:auto;padding:0 18px 24px}
+.af-note{margin:10px 0 22px;padding:14px 16px;border-radius:10px;background:#EAF1FF;color:var(--cta);
+  font-size:16px;line-height:1.45;letter-spacing:-.5px}
+.af-lab{display:block;margin:0 2px 8px;font-size:16px;font-weight:500;color:#3F434B;letter-spacing:-.5px}
+.af-select{display:flex;align-items:center;height:58px;padding:0 16px;margin-bottom:20px;
+  border:1px solid var(--line2);border-radius:10px;font-size:17px;background:#fff;width:100%;text-align:left}
+.af-select svg{margin-left:auto;color:#8B9099}
+.af-select--btn span{color:var(--ink)}
+.af-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.af-field{height:58px;padding:0 16px;border:1px solid var(--line2);border-radius:10px;display:flex;align-items:center;background:#fff}
+.af-field input{width:100%;border:0;outline:0;background:none;font-size:17px;color:var(--ink)}
+.af-field input::placeholder{color:#B6BAC1}
+.af-field--card input{letter-spacing:.5px}
+.af-sex{display:grid;grid-template-columns:1fr 1fr;gap:0;height:58px;border:1px solid var(--line2);border-radius:10px;overflow:hidden}
+.af-sex__b{font-size:17px;color:#4A4E57;background:#fff}
+.af-sex__b+.af-sex__b{border-left:1px solid var(--line2)}
+.af-sex__b.is-on{background:#EAF1FF;color:var(--cta);font-weight:500}
+.af-done{display:block;width:100%;height:58px;margin-top:8px;border-radius:9px;
+  background:var(--cta);color:#fff;font-size:18px;font-weight:500}
+.af-done:disabled{background:#F1F2F4;color:#B6BAC1}
+
+/* ───────────── 결제카드 정보입력 ───────────── */
+.screen--aircard{background:#fff;display:flex;flex-direction:column}
+.ac-head{display:flex;align-items:center;height:60px;padding:0 62px 0 18px;flex:none}
+.ac-head b{font-size:21px;font-weight:500;letter-spacing:-.5px}
+.ac-x{margin-left:auto;display:flex;color:var(--ink)}
+.ac-body{flex:1;overflow-y:auto;padding:6px 18px 20px}
+.ac-labrow{display:flex;align-items:center;margin-bottom:8px}
+.ac-chk{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:15.5px;color:#3F434B}
+.ac-body .af-field{margin-bottom:20px}
+.ac-body .af-two .af-field{margin-bottom:0}
+.ac-foot{flex:none;padding:10px 18px 18px}
+
+/* ───────────── 아래에서 올라오는 시트 ───────────── */
+.as-sheet{
+  position:absolute;left:0;right:0;bottom:0;max-height:70%;
+  background:#fff;border-radius:18px 18px 0 0;padding:24px 22px 22px;
+  display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,.16);
+}
+.as-sheet__t{margin:0 0 8px;text-align:center;font-size:21px;font-weight:500;letter-spacing:-.5px}
+.as-sheet__list{overflow-y:auto;scrollbar-width:none}
+.as-sheet__list::-webkit-scrollbar{display:none}
+.as-opt{display:flex;align-items:center;width:100%;padding:17px 2px;text-align:left;
+  font-size:19px;color:#3F434B;letter-spacing:-.5px}
+.as-opt.is-on{color:var(--cta);font-weight:500}
+.as-opt i{margin-left:auto;color:var(--cta);font-style:normal;font-size:18px}
+.as-close{margin-top:12px;height:56px;border-radius:9px;border:1px solid #DDE0E4;background:#fff;
+  font-size:18px;font-weight:500;color:#3F434B;flex:none}
+
+/* ───────────── 저장 동의 ───────────── */
+.ag-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;padding:26px 22px 22px;
+  box-shadow:0 -6px 24px rgba(0,0,0,.16)}
+.ag-title{margin:0 0 18px;text-align:center;font-size:21px;font-weight:500;letter-spacing:-.5px}
+.ag-all{display:flex;align-items:center;gap:12px;width:100%;height:62px;padding:0 16px;
+  border:1px solid var(--line2);border-radius:10px;font-size:18px;font-weight:500;color:var(--ink);text-align:left}
+.ag-row{display:flex;align-items:center;gap:10px;padding:16px 6px 4px;font-size:15.5px;line-height:1.45;color:#4A4E57}
+.ag-row em{margin-left:auto;font-style:normal;color:#8B9099;flex:none}
+.ag-btns{display:flex;gap:10px;margin-top:16px}
+.ag-cancel{flex:1;height:58px;border-radius:9px;border:1px solid #DDE0E4;background:#fff;
+  font-size:18px;font-weight:500;color:#3F434B}
+.ag-ok{flex:1;height:58px;border-radius:9px;background:var(--cta);color:#fff;font-size:18px;font-weight:500}
+.ag-ok:disabled{background:#F1F2F4;color:#B6BAC1}
