@@ -597,10 +597,10 @@ $('#btnCoupon').addEventListener('click', function () { push('pay'); });
 $('#btnPay').addEventListener('click', function () { push('pay'); });
 $('#ctaCall').addEventListener('click', function () {
   /* 진짜 카카오 T 도 결제수단이 없으면 호출이 되지 않는다(캡처 tp-10 의 다음 단계가
-     [결제수단 등록] 이다). 그냥 막기만 하면 왜 안 되는지 모르니 힌트까지 켜 준다. */
+     [결제수단 등록] 이다). 막기만 하지 않고 결제수단 화면을 바로 띄워 준다. */
   if (!payMethod) {
     toast('결제수단을 먼저 등록해 주세요.');
-    hintShow();
+    push('pay');
     return;
   }
   startRide();
