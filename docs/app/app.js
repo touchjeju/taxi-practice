@@ -233,6 +233,13 @@ var srchInput = $('#srchInput'), srchBody = $('#srchBody'), srchForm = $('#srchF
     srchClear = $('#srchClear'), srchMic = $('#srchMic'), srchTools = $('#srchTools');
 var recents = [], lastResults = [], sugTimer = null;
 
+/* 검색 범위 — 제주도 전체.
+   예전에는 제주시청 기준 20km 반경이었는데, 서귀포시청(26km)·성산일출봉(30km)처럼
+   섬의 남쪽·동쪽이 통째로 빠져서 아예 검색되지 않았다. 카카오 API 의 radius 최대값이
+   20km 라 반경을 늘릴 수 없어, 제주도를 통째로 감싸는 사각형으로 바꿨다. */
+var JEJU_SW = { lat: 33.10, lng: 126.14 }, JEJU_NE = { lat: 33.60, lng: 126.98 };
+function jejuArea() { return { bounds: new K.LatLngBounds(LL(JEJU_SW), LL(JEJU_NE)) }; }
+
 var srchMode = 'dest';                 // 'dest' | 'origin'
 function openSearch(mode) {
   srchMode = mode === 'origin' ? 'origin' : 'dest';
@@ -293,7 +300,7 @@ function suggest(q) {
       rows.push('<button class="sug" data-sug="' + esc(d.place_name) + '">' + highlight(d.place_name, q) + '</button>');
     });
     srchBody.innerHTML = rows.join('');
-  }, { location: LL(origin), radius: 20000, size: 10 });
+  }, Object.assign(jejuArea(), { size: 10 }));
 }
 
 function search(q) {
@@ -324,7 +331,7 @@ function search(q) {
         '<button class="res__btn" data-pick="' + i + '">' + (srchMode === 'origin' ? '출발' : '도착') + '</button>' +
       '</div>';
     }).join('');
-  }, { location: LL(origin), radius: 20000, size: 15 });
+  }, Object.assign(jejuArea(), { size: 15 }));
 }
 
 srchInput.addEventListener('input', typing);
