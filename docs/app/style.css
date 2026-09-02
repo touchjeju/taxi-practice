@@ -281,7 +281,8 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .route-map{bottom:0}
 .screen--route{background:#DCE9F5}
 .route-top{
-  position:absolute;left:12px;right:12px;top:12px;height:52px;z-index:5;
+  /* 오른쪽 위 [?] 버튼과 겹치지 않게 조금 짧게 */
+  position:absolute;left:12px;right:62px;top:12px;height:52px;z-index:5;
   display:flex;align-items:center;gap:10px;padding:0 18px 0 14px;
   border-radius:999px;background:#fff;box-shadow:0 3px 12px rgba(0,0,0,.16);
 }
@@ -739,7 +740,8 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 
 /* ───────────── 이용기록 ───────────── */
 .screen--uselog{background:#fff;display:flex;flex-direction:column}
-.ul-head{display:flex;align-items:center;gap:10px;height:58px;padding:0 14px}
+/* 오른쪽 위 [?] 버튼이 도움말 아이콘을 가리지 않게 */
+.ul-head{display:flex;align-items:center;gap:10px;height:58px;padding:0 62px 0 14px}
 .ul-back{display:flex;align-items:center}
 .ul-title{flex:1;text-align:center;font-size:21px;font-weight:500;letter-spacing:-.5px}
 .ul-help{display:flex;color:#8B9099}
