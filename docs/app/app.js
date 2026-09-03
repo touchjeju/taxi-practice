@@ -213,11 +213,21 @@ function setOrigin(name) {
 }
 
 btnLocate.addEventListener('click', function () {
+  if (!gotFix) { retryLocation(); return; }
   if (!mapS2) return;
   if (haversine(origin, myPos) < 8) { toast('이미 현위치에 있어요.'); return; }
   originTextEl.textContent = '위치 확인 중...';
   mapS2.panTo(LL(myPos));
 });
+
+/* 다시 시도 — 권한을 켜고 온 뒤에도 새로고침 없이 잡히게 한다 */
+function retryLocation() {
+  askedLocation = false;
+  $('#geoWarnText').textContent = '위치를 찾는 중이에요…';
+  originTextEl.textContent = '위치 확인 중...';
+  askLocation();
+}
+$('#geoRetry').addEventListener('click', retryLocation);
 $('#btnReserve').addEventListener('click', function () {
   toast('예약 호출은 이 연습에 포함되어 있지 않아요.');
 });
@@ -866,9 +876,19 @@ $$('.perk').forEach(function (b) {
 
 
 var askedLocation = false;
+var gotFix = false;             // 진짜 위치를 한 번이라도 받았는지
+
+/* 왜 제주시청으로 나오는지 화면에 남겨 둔다 — 잠깐 뜨는 알림은 놓치기 쉽다 */
+function geoWarn(msg) {
+  gotFix = false;
+  $('#geoWarnText').textContent = msg;
+  $('#geoWarn').hidden = false;
+}
+function geoWarnOff() { $('#geoWarn').hidden = true; }
+
 function askLocation() {
   if (askedLocation || !navigator.geolocation) {
-    if (!askedLocation) toast('위치를 확인할 수 없어 제주시청을 기준으로 안내해요.');
+    if (!askedLocation) geoWarn('이 기기는 위치를 알려 줄 수 없어 제주시청 기준이에요.');
     askedLocation = true;
     return;
   }
@@ -885,15 +905,18 @@ function askLocation() {
       return;
     }
     first = false;
+    gotFix = true;
+    geoWarnOff();
     origin.lat = q.lat; origin.lng = q.lng;
     if (mapS2) { mapS2.setCenter(LL(q)); }
     resolveOriginName();
     updateTaxiHeading();
   }
   function fail(err) {
-    toast(err && err.code === 1
-      ? '위치 권한이 꺼져 있어 제주시청을 기준으로 안내해요.'
-      : '위치를 확인할 수 없어 제주시청을 기준으로 안내해요.');
+    var code = err && err.code;
+    geoWarn(code === 1 ? '위치 사용이 꺼져 있어 제주시청 기준이에요. 휴대폰 설정에서 이 앱의 위치를 켜 주세요.'
+          : code === 3 ? '위치를 찾는 데 시간이 너무 걸려 제주시청 기준이에요.'
+                       : '지금 위치를 못 받아서 제주시청 기준이에요.');
   }
 
   var opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
