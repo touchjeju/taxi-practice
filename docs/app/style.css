@@ -663,6 +663,29 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .hint-arrow.is-up svg{transform:rotate(180deg)}
 @keyframes hint-bob{0%,100%{transform:translateY(-5px)}50%{transform:translateY(5px)}}
 
+/* ══════════════════════════════════════════════════════════
+   호출하기 직전 안내 — 둘레만 어둡게 덮고 [호출하기]만 환하게 남긴다.
+   구멍은 큼직한 box-shadow 하나로 판다(버튼 위에 아무것도 안 덮이므로
+   pointer-events:none 과 함께 누르는 데 지장이 없다).
+   ══════════════════════════════════════════════════════════ */
+.spot{position:absolute;inset:0;z-index:58;pointer-events:none}
+.spot__hole{
+  position:absolute;border-radius:14px;
+  box-shadow:0 0 0 9999px rgba(16,18,22,.66);
+  animation:spot-beat 1.6s ease-in-out infinite;
+}
+@keyframes spot-beat{
+  0%,100%{outline:3px solid rgba(255,255,255,.0);  outline-offset:0}
+  50%    {outline:3px solid rgba(255,255,255,.55); outline-offset:5px}
+}
+.spot__say{
+  position:absolute;left:18px;right:18px;
+  padding:14px 16px;border-radius:14px;background:#fff;color:#1B1F32;
+  font-size:17px;font-weight:500;line-height:1.5;text-align:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.3);
+}
+.spot__say b{font-weight:700;color:var(--cta,#1B1F32)}
+
 .hint-say{
   position:absolute;max-width:76%;padding:9px 14px;border-radius:12px;
   background:rgba(24,26,30,.92);color:#fff;font-size:16px;font-weight:500;line-height:1.35;

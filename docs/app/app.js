@@ -579,11 +579,46 @@ onEnter.detail = function () {
   screens.route.classList.add('has-detail');
   updateDetail();
   setTimeout(function () { fitRoute(lastBounds); }, 30);
+  showCallSpot();
 };
 onLeave.detail = function () {
   screens.route.classList.remove('has-detail');
   setTimeout(function () { fitRoute(lastBounds); }, 30);
+  hideCallSpot();
 };
+
+/* ── 호출하기 직전 안내 ──
+   결제수단까지 정해져서 [호출하기]만 남았을 때, 둘레를 어둡게 덮고 그 버튼만 남긴다.
+   진짜 택시가 오는 줄 알고 못 누르는 분들이 있어서 눌러도 된다고 알려 주는 자리다. */
+var spotEl = $('#callSpot'), spotHole = $('#callSpotHole'), spotSay = $('#callSpotSay');
+
+var spotTimer = null;
+function showCallSpot(delay) {
+  clearTimeout(spotTimer);
+  if (!payMethod) { hideCallSpot(); return; }   // 결제수단이 먼저다
+  spotTimer = setTimeout(function () {
+    if (stack[stack.length - 1] !== 'detail') return;   // 그새 다른 화면으로 갔으면 그만둔다
+    spotEl.hidden = false;
+    placeCallSpot();
+  }, delay || 0);
+}
+function hideCallSpot() { clearTimeout(spotTimer); spotEl.hidden = true; }
+
+function placeCallSpot() {
+  if (spotEl.hidden) return;
+  var p = $('#phone').getBoundingClientRect();
+  var r = $('#ctaCall').getBoundingClientRect();
+  var pad = 6;
+  spotHole.style.left   = (r.left - p.left - pad) + 'px';
+  spotHole.style.top    = (r.top  - p.top  - pad) + 'px';
+  spotHole.style.width  = (r.width  + pad * 2) + 'px';
+  spotHole.style.height = (r.height + pad * 2) + 'px';
+  /* 말풍선은 버튼 위에 둔다 — 자리가 모자라면 아래로 내린다 */
+  var above = r.top - p.top - pad - 14;
+  spotSay.style.top = above > spotSay.offsetHeight
+    ? (above - spotSay.offsetHeight) + 'px'
+    : (r.bottom - p.top + pad + 14) + 'px';
+}
 
 $('#dtDown').addEventListener('click', function () { pop(); });
 $('#dtHelp').addEventListener('click', function () { toast(picked.name + ' — ' + (picked.desc || '') + '\n예상 금액은 실제와 다를 수 있어요.'); });
@@ -604,6 +639,7 @@ $('#ctaCall').addEventListener('click', function () {
     push('pay');
     return;
   }
+  hideCallSpot();
   startRide();
 });
 
@@ -667,6 +703,7 @@ $('#payApply').addEventListener('click', function () {
   setPayMethod(paySel);
   pop();
   toast(PAY_LABEL[payMethod] + '(으)로 결제수단을 설정했어요.');
+  showCallSpot(2800);      // 안내 말풍선은 위 알림이 사라진 뒤에 띄운다
 });
 
 /* ───────────────────────── 7. 광고 팝업 ───────────────────────── */
@@ -965,6 +1002,16 @@ function startRide() {
   $('#waitFrom').textContent = trip ? trip.from.name : origin.name;
   $('#waitTo').textContent = trip ? trip.to.name : '';
   push('ride');
+  /* 호출 연습은 [호출하기] 를 누른 순간 다 한 것이다 — 그 뒤는 기다리기만 하면 된다.
+     대기 화면을 잠깐 보여 주고 마침 안내를 띄우되, 기록은 누른 즉시 "마침"으로 남긴다. */
+  if (FLOW === 'call') {
+    TRACK.finish(true);
+    setTimeout(function () {
+      clearTimeout(waitTimer);      // 마침 화면 뒤에서 배차 알림이 뜨지 않게
+
+      finish('택시를 불렀어요.\n택시 호출 연습을 마쳤어요.\n이제 택시가 올 때까지 기다리면 돼요.');
+    }, 2400);
+  }
 }
 
 /* ── 기사 배차 완료 ── */
@@ -979,9 +1026,6 @@ function matchDriver() {
   toast('배차가 완료됐어요.\n택시가 탑승 위치로 오고 있어요.');
   // 잠시 뒤 기사가 출발하면 안내 문구가 바뀐다 (취소하기 3 캡처)
   setTimeout(function () { $('#rideH1').textContent = '지금 탑승 위치로 출발'; }, 12000);
-  if (FLOW === 'call') setTimeout(function () {
-    finish('택시가 탑승 위치로 오고 있어요.\n택시 호출 연습을 마쳤어요.');
-  }, 2600);
 }
 
 function updateRideInfo() {
@@ -1626,6 +1670,7 @@ if (/[?&]debug/.test(location.search)) {
 }
 
 window.addEventListener('resize', function () {
+  placeCallSpot();
   if (mapS2) mapS2.relayout();
   if (mapS4) { mapS4.relayout(); fitRoute(lastBounds); }
   if (mapS6) mapS6.relayout();
