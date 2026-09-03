@@ -456,6 +456,42 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .pay__apply:disabled{background:#E2E4E8;color:#AEB2B9}
 
 /* ══════════════════════════════════════════════════════════
+   위치 정보 동의 (앱을 처음 열면 맨 먼저)
+   ══════════════════════════════════════════════════════════ */
+.geo__dim{position:absolute;inset:0;background:rgba(20,22,26,.55)}
+.geo__sheet{
+  position:absolute;left:0;right:0;bottom:0;
+  background:#fff;border-radius:18px 18px 0 0;padding:26px 22px 18px;text-align:center;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.61,.36,1);
+}
+.is-in .geo__sheet{transform:none}
+.geo__ico{
+  width:62px;height:62px;margin:0 auto 16px;border-radius:50%;
+  background:#EAF1FF;color:var(--cta);display:flex;align-items:center;justify-content:center;
+}
+.geo__ico svg{width:32px;height:32px}
+.geo__title{margin:0 0 10px;font-size:22px;font-weight:700;line-height:1.35}
+.geo__body{margin:0 0 18px;font-size:17px;line-height:1.55;color:#5A5E66}
+.geo__list{
+  list-style:none;margin:0 0 18px;padding:14px 16px;border-radius:12px;background:#F4F5F7;
+  font-size:16px;line-height:1.9;color:#3F434B;text-align:left;
+}
+.geo__list li{padding-left:24px;position:relative}
+.geo__list li::before{
+  content:"";position:absolute;left:4px;top:.72em;width:8px;height:8px;border-radius:50%;
+  background:var(--cta);
+}
+.geo__note{
+  margin:0 0 18px;padding:11px 14px;border-radius:999px;background:#FFF8E1;
+  font-size:16px;font-weight:500;color:#7A5A00;
+}
+.geo__note b{font-weight:700}
+.geo__btns{display:flex;gap:10px}
+.geo__no,.geo__ok{flex:1;height:56px;border-radius:9px;font-size:18px;font-weight:500;font-family:inherit}
+.geo__no{flex:0 0 34%;border:1px solid #DDE0E4;background:#fff;color:#7A7F87}
+.geo__ok{background:var(--cta);color:#fff;font-weight:700}
+
+/* ══════════════════════════════════════════════════════════
    광고 팝업 (tp-03)
    ══════════════════════════════════════════════════════════ */
 .ad__dim{position:absolute;inset:0;background:rgba(0,0,0,.6)}   /* 캡처에서 잰 값 */
@@ -821,6 +857,16 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .air-tags{display:flex;gap:8px}
 .air-tag{height:42px;padding:0 16px;border-radius:999px;border:1px solid #E2E4E8;background:#fff;
   font-size:16px;font-weight:500;color:#3F434B}
+/* 항공 첫 화면 아래 — 예전에는 광고 하나와 빈자리였다 */
+.air-deals{list-style:none;margin:14px 0 0;padding:0;background:#fff;border-radius:12px;overflow:hidden}
+.air-deal{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;font-size:17px;border-bottom:1px solid var(--line)}
+.air-deal:last-child{border-bottom:0}
+.air-deal__ro{color:#3F434B}
+.air-deal__ro i{margin:0 6px;color:#A9AEB6;font-style:normal}
+.air-deal b{font-weight:500;color:var(--cta)}
+.air-foot{margin:12px 4px 0;font-size:13.5px;color:#9AA0A8}
+
 .air-tag.is-on{background:var(--cta);border-color:var(--cta);color:#fff}
 
 /* ───────────── 편 목록 ───────────── */

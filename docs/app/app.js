@@ -1170,7 +1170,6 @@ function hintSpot() {
                                   : one('#dpDone', '[선택 완료]를 누르세요');
     case 'airlist': return one('#alList .al-item', '타고 갈 비행기를 누르세요');
     case 'airsel':  return one('#airGo',      '[예매하기]를 누르세요');
-    case 'airad':   return one('.screen--airad .ad__close', '[X]를 눌러 광고를 닫으세요');
     case 'airbook':
       if (!chosenPax)  return one('#airPickBtn',  '[탑승객을 선택하세요]를 누르세요');
       if (!paxDone)    return one('#abPickDone',  '[선택 완료]를 누르세요');
@@ -1383,6 +1382,7 @@ function setChosen(p) {
   $('#abRo').hidden = false;
 }
 $('#abPickDone').addEventListener('click', function () {
+  if (!chosenPax) { toast('탑승객을 먼저 고르세요.'); return; }
   paxDone = true;
   $('#abSumKo').textContent  = chosenPax.ko;
   $('#abSumSub').textContent = chosenPax.birth + ' │ ' + chosenPax.sex + ' │ 대한민국';
@@ -1401,7 +1401,7 @@ $('#airEmail').addEventListener('input', function () {
 $('#airCardBtn').addEventListener('click', function () { push('aircard'); });
 
 $('#airPay').addEventListener('click', function () {
-  if (!paxDone) {
+  if (!paxDone || !chosenPax) {
     toast(chosenPax ? '[선택 완료]를 눌러 주세요.' : '탑승객을 먼저 선택해 주세요.');
     hintShow(); return;
   }
@@ -1414,7 +1414,8 @@ $('#airPay').addEventListener('click', function () {
   }
   if (!cardSet) { toast('결제카드를 먼저 등록해 주세요.'); hintShow(); return; }
   goHome(function () {
-    finish('항공권을 예매했어요.\n제주 → 김포, ' + chosenPax.ko + ' 님\n항공권 예매 연습을 마쳤어요.');
+    finish('항공권을 예매했어요.\n제주 → 김포, ' + ((chosenPax && chosenPax.ko) || '탑승객') +
+           ' 님\n항공권 예매 연습을 마쳤어요.');
   });
 });
 
@@ -1632,17 +1633,6 @@ $('#dpDone').addEventListener('click', function () {
   toast('날짜를 정했어요.');
 });
 
-/* ── 광고 (항공 화면에 들어가면 한 번) — 터치제주 광고로 바꿨다 ── */
-var hertzShown = false;
-onEnter.air = function () {
-  if (hertzShown) return;
-  hertzShown = true;
-  setTimeout(function () { push('airad'); }, 420);
-};
-$('#hertzMore').addEventListener('click', function () {
-  pop(); toast('광고 자세히 보기는 이 연습에 포함되어 있지 않아요.');
-});
-
 /* ───────────────────────── 9. 시작 ───────────────────────── */
 
 function start() {
@@ -1652,10 +1642,30 @@ function start() {
   setOrigin('제주시청');
   if (K) initS2Map();
   else $('#phone').classList.add('no-map');   // 지도 자리에 안내 문구만 남긴다
+  /* 진짜 앱처럼 위치 동의부터 받는다 — 그래야 타는 곳이 지금 계신 곳으로 잡힌다.
+     항공권 연습은 지도를 쓰지 않으니 묻지 않고 바로 시작한다. */
+  if (FLOW === 'air') { beginFlow(); return; }
+  setTimeout(function () { push('geo'); }, 300);
+}
+
+/* 위치 동의를 마친 뒤 실제 연습을 시작한다 */
+function beginFlow() {
   if (FLOW === 'cancel') startFromCall();
   else if (FLOW === 'air') setTimeout(function () { push('air'); }, 200);
   else setTimeout(function () { push('ad0'); }, 500);   // 앱을 열면 시작 광고가 한 번 뜬다
 }
+
+$('#geoOk').addEventListener('click', function () {
+  pop();
+  askLocation();                       // 여기서 휴대폰의 진짜 허용 창이 뜬다
+  setTimeout(beginFlow, 280);          // 시트가 닫히고 나서 연습을 시작한다
+});
+$('#geoNo').addEventListener('click', function () {
+  pop();
+  askedLocation = true;                // 다시 묻지 않는다
+  toast('제주시청을 기준으로 안내해요.');
+  setTimeout(beginFlow, 280);
+});
 
 /* 취소 연습은 [호출하기] 버튼에서 시작한다 — 제주시청 → 제주국제공항이 미리 잡혀 있다 */
 function startFromCall() {

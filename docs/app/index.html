@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=202609031533">
+<link rel="stylesheet" href="style.css?v=202609031547">
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=606067c8b6243ab17db2869c47582727&libraries=services&autoload=false"></script>
 <!-- 연습 기록 임시 창구 — track.js 는 모듈이라 늦게 뜬다.
      그 전에 app.js 가 부른 것들을 시각과 함께 모아 두었다가 그대로 넘긴다. -->
@@ -533,9 +533,9 @@ window.TRACK = (function () {
             <button class="air-kind__b">다구간</button>
           </div>
           <div class="air-route">
-            <div class="air-port"><b>SEL</b><span>서울</span></div>
+            <div class="air-port"><b>CJU</b><span>제주</span></div>
             <i class="air-swap"><svg class="i22"><use href="#ic-swap"/></svg></i>
-            <div class="air-port"><b>IN</b><span>도착</span></div>
+            <div class="air-port"><b>GMP</b><span>김포</span></div>
           </div>
           <button class="air-row" id="airDate"><svg class="i22"><use href="#ic-cal"/></svg><span class="air-row__ph" id="airDateText">가는날 - 오는날</span></button>
           <div class="air-row air-row--last">
@@ -546,16 +546,14 @@ window.TRACK = (function () {
         </div>
       </div>
       <div class="air-body">
-        <div class="air-promo">
-          <div class="air-promo__txt">
-            <div class="home-ad__from"><i class="ad-avatar"></i>터치제주 오픈채팅에서 확인</div>
-            <b>제주형 스마트폰 안내서 출시</b>
-            <div class="home-ad__meta"><b class="ad-badge">AD</b> Touchjeju 광고입니다.</div>
-          </div>
-          <img class="air-promo__art" src="img/ad-thumb.jpg" alt="" aria-hidden="true">
-        </div>
-        <h3 class="air-h3">카카오 T 항공 특가 컨텐츠</h3>
-        <div class="air-tags"><button class="air-tag is-on">인기 여행지</button><button class="air-tag">미식 여행</button><button class="air-tag">중국 여행</button></div>
+        <h3 class="air-h3">카카오 T 항공 특가</h3>
+        <div class="air-tags"><button class="air-tag is-on">국내선</button><button class="air-tag">일본</button><button class="air-tag">동남아</button></div>
+        <ul class="air-deals">
+          <li class="air-deal"><span class="air-deal__ro">제주 <i>→</i> 김포</span><b>65,900원~</b></li>
+          <li class="air-deal"><span class="air-deal__ro">제주 <i>→</i> 김해</span><b>52,300원~</b></li>
+          <li class="air-deal"><span class="air-deal__ro">제주 <i>→</i> 대구</span><b>58,700원~</b></li>
+        </ul>
+        <p class="air-foot">요금은 예시예요. 연습에서는 결제되지 않아요.</p>
       </div>
     </section>
 
@@ -685,17 +683,6 @@ window.TRACK = (function () {
     </section>
 
     <!-- ═══════════  A10 · 광고 (터치제주)  ═══════════ -->
-    <section class="screen screen--overlay screen--airad" data-screen="airad">
-      <div class="ad__dim" data-back></div>
-      <div class="ad__wrap">
-        <div class="ad__card">
-          <img class="ad__img" src="img/ad-book.jpg" alt="제주형 스마트폰 활용 교재 광고">
-          <div class="ad__actions"><button class="ad__act" id="hertzMore">자세히 보기</button></div>
-        </div>
-        <button class="ad__close" data-back aria-label="광고 닫기"><svg class="i26"><use href="#ic-x"/></svg></button>
-      </div>
-    </section>
-
     <!-- ═══════════  A5 · 탑승객 저장 목록  ═══════════ -->
     <section class="screen screen--airpax" data-screen="airpax">
       <div class="ap-head"><button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button></div>
@@ -779,6 +766,27 @@ window.TRACK = (function () {
     </section>
 
     <!-- ═══════════  S0 · 시작 광고 (앱을 열면 한 번, tp-01 캡처)  ═══════════ -->
+    <!-- ═══════════  위치 정보 동의 (앱을 처음 열면 맨 먼저)  ═══════════
+         [동의하고 시작하기] 를 누르면 그제야 휴대폰이 진짜 위치 허용 창을 띄운다.
+         그 창에서 [허용] 을 눌러야 한다는 걸 미리 알려 준다. -->
+    <section class="screen screen--overlay screen--geo" data-screen="geo">
+      <div class="geo__dim"></div>
+      <div class="geo__sheet">
+        <div class="geo__ico"><svg viewBox="0 0 24 24"><use href="#ic-crosshair"/></svg></div>
+        <h2 class="geo__title">위치 정보 이용에 동의해 주세요</h2>
+        <p class="geo__body">지금 계신 곳에서 택시를 부르려면<br>휴대폰의 위치 정보가 필요해요.</p>
+        <ul class="geo__list">
+          <li>타는 곳이 저절로 잡혀요</li>
+          <li>가까운 택시를 찾아 줘요</li>
+        </ul>
+        <p class="geo__note">누르면 뜨는 창에서 <b>[허용]</b>을 눌러 주세요.</p>
+        <div class="geo__btns">
+          <button class="geo__no" id="geoNo" type="button">나중에</button>
+          <button class="geo__ok" id="geoOk" type="button">동의하고 시작하기</button>
+        </div>
+      </div>
+    </section>
+
     <section class="screen screen--overlay screen--ad0" data-screen="ad0">
       <div class="ad__dim" data-back></div>
       <div class="ad0__wrap">
@@ -830,7 +838,7 @@ window.TRACK = (function () {
   </div>
 </div>
 
-<script src="app.js?v=202609031533"></script>
-<script type="module" src="track.js?v=202609031533"></script>
+<script src="app.js?v=202609031547"></script>
+<script type="module" src="track.js?v=202609031547"></script>
 </body>
 </html>
