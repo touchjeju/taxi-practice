@@ -647,9 +647,13 @@ $('#ctaCall').addEventListener('click', function () {
 
 var paySel = null;
 
-/* 진짜 카카오 T 와 같게 — 카카오페이에 카드나 계좌가 등록돼 있지 않으면
-   골라도 [적용]이 활성화되지 않는다. 다른 결제수단을 골라야 넘어간다. */
-var PAY_BLOCKED = { kakaopay: true };
+/* 진짜 카카오 T 와 같게 — 등록해 둔 카드도, 카카오페이도, 포인트도 없는 계정이라
+   골라도 [적용]이 활성화되지 않는다. [다른 결제수단] 의 직접결제만 쓸 수 있다. */
+var PAY_BLOCKED = {
+  kakaopay: '카카오페이에 등록된 카드나 계좌가 없어 결제할 수 없어요.',
+  card:     '등록해 둔 신용/체크카드가 없어 결제할 수 없어요.',
+  point:    '가지고 있는 포인트가 0P 라 결제할 수 없어요.'
+};
 
 onEnter.pay = function () {
   paySel = payMethod || 'kakaopay';   // 처음 열 때도 카카오페이가 골라져 있다
@@ -663,6 +667,8 @@ function syncPay() {
   $('#payNote').hidden = !paySel;
   $('#payApply').disabled = !paySel || !!PAY_BLOCKED[paySel];
   $('#payWarn').hidden = !PAY_BLOCKED[paySel];
+  if (PAY_BLOCKED[paySel])
+    $('#payWarn').textContent = PAY_BLOCKED[paySel] + ' [다른 결제수단]을 골라 주세요.';
 
   var off = paySel === 'other';
   $$('.pay__row').forEach(function (r) { r.classList.toggle('is-off', off); });
@@ -1147,7 +1153,7 @@ function hintSpot() {
     case 'pay':
       if (!$('#payApply').disabled) return one('#payApply', '[적용]을 누르세요');
       if (PAY_BLOCKED[paySel])
-        return one('.pm[data-pm="other"]', '카카오페이는 등록된 카드가 없어요\n[다른 결제수단]을 눌러 보세요');
+        return one('.pm[data-pm="other"]', '이 방법은 등록된 게 없어 못 써요\n[다른 결제수단]을 눌러 보세요');
       return one('#payCard .pm', '결제수단을 하나 고르세요');
     case 'ride':
       if (rideScreen.classList.contains('is-wait'))
@@ -1657,8 +1663,8 @@ function start() {
 /* 취소 연습은 [호출하기] 버튼에서 시작한다 — 제주시청 → 제주국제공항이 미리 잡혀 있다 */
 function startFromCall() {
   picked = OPTS[1];
-  setPayMethod('card');              // 취소 연습은 결제수단 등록을 건너뛴다
-                                     // (카카오페이는 등록된 카드가 없어 고를 수 없다)
+  setPayMethod('other');             // 취소 연습은 결제수단 등록을 건너뛴다
+                                     // (쓸 수 있는 건 직접결제뿐이다)
   chooseDest(FAVS.airport);
   push('detail');
 }
