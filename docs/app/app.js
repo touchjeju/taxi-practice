@@ -165,6 +165,18 @@ var lastRoute = null;
 
 /* 경로선 위에서 핀으로부터 화면상 TAXI_BACK 쯤 떨어진 점을 찾아 택시를 놓는다.
    지도를 확대·축소해도 도로를 벗어나지 않는다. 놓을 자리를 못 찾으면 false. */
+/* 경로의 i 번째 점에서 차가 나아가는 방향(길이 뻗은 쪽).
+   끝점을 바라보게 하면 길이 굽은 데서 건물을 가로지르는 것처럼 보인다. */
+function roadDir(pts, i) {
+  var a = { lat: pts[i][0], lng: pts[i][1] };
+  for (var j = i + 1; j < pts.length; j++) {
+    var b = { lat: pts[j][0], lng: pts[j][1] };
+    if (haversine(a, b) >= 8) return bearing(a, b);
+  }
+  var e = pts[pts.length - 1];
+  return bearing(a, { lat: e[0], lng: e[1] });
+}
+
 function placeTaxiOnRoad() {
   if (!taxiEl || !mapS2 || !K || !lastRoute || lastRoute.length < 2) return false;
   var proj = mapS2.getProjection();
@@ -177,6 +189,7 @@ function placeTaxiOnRoad() {
   /* 지도를 많이 옮겼으면 이 경로는 이미 딴 곳 것이다 — 새 경로가 올 때까지 그대로 둔다 */
   if (haversine({ lat: end[0], lng: end[1] }, origin) > 40) return false;
   for (var i = pts.length - 2; i >= 0; i--) {
+    if (!pts[i][2]) continue;                // 이름 없는 길(건물 진입로·주차장)은 건너뛴다
     var p;
     try { p = proj.containerPointFromCoords(new K.LatLng(pts[i][0], pts[i][1])); } catch (e) { break; }
     if (!p) break;
@@ -189,8 +202,7 @@ function placeTaxiOnRoad() {
   }
   if (!best) return false;
 
-  var deg = bearing({ lat: pts[best.i][0], lng: pts[best.i][1] },
-                    { lat: end[0],        lng: end[1] });
+  var deg = roadDir(pts, best.i);
   taxiEl.style.transform =
     'translate(' + best.dx.toFixed(1) + 'px,' + best.dy.toFixed(1) + 'px) ' +
     'rotate(' + (deg - 90).toFixed(1) + 'deg)';
@@ -391,7 +403,9 @@ function search(q) {
       };
     });
     srchBody.innerHTML = '<div class="res-head">장소결과</div>' + lastResults.map(function (p, i) {
-      return '<div class="res">' +
+      /* 줄 전체가 눌린다 — 오른쪽 작은 [도착] 버튼만 눌러야 하는 줄 모르고
+         이름을 눌렀다가 아무 일도 안 일어나 "검색이 안 된다"고 하신다. */
+      return '<div class="res" data-pick="' + i + '">' +
         '<div class="res__txt">' +
           '<div class="res__name">' + highlight(p.name, q) + '</div>' +
           '<div class="res__addr">' + esc(p.addr) + '<em>' + p.km.toFixed(2) + 'km</em></div>' +
@@ -500,7 +514,9 @@ function fetchDirections(o, d) {
       (rt.sections || []).forEach(function (sec) {
         (sec.roads || []).forEach(function (rd) {
           for (var i = 0; i + 1 < rd.vertexes.length; i += 2) {
-            coords.push([rd.vertexes[i + 1], rd.vertexes[i]]);
+            /* 세 번째 칸은 도로 이름 — 비어 있으면 건물 진입로나 주차장 길이다.
+               거기에 택시를 세우면 건물 안에 박힌 것처럼 보인다. */
+            coords.push([rd.vertexes[i + 1], rd.vertexes[i], rd.name || '']);
           }
         });
       });
@@ -1272,7 +1288,8 @@ function hintSpot() {
     case 'taxi':   return one('#rowDest',        '[어디로 갈까요?]를 누르세요');
     case 'search':
       if (!$('#srchInput').value.trim()) return one('#srchInput', '여기에 가려는 곳을 적으세요');
-      return one('#srchBody .sug', '찾는 곳을 누르세요') || one('#srchInput', '여기에 가려는 곳을 적으세요');
+      return one('#srchBody .res, #srchBody .sug', '찾는 곳을 누르세요') ||
+             one('#srchInput', '여기에 가려는 곳을 적으세요');
     case 'route':  return one('#opts .opt',      '부르고 싶은 택시를 누르세요');
     case 'detail': return payMethod ? one('#ctaCall', '[호출하기]를 누르세요')
                                     : one('#btnPay',  '[결제수단 등록]을 누르세요');
