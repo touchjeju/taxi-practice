@@ -1,0 +1,59 @@
+rules_version = '2';
+
+/* ==========================================================================
+   누가 무엇을 읽고 쓸 수 있는지 — 진짜 자물쇠는 여기 하나다.
+   웹 페이지에 적힌 apiKey 는 열쇠가 아니라 주소일 뿐이라, 이 규칙이 막지 않으면
+   아무나 남의 반 명단을 볼 수 있다.
+
+     교사  : 구글 로그인. 자기가 만든 반만 보고 고칠 수 있다.
+     수강생: 익명 로그인. 자기 기록만 쓰고, 자기 것만 읽는다.
+             반 이름은 링크로 들어와야 하니 읽기만 열어 둔다(코드를 알아야 한다).
+   ========================================================================== */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    /* 구글 계정으로 들어온 사람 — 익명(수강생)은 반을 만들 수 없다 */
+    function isTeacher() {
+      return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    /* 이 반을 만든 선생님인가 */
+    function teacherOf(cid) {
+      return signedIn()
+        && get(/databases/$(database)/documents/classes/$(cid)).data.teacherUid == request.auth.uid;
+    }
+
+    match /classes/{cid} {
+      /* 링크를 받은 수강생이 반 이름을 확인해야 하므로 한 건 읽기는 열어 둔다 */
+      allow get:    if signedIn();
+      /* 목록은 자기 반만 — where('teacherUid','==',내uid) 로 물어야만 통과한다 */
+      allow list:   if signedIn() && resource.data.teacherUid == request.auth.uid;
+      allow create: if isTeacher() && request.resource.data.teacherUid == request.auth.uid;
+      allow update, delete: if teacherOf(cid);
+
+      match /students/{sid} {
+        allow get, list: if teacherOf(cid) || request.auth.uid == sid;
+        allow create:    if signedIn() && request.auth.uid == sid;
+        allow update:    if request.auth.uid == sid || teacherOf(cid);
+        allow delete:    if teacherOf(cid);
+
+        match /attempts/{aid} {
+          allow get, list:      if teacherOf(cid) || request.auth.uid == sid;
+          allow create, update: if request.auth.uid == sid;
+          /* 반이나 수강생을 지울 때 선생님도 기록을 치울 수 있어야 한다 */
+          allow delete:         if teacherOf(cid) || request.auth.uid == sid;
+        }
+      }
+    }
+
+    /* 그 밖의 모든 곳은 잠근다 */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<title>연습 시작하기 — 터치제주</title>
+<style>
+@font-face{font-family:Paperlogy;font-weight:400;font-display:swap;
+  src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2") format("woff2")}
+@font-face{font-family:Paperlogy;font-weight:500;font-display:swap;
+  src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-5Medium.woff2") format("woff2")}
+@font-face{font-family:Paperlogy;font-weight:700;font-display:swap;
+  src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2") format("woff2")}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:#fff;color:#1B1F32;
+  font-family:Paperlogy,"Malgun Gothic","맑은 고딕",-apple-system,"Apple SD Gothic Neo",
+              "Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+  display:flex;justify-content:center;
+}
+.wrap{
+  width:min(100vw,460px);
+  font-size:calc(min(100vw,460px) * .0463);   /* 430px 화면에서 20px */
+  padding:0 2.3em;display:flex;flex-direction:column;
+}
+
+.head{padding:3.6em 0 0}
+.head__sub{margin:0;font-size:.72em;font-weight:500;color:#4A4E57}
+.head__title{margin:.34em 0 0;font-size:1.45em;font-weight:700;line-height:1.34;white-space:pre-line}
+.head__class{margin:.7em 0 0;font-size:.95em;font-weight:700;color:#4D5CAD}
+
+/* ───────────── 이름 넣기 ───────────── */
+.card{margin-top:2.2em}
+.lab{display:block;font-size:.85em;font-weight:700;color:#4A4E57;margin-bottom:.6em}
+.name{
+  width:100%;height:3.2em;padding:0 .9em;border:2px solid #D5D9E8;border-radius:.7em;
+  font:inherit;font-size:1.1em;font-weight:700;color:#1B1F32;background:#fff;
+}
+.name:focus{outline:none;border-color:#4D5CAD}
+.go{
+  width:100%;height:3.4em;margin-top:1.1em;border:0;border-radius:.8em;
+  background:#4D5CAD;color:#fff;font:inherit;font-size:1.05em;font-weight:700;cursor:pointer;
+}
+.go:disabled{background:#C3C8DA;cursor:default}
+.err{margin:.8em 0 0;font-size:.8em;color:#C0392B;font-weight:500;min-height:1.2em}
+
+/* ───────────── 연습 고르기 ───────────── */
+.menu{display:flex;flex-direction:column;gap:1.55em;padding:1.6em 0 0}
+.btn{
+  display:flex;align-items:center;height:5.15em;padding:0 1.15em;
+  border:0;border-radius:.9em;text-align:left;text-decoration:none;
+  font-size:1.05em;font-weight:700;color:#fff;font-family:inherit;cursor:pointer;
+  transition:transform .12s ease,filter .12s ease;
+}
+.btn:active{transform:scale(.985);filter:brightness(.94)}
+.btn--call{background:#4D5CAD}
+.btn--cancel{background:#3B457C}
+.btn--air{background:#1B2038}
+.btn--all{background:#F7DA00;color:#282D4B}
+.btn.is-done::after{content:"✓ 마침";margin-left:auto;font-size:.78em;opacity:.9;font-weight:500}
+
+.foot{margin:2.4em 0 2.6em;font-size:.78em;line-height:1.6;color:#8B9099;font-weight:500}
+.foot button{background:none;border:0;padding:0;font:inherit;color:#4D5CAD;
+  text-decoration:underline;cursor:pointer}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header class="head">
+    <p class="head__sub">터치제주 연습하기</p>
+    <h1 class="head__title" id="title">불러오는 중…</h1>
+    <p class="head__class" id="className" hidden></p>
+  </header>
+
+  <!-- 1. 이름 넣기 -->
+  <section class="card" id="stepName" hidden>
+    <label class="lab" for="nameInput">이름을 적어 주세요</label>
+    <input class="name" id="nameInput" type="text" autocomplete="name"
+           enterkeyhint="done" maxlength="20" placeholder="예) 김제주">
+    <button class="go" id="btnGo" type="button" disabled>연습 시작하기</button>
+    <p class="err" id="err"></p>
+  </section>
+
+  <!-- 2. 연습 고르기 -->
+  <nav class="menu" id="stepMenu" hidden>
+    <a class="btn btn--call"   data-flow="call">택시 호출 연습하기</a>
+    <a class="btn btn--cancel" data-flow="cancel">택시 취소 연습하기</a>
+    <a class="btn btn--air"    data-flow="air">항공권 예매 연습하기</a>
+    <a class="btn btn--all"    data-flow="all">한번에 연습하기</a>
+  </nav>
+
+  <p class="foot" id="foot" hidden>
+    <span id="who"></span>
+    <button type="button" id="btnRename">이름 바꾸기</button>
+  </p>
+</main>
+
+<script type="module">
+/* ==========================================================================
+   수강생이 선생님께 받은 링크(/join/?c=코드)로 들어오는 자리.
+   이름을 한 번 적으면 그 기기에 남아, 다음 시간에는 바로 연습 목록이 뜬다.
+   ========================================================================== */
+import { db, anonUser, doc, getDoc, setDoc, updateDoc } from "../common/fb.js?v=202609031458";
+
+var STORE = 'tj.student';
+var code  = (new URLSearchParams(location.search).get('c') || '').trim().toUpperCase();
+var $     = function (id) { return document.getElementById(id); };
+var titleEl = $('title'), classEl = $('className'), err = $('err');
+
+function fail(msg) {
+  titleEl.textContent = msg;
+  $('stepName').hidden = true;
+  $('stepMenu').hidden = true;
+  $('foot').hidden = true;
+}
+
+if (!code) {
+  fail('주소가 올바르지 않아요.\n선생님께 받은 링크로\n다시 들어와 주세요.');
+} else {
+  boot().catch(function (e) {
+    console.error(e);
+    fail('연결이 안 됩니다.\n인터넷을 확인하고\n다시 열어 주세요.');
+  });
+}
+
+async function boot() {
+  /* 반 이름을 읽는 것부터 로그인이 필요하다(접근 규칙). 익명이라 묻는 건 없다. */
+  await anonUser();
+  var cls = await getDoc(doc(db, 'classes/' + code));
+  if (!cls.exists()) {
+    fail('없는 반이에요.\n선생님께 링크를\n다시 받아 주세요.');
+    return;
+  }
+  var info = cls.data();
+  titleEl.textContent = '연습 시작하기';
+  classEl.textContent = info.name;
+  classEl.hidden = false;
+  document.title = info.name + ' — 연습 시작하기';
+
+  var me = null;
+  try { me = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) {}
+  if (me && me.code === code && me.name) showMenu(me.name);
+  else showName();
+
+  /* ── 이름 넣기 ── */
+  function showName() {
+    $('stepMenu').hidden = true;
+    $('foot').hidden = true;
+    $('stepName').hidden = false;
+    var input = $('nameInput'), go = $('btnGo');
+    input.value = (me && me.name) || '';
+    go.disabled = !input.value.trim();
+    input.focus();
+    input.oninput = function () { go.disabled = !input.value.trim(); err.textContent = ''; };
+    input.onkeydown = function (e) { if (e.key === 'Enter' && !go.disabled) go.click(); };
+    go.onclick = async function () {
+      var name = input.value.trim();
+      if (!name) return;
+      go.disabled = true;
+      go.textContent = '들어가는 중…';
+      try {
+        var u = await anonUser();
+        var ref = doc(db, 'classes/' + code + '/students/' + u.uid);
+        var cur = await getDoc(ref);
+        if (cur.exists()) await updateDoc(ref, { name: name, lastSeenAt: Date.now() });
+        else await setDoc(ref, { name: name, joinedAt: Date.now(),
+                                 lastSeenAt: Date.now(), results: {} });
+        me = { code: code, name: name, uid: u.uid };
+        localStorage.setItem(STORE, JSON.stringify(me));
+        go.textContent = '연습 시작하기';
+        showMenu(name);
+      } catch (e) {
+        console.error(e);
+        err.textContent = '저장이 안 됐어요. 잠시 뒤 다시 눌러 주세요.';
+        go.disabled = false;
+        go.textContent = '연습 시작하기';
+      }
+    };
+  }
+
+  /* ── 연습 고르기 ── */
+  async function showMenu(name) {
+    $('stepName').hidden = true;
+    $('stepMenu').hidden = false;
+    $('foot').hidden = false;
+    $('who').textContent = name + ' 님 ';
+    var btns = document.querySelectorAll('#stepMenu .btn');
+    Array.prototype.forEach.call(btns, function (a) {
+      a.href = '../app/?flow=' + a.dataset.flow + '&c=' + code;
+    });
+    $('btnRename').onclick = showName;
+
+    /* 이미 마친 연습에는 표시를 붙여 준다 */
+    try {
+      var u = await anonUser();
+      var mine = await getDoc(doc(db, 'classes/' + code + '/students/' + u.uid));
+      var r = (mine.exists() && mine.data().results) || {};
+      Array.prototype.forEach.call(btns, function (a) {
+        a.classList.toggle('is-done', !!(r[a.dataset.flow] && r[a.dataset.flow].completed));
+      });
+    } catch (e) {}
+  }
+}
+</script>
+</body>
+</html>

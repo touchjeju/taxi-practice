@@ -65,6 +65,7 @@ function renderStack(anim) {
     el.style.zIndex = pos > -1 ? 10 + pos : 1;
     if (!anim) { el.getBoundingClientRect(); el.classList.remove('no-anim'); }
   });
+  TRACK.at(stack[stack.length - 1]);          // 연습 기록 — 반 링크로 들어왔을 때만 남는다
 }
 function push(name) {
   if (stack[stack.length - 1] === name) return;
@@ -1061,6 +1062,7 @@ $('#cxGo').addEventListener('click', function () {
 function finish(text) {
   $('#doneText').textContent = text;
   push('done');
+  TRACK.finish(true);
 }
 $('#doneAgain').addEventListener('click', function () { location.reload(); });
 $('#doneHome').addEventListener('click', function () { location.href = '../'; });
@@ -1211,7 +1213,8 @@ function hintTick() {
   hintRaf = requestAnimationFrame(hintTick);
 }
 
-function hintShow() {
+function hintShow(why) {
+  TRACK.hint(hintTop(), why === 'ask' ? 'ask' : 'auto');
   var spot = hintSpot();
   if (!spot) { toast('이 화면에서는 알려 드릴 게 없어요.'); return; }
   hintTarget = spot.el || null;
@@ -1237,7 +1240,7 @@ function hintHide() {
 }
 
 hintBtn.addEventListener('click', function () {
-  if (hintLayer.hidden) hintShow(); else hintHide();
+  if (hintLayer.hidden) hintShow('ask'); else hintHide();
 });
 
 /* 맞게 눌렀으면 표시를 거둔다 — 다음 화면은 다시 스스로 */

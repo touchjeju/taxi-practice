@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<title>교사용 — 터치제주 연습하기</title>
+<style>
+@font-face{font-family:Paperlogy;font-weight:400;font-display:swap;
+  src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2") format("woff2")}
+@font-face{font-family:Paperlogy;font-weight:500;font-display:swap;
+  src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-5Medium.woff2") format("woff2")}
+@font-face{font-family:Paperlogy;font-weight:700;font-display:swap;
+  src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2") format("woff2")}
+
+:root{
+  --ink:#1B1F32; --ink2:#4A4E57; --ink3:#8B9099;
+  --line:#E3E6EF; --bg:#F6F7FB; --card:#fff;
+  --navy:#4D5CAD; --navy-d:#3B457C; --deep:#282D4B;
+  --ok:#1E8E5A; --warn:#C77700; --bad:#C0392B;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:Paperlogy,"Malgun Gothic","맑은 고딕",-apple-system,"Apple SD Gothic Neo",
+              "Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+[hidden]{display:none!important}
+
+/* ───────────── 머리줄 ───────────── */
+.top{display:flex;align-items:center;gap:12px;padding:22px 0 18px}
+.top__brand{font-size:15px;font-weight:700;color:var(--navy)}
+.top__brand span{color:var(--ink3);font-weight:500}
+.top__right{margin-left:auto;display:flex;align-items:center;gap:10px;
+  font-size:13px;color:var(--ink3)}
+
+h1{font-size:26px;font-weight:700;margin:0 0 6px}
+h2{font-size:19px;font-weight:700;margin:0 0 12px}
+.sub{margin:0 0 22px;color:var(--ink2);font-size:14px}
+
+/* ───────────── 버튼 ───────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  height:42px;padding:0 18px;border:1px solid transparent;border-radius:9px;
+  font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;
+  background:var(--navy);color:#fff;transition:filter .12s;white-space:nowrap;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{filter:brightness(.93)}
+.btn:disabled{background:#C3C8DA;cursor:default;filter:none}
+.btn--ghost{background:#fff;color:var(--ink2);border-color:var(--line)}
+.btn--ghost:hover{background:#fff;border-color:#C3C8DA;filter:none}
+.btn--sm{height:34px;padding:0 12px;font-size:13px}
+.btn--danger{background:#fff;color:var(--bad);border-color:#F0CFCA}
+
+/* ───────────── 카드 ───────────── */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card + .card{margin-top:16px}
+
+/* ───────────── 로그인 ───────────── */
+.login{max-width:420px;margin:14vh auto 0;text-align:center}
+.login h1{font-size:24px;margin-bottom:10px}
+.login p{color:var(--ink2);font-size:14px;margin:0 0 26px;line-height:1.7}
+.gbtn{
+  display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 22px;
+  border:1px solid var(--line);border-radius:10px;background:#fff;
+  font:inherit;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;
+}
+.gbtn:hover{background:#FAFBFF;border-color:#C3C8DA}
+.gbtn svg{width:19px;height:19px}
+
+/* ───────────── 반 목록 ───────────── */
+.classes{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.cls{
+  display:block;text-align:left;width:100%;background:var(--card);cursor:pointer;
+  border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;font:inherit;
+  transition:border-color .12s,transform .12s;
+}
+.cls:hover{border-color:var(--navy);transform:translateY(-1px)}
+.cls__name{font-size:17px;font-weight:700;margin-bottom:4px}
+.cls__meta{font-size:13px;color:var(--ink3)}
+.cls__code{margin-top:12px;font-size:13px;font-weight:700;color:var(--navy);
+  letter-spacing:.09em}
+.cls--new{border-style:dashed;color:var(--ink3);display:flex;align-items:center;
+  justify-content:center;min-height:112px;font-size:15px;font-weight:700}
+.cls--new:hover{color:var(--navy)}
+
+/* ───────────── 반 상세 ───────────── */
+.back{background:none;border:0;padding:0;margin:0 0 14px;font:inherit;font-size:14px;
+  color:var(--ink3);cursor:pointer}
+.back:hover{color:var(--navy)}
+
+.share{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.share__main{flex:1;min-width:260px}
+.share__lab{font-size:13px;font-weight:700;color:var(--ink2);margin:0 0 7px}
+.share__link{
+  display:flex;gap:8px;align-items:center;background:#F6F7FB;border:1px solid var(--line);
+  border-radius:9px;padding:9px 12px;font-size:13px;color:var(--ink2);
+  word-break:break-all;line-height:1.4;
+}
+.share__link code{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.share__code{
+  margin-top:16px;display:flex;align-items:baseline;gap:12px;
+}
+.share__code b{font-size:30px;font-weight:700;letter-spacing:.13em;color:var(--deep)}
+.share__qr{text-align:center}
+.share__qr canvas,.share__qr img{display:block;border-radius:8px}
+.share__qr .cap{font-size:12px;color:var(--ink3);margin-top:8px}
+
+/* 크게 띄우기 */
+.beam{position:fixed;inset:0;background:#fff;z-index:80;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:24px}
+.beam h2{font-size:min(6vw,42px);margin:0}
+.beam__code{font-size:min(13vw,110px);font-weight:700;letter-spacing:.1em;color:var(--navy)}
+.beam__qr canvas,.beam__qr img{width:min(52vw,340px);height:auto}
+.beam__url{font-size:min(3.2vw,20px);color:var(--ink2);word-break:break-all;text-align:center}
+
+/* ───────────── 표 ───────────── */
+.tblbox{overflow-x:auto;margin:0 -4px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+th,td{padding:11px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:12px;font-weight:700;color:var(--ink3);white-space:nowrap}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:#FAFBFF}
+td.nm{font-weight:700}
+.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700;
+  white-space:nowrap}
+.pill--ok{background:#E6F4EC;color:var(--ok)}
+.pill--warn{background:#FCF1DE;color:var(--warn)}
+.pill--bad{background:#FBEAE7;color:var(--bad)}
+.pill--stop{background:#EEF0F6;color:var(--ink2)}
+.pill--none{background:none;color:#C3C8DA;font-weight:500}
+
+.empty{text-align:center;color:var(--ink3);font-size:14px;padding:34px 0;line-height:1.8}
+
+.rowend{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.bar h2{margin:0}
+.bar .sp{margin-left:auto}
+
+/* ───────────── 평가지 ───────────── */
+.sheet{background:#fff;border:1px solid var(--line);border-radius:14px;padding:30px 32px}
+.sheet + .sheet{margin-top:18px}
+.sheet__head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  padding-bottom:16px;border-bottom:2px solid var(--deep);margin-bottom:22px}
+.sheet__name{font-size:24px;font-weight:700}
+.sheet__meta{font-size:13px;color:var(--ink3);margin-left:auto}
+
+.sec{margin-bottom:26px}
+.sec__t{font-size:16px;font-weight:700;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.sec__t .pill{font-size:11px}
+.kv{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-bottom:12px}
+.kv b{color:var(--ink)}
+
+.stuck{list-style:none;margin:0;padding:0}
+.stuck li{border-left:3px solid var(--line);padding:2px 0 2px 14px;margin-bottom:14px}
+.stuck li.lv2{border-left-color:var(--bad)}
+.stuck li.lv1{border-left-color:var(--warn)}
+.stuck__t{font-size:14px;font-weight:700;margin-bottom:3px}
+.stuck__n{font-size:12px;color:var(--ink3);margin-bottom:5px}
+.stuck__a{font-size:13px;color:var(--ink2);line-height:1.65}
+.good{font-size:13px;color:var(--ok);font-weight:700}
+
+.focus{background:#F6F7FB;border-radius:11px;padding:18px 20px}
+.focus ol{margin:0;padding-left:20px}
+.focus li{font-size:14px;margin-bottom:9px;line-height:1.65}
+.focus li b{font-weight:700}
+.focus li .lb{font-size:13px;color:var(--ink3)}
+
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,10px);
+  background:rgba(27,31,50,.94);color:#fff;padding:11px 18px;border-radius:9px;
+  font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:90;
+}
+.toast.is-on{opacity:1;transform:translate(-50%,0)}
+
+/* ───────────── 인쇄 (PDF 로 저장) ───────────── */
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff;font-size:11pt}
+  .wrap{max-width:none;padding:0}
+  .no-print{display:none!important}
+  .sheet{border:0;border-radius:0;padding:0;break-inside:auto}
+  .sheet + .sheet{margin-top:0;break-before:page}
+  .sec{break-inside:avoid}
+  .focus{background:#F2F3F8;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pill{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ══════════ 로그인 ══════════ -->
+  <section class="login" id="vLogin" hidden>
+    <h1>교사용 페이지</h1>
+    <p>반을 만들고, 수강생에게 줄 연습 링크를 뽑고,<br>
+       누가 어디서 막혔는지 평가지로 볼 수 있습니다.</p>
+    <button class="gbtn" id="btnLogin" type="button">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-2.8-.4-4H24v7.3h12.1c-.2 2-1.6 5-4.5 7l6.9 5.3c4.1-3.8 6.6-9.4 6.6-15.6z"/>
+        <path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-6.9-5.3c-1.8 1.3-4.3 2.2-7.6 2.2-5.8 0-10.7-3.8-12.5-9.1l-7.1 5.5C8.1 41.1 15.4 46 24 46z"/>
+        <path fill="#FBBC05" d="M11.5 28.5c-.5-1.4-.7-2.9-.7-4.5s.3-3.1.7-4.5l-7.1-5.5C2.9 17 2 20.4 2 24s.9 7 2.4 10z"/>
+        <path fill="#EA4335" d="M24 10.7c3.2 0 5.4 1.4 6.7 2.6l5.9-5.8C33 4.1 29.9 2 24 2 15.4 2 8.1 6.9 4.4 14l7.1 5.5c1.8-5.3 6.7-8.8 12.5-8.8z"/>
+      </svg>
+      구글 계정으로 들어가기
+    </button>
+  </section>
+
+  <!-- ══════════ 반 목록 ══════════ -->
+  <section id="vClasses" hidden>
+    <div class="top no-print">
+      <div class="top__brand">터치제주 <span>교사용</span></div>
+      <div class="top__right">
+        <span id="meEmail"></span>
+        <button class="btn btn--ghost btn--sm" id="btnLogout" type="button">나가기</button>
+      </div>
+    </div>
+    <h1>내 반</h1>
+    <p class="sub">반을 만들면 수강생에게 보낼 링크와 참여 코드가 함께 생깁니다.</p>
+    <div class="classes" id="classList"></div>
+  </section>
+
+  <!-- ══════════ 반 상세 ══════════ -->
+  <section id="vClass" hidden>
+    <div class="top no-print">
+      <div class="top__brand">터치제주 <span>교사용</span></div>
+      <div class="top__right">
+        <span id="meEmail2"></span>
+        <button class="btn btn--ghost btn--sm" id="btnLogout2" type="button">나가기</button>
+      </div>
+    </div>
+    <button class="back no-print" id="btnBackList" type="button">← 반 목록</button>
+    <h1 id="clsName"></h1>
+    <p class="sub" id="clsSub"></p>
+
+    <div class="card no-print">
+      <div class="share">
+        <div class="share__main">
+          <p class="share__lab">수강생에게 보낼 링크</p>
+          <div class="share__link">
+            <code id="joinUrl"></code>
+            <button class="btn btn--ghost btn--sm" id="btnCopy" type="button">복사</button>
+          </div>
+          <div class="share__code">
+            <span class="share__lab" style="margin:0">참여 코드</span>
+            <b id="joinCode"></b>
+          </div>
+          <div class="rowend" style="justify-content:flex-start">
+            <button class="btn btn--ghost btn--sm" id="btnBeam" type="button">화면에 크게 띄우기</button>
+          </div>
+        </div>
+        <div class="share__qr">
+          <div id="qrBox"></div>
+          <p class="cap">폰 카메라로 찍어 들어옵니다</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="bar">
+        <h2>수강생 <span id="cntStu" style="color:var(--ink3);font-weight:500"></span></h2>
+        <div class="sp"></div>
+        <button class="btn btn--ghost btn--sm no-print" id="btnAllReport" type="button">반 전체 평가지</button>
+        <button class="btn btn--danger btn--sm no-print" id="btnDelClass" type="button">반 지우기</button>
+      </div>
+      <div class="tblbox">
+        <table>
+          <thead>
+            <tr>
+              <th>이름</th><th>택시 호출</th><th>택시 취소</th><th>항공권</th><th>한번에</th>
+              <th>도움 요청</th><th>마지막 연습</th><th class="no-print"></th>
+            </tr>
+          </thead>
+          <tbody id="stuRows"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="stuEmpty" hidden>
+        아직 들어온 수강생이 없습니다.<br>
+        위 링크나 참여 코드를 나눠 주세요.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 평가지 ══════════ -->
+  <section id="vReport" hidden>
+    <div class="top no-print">
+      <div class="top__brand">터치제주 <span>교사용</span></div>
+    </div>
+    <button class="back no-print" id="btnBackClass" type="button">← 반으로</button>
+    <div class="bar no-print">
+      <h2 id="repTitle"></h2>
+      <div class="sp"></div>
+      <button class="btn" id="btnPrint" type="button">PDF 로 저장 / 인쇄</button>
+    </div>
+    <div id="sheets"></div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script type="module">
+/* ==========================================================================
+   교사용 — 반 만들기 · 링크와 QR 뽑기 · 수강생 진도 보기 · 평가지 PDF
+
+   수강생이 연습하는 동안 앱(track.js)이 화면마다 머문 시간과 [?] 누른 횟수를
+   남긴다. 여기서는 그 기록을 읽어 "어디서 막혔는지"와 "무엇을 더 짚어 주면
+   좋은지"로 바꿔 보여 준다.
+   ========================================================================== */
+import { auth, db, waitUser, signInWithPopup, GoogleAuthProvider, signOut,
+         onAuthStateChanged, collection, doc, getDoc, getDocs, setDoc, deleteDoc,
+         query, where, onSnapshot }
+  from "../common/fb.js?v=202609031458";
+import { STEPS, FLOWS, stepLabel, stuckWhy, fmtSec } from "../common/steps.js?v=202609031458";
+
+var $ = function (id) { return document.getElementById(id); };
+var FLOW_ORDER = ['call', 'cancel', 'air', 'all'];
+var ALPHABET   = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   /* 헷갈리는 I·O·0·1 은 뺐다 */
+var JOIN_BASE  = location.origin + location.pathname.replace(/teacher\/.*$/, 'join/');
+
+var me = null, unsubStu = null, curClass = null, curStudents = [];
+
+/* ───────────── 화면 바꾸기 ───────────── */
+function show(id) {
+  ['vLogin', 'vClasses', 'vClass', 'vReport'].forEach(function (v) {
+    $(v).hidden = (v !== id);
+  });
+  window.scrollTo(0, 0);
+}
+var toastT = null;
+function toast(msg) {
+  var t = $('toast');
+  t.textContent = msg; t.classList.add('is-on');
+  clearTimeout(toastT);
+  toastT = setTimeout(function () { t.classList.remove('is-on'); }, 2400);
+}
+
+/* ───────────── 로그인 ───────────── */
+$('btnLogin').onclick = function () {
+  signInWithPopup(auth, new GoogleAuthProvider()).catch(function (e) {
+    console.error(e);
+    toast(e.code === 'auth/popup-closed-by-user'
+      ? '로그인 창이 닫혔습니다.' : '로그인에 실패했습니다. 다시 시도해 주세요.');
+  });
+};
+function logout() { if (unsubStu) unsubStu(); signOut(auth); }
+$('btnLogout').onclick = logout;
+$('btnLogout2').onclick = logout;
+
+onAuthStateChanged(auth, function (u) {
+  /* 익명(학생) 로그인이 남아 있으면 교사로는 못 쓴다 — 다시 로그인시킨다 */
+  if (u && u.isAnonymous) { signOut(auth); return; }
+  me = u;
+  if (!u) { show('vLogin'); return; }
+  $('meEmail').textContent = u.email || '';
+  $('meEmail2').textContent = u.email || '';
+  openClasses();
+});
+
+/* ───────────── 반 목록 ───────────── */
+async function openClasses() {
+  if (unsubStu) { unsubStu(); unsubStu = null; }
+  show('vClasses');
+  var box = $('classList');
+  box.innerHTML = '<div class="cls cls--new">불러오는 중…</div>';
+
+  var snap = await getDocs(query(collection(db, 'classes'), where('teacherUid', '==', me.uid)));
+  var list = [];
+  snap.forEach(function (d) { list.push(Object.assign({ id: d.id }, d.data())); });
+  list.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+
+  box.innerHTML = '';
+  list.forEach(function (c) {
+    var b = document.createElement('button');
+    b.className = 'cls';
+    b.type = 'button';
+    b.innerHTML =
+      '<div class="cls__name"></div>' +
+      '<div class="cls__meta">' + fmtDate(c.createdAt) + ' 만듦</div>' +
+      '<div class="cls__code">참여 코드 ' + c.id + '</div>';
+    b.querySelector('.cls__name').textContent = c.name;
+    b.onclick = function () { openClass(c); };
+    box.appendChild(b);
+  });
+
+  var add = document.createElement('button');
+  add.className = 'cls cls--new';
+  add.type = 'button';
+  add.textContent = '+ 새 반 만들기';
+  add.onclick = newClass;
+  box.appendChild(add);
+}
+
+async function newClass() {
+  var name = (prompt('반 이름을 적어 주세요.\n예) 2026년 1기 화요일반') || '').trim();
+  if (!name) return;
+  var code = null;
+  for (var i = 0; i < 6 && !code; i++) {           /* 겹치면 다시 뽑는다 */
+    var t = '';
+    for (var j = 0; j < 6; j++) t += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+    var got = await getDoc(doc(db, 'classes/' + t));
+    if (!got.exists()) code = t;
+  }
+  if (!code) { toast('코드 만들기에 실패했습니다. 다시 시도해 주세요.'); return; }
+  try {
+    await setDoc(doc(db, 'classes/' + code),
+                 { name: name, teacherUid: me.uid, createdAt: Date.now() });
+    openClasses();
+  } catch (e) { console.error(e); toast('반을 만들지 못했습니다.'); }
+}
+
+/* ───────────── 반 상세 ───────────── */
+function joinUrlOf(code) { return JOIN_BASE + '?c=' + code; }
+
+function openClass(c) {
+  curClass = c;
+  show('vClass');
+  $('clsName').textContent = c.name;
+  $('clsSub').textContent = fmtDate(c.createdAt) + ' 만든 반';
+
+  var url = joinUrlOf(c.id);
+  $('joinUrl').textContent = url;
+  $('joinCode').textContent = c.id;
+  $('qrBox').innerHTML = '';
+  new QRCode($('qrBox'), { text: url, width: 132, height: 132,
+                           correctLevel: QRCode.CorrectLevel.M });
+
+  $('btnCopy').onclick = function () {
+    navigator.clipboard.writeText(url)
+      .then(function () { toast('링크를 복사했습니다.'); })
+      .catch(function () { toast('복사가 안 됩니다. 링크를 길게 눌러 복사해 주세요.'); });
+  };
+  $('btnBeam').onclick = function () { beam(c); };
+  $('btnDelClass').onclick = function () { delClass(c); };
+  $('btnAllReport').onclick = function () { openReport(null); };
+
+  /* 수강생 목록 — 연습하는 동안 저절로 갱신된다 */
+  if (unsubStu) unsubStu();
+  unsubStu = onSnapshot(collection(db, 'classes/' + c.id + '/students'), function (snap) {
+    curStudents = [];
+    snap.forEach(function (d) { curStudents.push(Object.assign({ id: d.id }, d.data())); });
+    curStudents.sort(function (a, b) { return (a.name || '').localeCompare(b.name || '', 'ko'); });
+    drawStudents();
+  }, function (e) { console.error(e); toast('명단을 불러오지 못했습니다.'); });
+}
+
+function drawStudents() {
+  var tb = $('stuRows');
+  tb.innerHTML = '';
+  $('cntStu').textContent = curStudents.length ? curStudents.length + '명' : '';
+  $('stuEmpty').hidden = curStudents.length > 0;
+  $('btnAllReport').disabled = curStudents.length === 0;
+
+  curStudents.forEach(function (s) {
+    var r = s.results || {};
+    var tr = document.createElement('tr');
+    var hints = 0, last = s.lastSeenAt || 0;
+    FLOW_ORDER.forEach(function (f) { if (r[f]) hints += r[f].hints || 0; });
+
+    var td = document.createElement('td');
+    td.className = 'nm';
+    td.textContent = s.name || '(이름 없음)';
+    tr.appendChild(td);
+
+    FLOW_ORDER.forEach(function (f) {
+      var c = document.createElement('td');
+      c.innerHTML = pillFor(r[f]);
+      tr.appendChild(c);
+    });
+
+    var h = document.createElement('td');
+    h.textContent = hints ? hints + '번' : '—';
+    tr.appendChild(h);
+
+    var l = document.createElement('td');
+    l.textContent = last ? fmtWhen(last) : '—';
+    tr.appendChild(l);
+
+    var x = document.createElement('td');
+    x.className = 'no-print';
+    var xb = document.createElement('button');
+    xb.className = 'btn btn--ghost btn--sm rm';
+    xb.type = 'button';
+    xb.textContent = '지우기';
+    xb.onclick = function (e) { e.stopPropagation(); delStudent(s); };
+    x.appendChild(xb);
+    tr.appendChild(x);
+
+    tr.onclick = function () { openReport(s); };
+    tb.appendChild(tr);
+  });
+}
+
+function pillFor(res) {
+  if (!res)             return '<span class="pill pill--none">—</span>';
+  if (!res.completed)   return '<span class="pill pill--stop">중간에 그만둠</span>';
+  if (res.level >= 2)   return '<span class="pill pill--bad">많이 막힘</span>';
+  if (res.level === 1)  return '<span class="pill pill--warn">조금 헤맴</span>';
+  return '<span class="pill pill--ok">잘함</span>';
+}
+
+/* 수강생 한 명 지우기 — 이름을 잘못 적었거나 같은 사람이 둘로 잡힌 경우에 쓴다 */
+async function delStudent(s) {
+  if (!confirm('"' + (s.name || '이름 없음') + '" 님을 명단에서 지웁니다.\n\n' +
+               '연습 기록도 함께 사라지고, 되돌릴 수 없습니다.\n계속할까요?')) return;
+  try {
+    var base = 'classes/' + curClass.id + '/students/' + s.id;
+    var ats = await getDocs(collection(db, base + '/attempts'));
+    for (var i = 0; i < ats.docs.length; i++) await deleteDoc(ats.docs[i].ref);
+    await deleteDoc(doc(db, base));
+    toast('지웠습니다.');
+  } catch (e) { console.error(e); toast('지우지 못했습니다.'); }
+}
+
+async function delClass(c) {
+  if (!confirm('"' + c.name + '" 반을 지웁니다.\n\n' +
+               '수강생 명단과 연습 기록도 함께 사라지고, 되돌릴 수 없습니다.\n계속할까요?')) return;
+  try {
+    var stus = await getDocs(collection(db, 'classes/' + c.id + '/students'));
+    for (var i = 0; i < stus.docs.length; i++) {
+      var sd = stus.docs[i];
+      var ats = await getDocs(collection(db, 'classes/' + c.id + '/students/' + sd.id + '/attempts'));
+      for (var j = 0; j < ats.docs.length; j++) await deleteDoc(ats.docs[j].ref);
+      await deleteDoc(sd.ref);
+    }
+    await deleteDoc(doc(db, 'classes/' + c.id));
+    toast('반을 지웠습니다.');
+    openClasses();
+  } catch (e) { console.error(e); toast('지우지 못했습니다.'); }
+}
+
+/* ───────────── 크게 띄우기 ───────────── */
+function beam(c) {
+  var url = joinUrlOf(c.id);
+  var d = document.createElement('div');
+  d.className = 'beam';
+  d.innerHTML =
+    '<h2></h2><div class="beam__qr"></div>' +
+    '<div class="beam__code">' + c.id + '</div>' +
+    '<div class="beam__url">' + url + '</div>' +
+    '<div style="font-size:14px;color:#8B9099">아무 데나 누르면 닫힙니다</div>';
+  d.querySelector('h2').textContent = c.name;
+  document.body.appendChild(d);
+  new QRCode(d.querySelector('.beam__qr'),
+             { text: url, width: 340, height: 340, correctLevel: QRCode.CorrectLevel.M });
+  d.onclick = function () { d.remove(); };
+}
+
+/* ───────────── 평가지 ───────────── */
+$('btnBackList').onclick = openClasses;
+$('btnBackClass').onclick = function () { show('vClass'); };
+$('btnPrint').onclick = function () { window.print(); };
+
+async function openReport(student) {
+  var who = student ? [student] : curStudents;
+  show('vReport');
+  $('repTitle').textContent = student
+    ? student.name + ' 님 평가지'
+    : curClass.name + ' — 반 전체 평가지 (' + who.length + '명)';
+  var box = $('sheets');
+  box.innerHTML = '<div class="sheet"><p class="empty">불러오는 중…</p></div>';
+
+  var made = [];
+  for (var i = 0; i < who.length; i++) made.push(await buildSheet(who[i]));
+  box.innerHTML = '';
+  made.forEach(function (el) { box.appendChild(el); });
+}
+
+async function buildSheet(s) {
+  var atts = [];
+  try {
+    var snap = await getDocs(
+      collection(db, 'classes/' + curClass.id + '/students/' + s.id + '/attempts'));
+    snap.forEach(function (d) { atts.push(d.data()); });
+  } catch (e) { console.error(e); }
+
+  /* 연습마다 가장 최근 것 하나만 본다 */
+  var latest = {};
+  atts.forEach(function (a) {
+    if (!latest[a.flow] || (a.endedAt || 0) > (latest[a.flow].endedAt || 0)) latest[a.flow] = a;
+  });
+
+  var el = document.createElement('section');
+  el.className = 'sheet';
+  var h = document.createElement('div');
+  h.className = 'sheet__head';
+  h.innerHTML = '<div class="sheet__name"></div>' +
+                '<div class="sheet__meta">' + curClass.name + ' · ' +
+                fmtDate(Date.now()) + ' 뽑음</div>';
+  h.querySelector('.sheet__name').textContent = (s.name || '(이름 없음)') + ' 님';
+  el.appendChild(h);
+
+  var anyDone = false;
+  var groupScore = {};
+
+  FLOW_ORDER.forEach(function (f) {
+    var a = latest[f];
+    if (!a) return;
+    anyDone = true;
+    var sec = document.createElement('div');
+    sec.className = 'sec';
+
+    var t = document.createElement('h3');
+    t.className = 'sec__t';
+    t.innerHTML = FLOWS[f].label + ' ' +
+      (a.completed ? pillFor({ completed: true, level: a.level })
+                   : '<span class="pill pill--stop">중간에 그만둠</span>');
+    sec.appendChild(t);
+
+    var kv = document.createElement('div');
+    kv.className = 'kv';
+    kv.innerHTML =
+      '<span>걸린 시간 <b>' + fmtSec(a.totalMs) + '</b></span>' +
+      '<span>도움 요청 <b>' + (a.hints || 0) + '번</b></span>' +
+      '<span>연습한 날 <b>' + fmtDate(a.endedAt) + '</b></span>';
+    sec.appendChild(kv);
+
+    var stuck = (a.stuck || []).filter(function (x) { return STEPS[x.step]; });
+    if (!stuck.length) {
+      var g = document.createElement('p');
+      g.className = 'good';
+      g.textContent = a.completed
+        ? '막힘 없이 끝까지 해내셨습니다.'
+        : '기록된 막힘은 없지만 끝까지 가지는 않았습니다.';
+      sec.appendChild(g);
+    } else {
+      var ul = document.createElement('ul');
+      ul.className = 'stuck';
+      stuck.forEach(function (x) {
+        var st = STEPS[x.step];
+        var g = groupScore[st.group] ||
+                (groupScore[st.group] = { score: 0, step: x.step, best: -1 });
+        g.score += x.level;
+        if (x.level > g.best) { g.best = x.level; g.step = x.step; }  /* 가장 심한 자리 */
+        var li = document.createElement('li');
+        li.className = 'lv' + x.level;
+        li.innerHTML =
+          '<div class="stuck__t"></div>' +
+          '<div class="stuck__n">' + stuckWhy(x.step, x) + '</div>' +
+          '<div class="stuck__a"></div>';
+        li.querySelector('.stuck__t').textContent =
+          (x.level >= 2 ? '많이 막힘 — ' : '조금 헤맴 — ') + stepLabel(x.step);
+        li.querySelector('.stuck__a').textContent = st.advice || '';
+        ul.appendChild(li);
+      });
+      sec.appendChild(ul);
+    }
+    el.appendChild(sec);
+  });
+
+  if (!anyDone) {
+    var p = document.createElement('p');
+    p.className = 'empty';
+    p.textContent = '아직 연습 기록이 없습니다.';
+    el.appendChild(p);
+    return el;
+  }
+
+  /* 종합 — 어디를 집중해 도우면 좋은지 */
+  var tops = Object.keys(groupScore)
+    .sort(function (a, b) { return groupScore[b].score - groupScore[a].score; })
+    .slice(0, 3);
+  var fo = document.createElement('div');
+  fo.className = 'sec focus';
+  if (!tops.length) {
+    fo.innerHTML = '<h3 class="sec__t">다음 시간에 집중할 부분</h3>' +
+      '<p style="margin:0;font-size:14px">특별히 막힌 곳이 없었습니다. ' +
+      '다음 단계 연습으로 넘어가도 좋겠습니다.</p>';
+  } else {
+    var ol = document.createElement('ol');
+    tops.forEach(function (g) {
+      /* 그 묶음에서 실제로 가장 심하게 막힌 자리의 조언을 쓴다 */
+      var st = STEPS[groupScore[g].step];
+      var li = document.createElement('li');
+      li.innerHTML = '<b></b><br><span class="lb"></span><br>';
+      li.querySelector('b').textContent = g;
+      li.querySelector('.lb').textContent = '특히 : ' + st.label;
+      li.appendChild(document.createTextNode(st.advice || ''));
+      ol.appendChild(li);
+    });
+    fo.innerHTML = '<h3 class="sec__t">다음 시간에 집중할 부분</h3>';
+    fo.appendChild(ol);
+  }
+  el.appendChild(fo);
+  return el;
+}
+
+/* ───────────── 날짜 ───────────── */
+function fmtDate(ms) {
+  if (!ms) return '—';
+  var d = new Date(ms);
+  return d.getFullYear() + '. ' + (d.getMonth() + 1) + '. ' + d.getDate() + '.';
+}
+function fmtWhen(ms) {
+  var gap = Date.now() - ms;
+  if (gap < 60000) return '방금';
+  if (gap < 3600000) return Math.floor(gap / 60000) + '분 전';
+  var d = new Date(ms), today = new Date();
+  if (d.toDateString() === today.toDateString())
+    return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+  return fmtDate(ms);
+}
+
+/* 처음 뜰 때 로그인 상태를 기다린다 */
+waitUser().then(function (u) { if (!u) show('vLogin'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+/* ==========================================================================
+   연습 화면 사전 — 화면 이름(app.js 의 stack 값)을 사람이 읽는 말로 바꾸고,
+   그 자리에서 막혔을 때 교사가 무엇을 짚어 주면 되는지 적어 둔다.
+   연습 앱(track.js)과 교사용 평가지(teacher/)가 같은 사전을 본다.
+   ========================================================================== */
+
+/* 얼마나 오래 머물면 "막혔다"고 볼지 — 화면마다 다르게 잡는다(밀리초) */
+export const SOFT = 20000;   /* 이만큼 넘으면 : 조금 헤맴 */
+export const HARD = 45000;   /* 이만큼 넘으면 : 많이 막힘 */
+
+export const FLOWS = {
+  call:   { label: '택시 호출 연습',   short: '호출'   },
+  cancel: { label: '택시 취소 연습',   short: '취소'   },
+  air:    { label: '항공권 예매 연습', short: '항공권' },
+  all:    { label: '한번에 연습',      short: '한번에' }
+};
+
+/* group : 평가지에서 비슷한 화면을 한 덩어리로 묶어 보여 줄 때 쓴다
+   wait  : 기다리는 게 정상인 화면 — 시간으로는 막힘을 매기지 않는다
+   skip  : 평가에서 아예 뺀다                                            */
+export const STEPS = {
+  home:    { group: '앱 열고 택시 찾기', label: '첫 화면에서 [택시] 찾기',
+             advice: '아이콘이 많아 택시를 못 찾는 경우예요. [이동할 때] 칸 안에 택시가 있다는 걸 손으로 짚어 주세요.' },
+  ad0:     { group: '광고 닫기', label: '앱을 열자마자 뜬 광고 닫기', soft: 12000, hard: 25000,
+             advice: '광고를 앱 화면으로 착각해 그대로 읽고 계신 경우가 많아요. [닫기] 글자의 위치를 미리 알려 주세요.' },
+  ad:      { group: '광고 닫기', label: '중간에 뜬 광고 닫기 ([X])', soft: 12000, hard: 25000,
+             advice: '오른쪽 위 작은 [X]가 잘 안 보입니다. "구석의 작은 X"를 찾는 습관을 연습시켜 주세요.' },
+  taxi:    { group: '어디로 갈지 정하기', label: '[어디로 갈까요?] 누르기',
+             advice: '지도만 보고 어디를 눌러야 할지 몰라 멈춥니다. 지도 아래 흰 칸을 누르는 것이라고 알려 주세요.' },
+  search:  { group: '어디로 갈지 정하기', label: '가려는 곳 이름 적고 고르기', soft: 30000, hard: 60000,
+             advice: '한글 입력이 느리거나 오타가 나는 자리예요. 두세 글자만 적어도 목록에 뜬다는 걸 보여 주세요.' },
+  route:   { group: '택시 고르기', label: '부를 택시 종류 고르기',
+             advice: '종류가 여러 개라 고민하다 멈춥니다. 맨 위의 것을 골라도 된다고 안심시켜 주세요.' },
+  detail:  { group: '결제수단과 호출', label: '호출 화면 — 결제수단 등록 / [호출하기]',
+             advice: '결제수단이 없으면 호출 버튼이 안 눌립니다. 먼저 [결제수단 등록]을 눌러야 한다는 순서를 알려 주세요.' },
+  pay:     { group: '결제수단과 호출', label: '결제수단 고르고 [적용]',
+             advice: '카드를 고르기만 하고 [적용]을 안 눌러 되돌아옵니다. "고르고 → 적용" 두 단계임을 짚어 주세요.' },
+  ride:    { group: '호출하고 기다리기', label: '배차 기다리기 / [호출취소]', wait: true,
+             advice: '기다리는 화면입니다. 기사님을 찾는 동안은 아무것도 안 해도 된다고 말해 주세요.' },
+  cancel:  { group: '호출 취소하기', label: '취소 사유 고르고 [호출 취소하기]',
+             advice: '사유를 고르기 전에는 취소 버튼이 흐릿합니다. 사유부터 골라야 한다고 알려 주세요.' },
+  reason:  { group: '호출 취소하기', label: '취소 이유 목록에서 하나 고르기',
+             advice: '이유가 여러 줄이라 고르기 어려워합니다. 아무거나 골라도 연습에는 지장이 없다고 해 주세요.' },
+  all:     { group: '되돌아오기', label: '전체 서비스 화면에서 [홈]으로 돌아오기',
+             advice: '엉뚱한 화면으로 들어간 뒤 못 빠져나온 경우예요. 아래 줄의 [홈]이 항상 처음으로 돌아가는 길임을 알려 주세요.' },
+  noti:    { group: '되돌아오기', label: '알림 화면에서 [홈]으로 돌아오기',
+             advice: '아래 줄의 [홈]을 누르면 언제든 처음으로 돌아온다고 반복해 알려 주세요.' },
+  uselog:  { group: '되돌아오기', label: '이용기록 화면에서 뒤로 가기',
+             advice: '왼쪽 위 화살표가 "뒤로"라는 걸 모르는 경우가 많습니다. 화살표 모양을 짚어 주세요.' },
+
+  air:     { group: '항공권 날짜 고르기', label: '항공권 첫 화면 — 날짜 고르고 [항공권 검색]',
+             advice: '날짜를 안 고르고 검색을 누르려다 멈춥니다. [가는날 - 오는날] 칸을 먼저 눌러야 합니다.' },
+  airdate: { group: '항공권 날짜 고르기', label: '달력에서 가는날·오는날 고르기', soft: 30000, hard: 60000,
+             advice: '두 번 눌러야 하는 걸 모르고 한 번만 누르고 기다립니다. "가는날 한 번, 오는날 한 번"으로 세어 주세요.' },
+  airlist: { group: '항공편 고르기', label: '타고 갈 비행기 고르기',
+             advice: '시간과 요금이 빽빽해 고르기 어렵습니다. 한 줄 전체가 버튼이라는 걸 알려 주세요.' },
+  airsel:  { group: '항공편 고르기', label: '[예매하기] 누르기',
+             advice: '고른 것을 확인만 하고 다음으로 안 넘어갑니다. 맨 아래 [예매하기]를 짚어 주세요.' },
+  airad:   { group: '광고 닫기', label: '항공권 광고 닫기 ([X])', soft: 12000, hard: 25000,
+             advice: '여기서도 구석의 작은 [X]입니다. 광고는 언제든 닫아도 된다고 안심시켜 주세요.' },
+  airbook: { group: '예매 정보 넣기', label: '예매 화면 — 탑승객·이메일·카드', soft: 40000, hard: 90000,
+             advice: '적을 것이 한 화면에 여러 개라 가장 많이 막히는 자리예요. 위에서부터 하나씩 순서대로 짚어 주세요.' },
+  airpax:  { group: '예매 정보 넣기', label: '탑승객 추가하기',
+             advice: '[탑승객 추가]를 못 찾습니다. 새로 만들어야 목록에 생긴다는 걸 알려 주세요.' },
+  airagree:{ group: '예매 정보 넣기', label: '약관 동의하기',
+             advice: '동의 항목이 많아 겁을 냅니다. [모두 확인, 동의합니다] 한 번이면 된다고 알려 주세요.' },
+  airform: { group: '예매 정보 넣기', label: '탑승객 정보(영문 이름 등) 채우기', soft: 60000, hard: 120000,
+             advice: '영문 이름 입력이 가장 어렵습니다. 여권과 똑같이 적어야 한다는 점과 자판 바꾸는 법을 같이 연습해 주세요.' },
+  airsheet:{ group: '예매 정보 넣기', label: '아래에서 올라온 목록에서 고르기',
+             advice: '아래에서 올라온 창을 못 보고 헤맵니다. 화면 아래쪽을 보라고 안내해 주세요.' },
+  aircard: { group: '카드 정보 넣기', label: '카드번호·유효기간·비밀번호 적기', soft: 60000, hard: 120000,
+             advice: '숫자가 길어 중간에 놓칩니다. 카드번호 4자리씩 끊어 읽어 주고, 비밀번호는 앞 2자리만이라는 점을 알려 주세요.' },
+
+  done:    { skip: true, label: '연습 끝' }
+};
+
+/* 화면 하나의 기록을 보고 막힘 정도를 매긴다 → 0 정상 · 1 조금 헤맴 · 2 많이 막힘 */
+export function stuckLevel(name, rec) {
+  var s = STEPS[name];
+  if (!s || s.skip) return 0;
+  var hints = (rec.ask || 0) + (rec.auto || 0);
+  var byTime = 0;
+  if (!s.wait) {
+    var soft = s.soft || SOFT, hard = s.hard || HARD;
+    byTime = rec.ms >= hard ? 2 : rec.ms >= soft ? 1 : 0;
+  }
+  var byHint = hints >= 2 ? 2 : hints >= 1 ? 1 : 0;
+  return Math.max(byTime, byHint);
+}
+
+export function stepLabel(name) {
+  return (STEPS[name] && STEPS[name].label) || name;
+}
+
+/* 왜 막혔다고 봤는지 — 실제로 걸린 이유만 적는다.
+   [?] 한 번 때문에 잡힌 것을 "2초 머묾" 탓으로 읽히지 않게 한다. */
+export function stuckWhy(name, x) {
+  var s = STEPS[name] || {}, why = [];
+  var soft = s.soft || SOFT;
+  if (!s.wait && x.ms >= soft) why.push('이 화면에서 ' + fmtSec(x.ms) + ' 머묾');
+  if (x.ask)  why.push('[?] 를 ' + x.ask + '번 눌러 도움을 청함');
+  if (x.auto) why.push('잘못 눌러 도움말이 ' + x.auto + '번 뜸');
+  if (!why.length) why.push('이 화면에서 ' + fmtSec(x.ms) + ' 머묾');
+  return why.join(' · ');
+}
+
+export function fmtSec(ms) {
+  var s = Math.round((ms || 0) / 1000);
+  if (s < 60) return s + '초';
+  return Math.floor(s / 60) + '분 ' + (s % 60) + '초';
+}
