@@ -458,6 +458,30 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .pay__apply:disabled{background:#E2E4E8;color:#AEB2B9}
 
 /* ══════════════════════════════════════════════════════════
+   출발지 / 도착지 검색 — 전체 화면, 도시를 눌러 고른다
+   ══════════════════════════════════════════════════════════ */
+.screen--portpick{background:#fff;display:flex;flex-direction:column}
+.pp-head{display:flex;align-items:center;justify-content:center;position:relative;
+  height:56px;flex:none;border-bottom:1px solid var(--line)}
+.pp-head b{font-size:19px;font-weight:500}
+.pp-x{position:absolute;right:56px;top:50%;transform:translateY(-50%);   /* [?] 버튼을 피한다 */
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#17171B}
+.pp-search{display:flex;align-items:center;gap:10px;margin:14px 16px 6px;
+  padding:0 16px;height:52px;border-radius:12px;background:#F4F5F7}
+.pp-dot{width:9px;height:9px;border-radius:50%;border:2px solid #9AA0A8;flex:none}
+.pp-dot.is-dest{background:var(--red,#E8402A);border-color:var(--red,#E8402A)}
+.pp-search input{flex:1;border:0;background:none;font:inherit;font-size:17px;color:#17171B;outline:none}
+.pp-search input::placeholder{color:#9AA0A8}
+.pp-body{flex:1;overflow-y:auto;padding:10px 16px 24px}
+.pp-sec{margin-top:14px;font-size:16px;font-weight:700;color:#17171B}
+.pp-chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.pp-chip{height:44px;padding:0 18px;border-radius:999px;border:1px solid #E2E4E8;background:#fff;
+  font:inherit;font-size:16px;color:#3F434B;cursor:pointer}
+.pp-chip:active{background:#EEF2FF;border-color:var(--cta)}
+.pp-chip.is-on{border-color:var(--cta);color:var(--cta);font-weight:500}
+.pp-none{padding:40px 0;text-align:center;color:#9AA0A8;font-size:15px;line-height:1.7}
+
+/* ══════════════════════════════════════════════════════════
    광고 팝업 (tp-03)
    ══════════════════════════════════════════════════════════ */
 .ad__dim{position:absolute;inset:0;background:rgba(0,0,0,.6)}   /* 캡처에서 잰 값 */
@@ -876,6 +900,13 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .al-chip{height:40px;padding:0 16px;border-radius:999px;border:1px solid #E2E4E8;background:#fff;
   font-size:15.5px;font-weight:500;color:#3F434B}
 .al-chip--ico{width:44px;padding:0;display:flex;align-items:center;justify-content:center;color:#3F434B}
+/* 편 목록 머리 — 실제처럼 "❶ 가는편 선택 / 가격 낮은 순" */
+.al-pick{display:flex;align-items:center;padding:14px 18px 10px;background:#F4F5F7;flex:none}
+.al-pick b{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:500}
+.al-no{width:20px;height:20px;border-radius:50%;background:#3F434B;color:#fff;font-style:normal;
+  font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.al-sort{margin-left:auto;background:none;border:0;font:inherit;font-size:15px;color:#6E727A;cursor:pointer}
+.al-sort::after{content:" ⌄"}
 .al-list{flex:1;overflow-y:auto;padding:12px 14px 20px}
 .al-item{display:block;width:100%;background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:10px;text-align:left}
 .al-time{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:500;letter-spacing:-.6px}
@@ -1121,4 +1152,35 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
   width:44px;height:44px;border-radius:50%;background:var(--cta)}
 .dp-cell.pick{color:#fff;font-weight:500}
 .dp-cell span{position:relative;z-index:1}
-.dp-foot{flex:none;padding:10px 16px 18px;border-top:1px solid var(--line)}
+/* ── 일정 선택 — 실제 카카오 T 처럼 아래에 왕복/편도와 [적용하기] ── */
+.dp-head{display:flex;align-items:center;height:56px;flex:none;padding:0 62px 0 18px;
+  border-bottom:1px solid var(--line)}
+.dp-head b{font-size:21px;font-weight:500;letter-spacing:-.5px}
+.dp-x{margin-left:auto;display:flex;color:var(--ink)}
+.dp-cell{position:relative;height:62px;display:flex;align-items:flex-start;justify-content:center;
+  padding-top:9px;font-size:17px;color:var(--ink);background:none}
+/* 날짜 밑에 붙는 작은 글자(오늘·가는 날·추석) — 동그라미에 가리지 않게 칸 맨 아래에 둔다 */
+.dp-cell em{position:absolute;left:0;right:0;bottom:6px;z-index:1;font-style:normal;
+  font-size:11px;color:#8B9099;line-height:1;text-align:center}
+.dp-cell.pick em{color:var(--cta);font-weight:500}
+.dp-cell.today em{color:#8B9099}
+.dp-cell.hol{color:#E8402A}
+.dp-cell.today::after{content:"";position:absolute;left:50%;top:18px;transform:translate(-50%,-50%);
+  width:38px;height:38px;border-radius:50%;border:1px solid #C3C7CE}
+.dp-cell.pick::after{top:18px;width:38px;height:38px;border:0}
+.dp-cell.mid::before,.dp-cell.edge::before{top:0;bottom:19px}
+.dp-cell span{position:relative;z-index:1;line-height:1}
+
+.dp-foot{flex:none;padding:12px 16px 16px;border-top:1px solid var(--line);background:#fff}
+.dp-kind{display:flex;gap:0;margin-bottom:14px}
+.dp-kind__b{flex:1;height:44px;border:1px solid var(--line2,#DDE0E4);background:#fff;
+  font:inherit;font-size:16px;color:#8B9099;cursor:pointer}
+.dp-kind__b:first-child{border-radius:9px 0 0 9px}
+.dp-kind__b:last-child{border-radius:0 9px 9px 0;border-left:0}
+.dp-kind__b.is-on{border-color:var(--cta);color:var(--cta);background:#F5F9FF;font-weight:500;z-index:1}
+.dp-sel{display:flex;gap:20px;padding:0 4px 14px}
+.dp-sel__b{flex:1;min-width:0;border:0;padding:0;background:none}
+.dp-sel__b span{display:block;font-size:14px;color:#8B9099}
+.dp-sel__b b{display:block;margin-top:4px;font-size:18px;font-weight:500;letter-spacing:-.5px;color:var(--ink)}
+.dp-sel__b.is-empty b{color:var(--cta)}
+

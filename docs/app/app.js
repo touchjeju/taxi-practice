@@ -1361,12 +1361,14 @@ function hintSpot() {
     case 'all':    return one('.screen--all .home-nav [data-nav="home"]',  '[홈]을 눌러 돌아가세요');
     case 'noti':   return one('.screen--noti .home-nav [data-nav="home"]', '[홈]을 눌러 돌아가세요');
     case 'uselog': return one('.ul-back', '왼쪽 위 화살표를 눌러 돌아가세요');
-    case 'air':     return datesReady() ? one('#airSearch', '[항공권 검색]을 누르세요')
+    case 'air':     if (!portB) return one('#portTo', '[도착]을 눌러 갈 곳을 고르세요');
+                    return datesReady() ? one('#airSearch', '[항공권 검색]을 누르세요')
                                         : one('#airDate', isRound ? '[가는날 - 오는날]을 눌러 날짜를 고르세요'
                                                                   : '[가는날]을 눌러 날짜를 고르세요');
     case 'airdate': return !dpFrom ? one('.dp-cell:not(:disabled)', '가는날을 누르세요')
                         : (isRound && !dpTo) ? one('.dp-cell:not(:disabled)', '오는날을 누르세요')
-                                             : one('#dpDone', '[선택 완료]를 누르세요');
+                                             : one('#dpDone', '[적용하기]를 누르세요');
+    case 'portpick':return one('#ppBody .pp-chip', '가려는 도시를 누르세요');
     case 'airlist': return one('#alList .al-item', '타고 갈 비행기를 누르세요');
     case 'airsel':  return one('#airGo',      '[예매하기]를 누르세요');
     case 'airbook':
@@ -1539,13 +1541,18 @@ function renderFlights() {
   $('#alList').innerHTML = FLIGHTS.map(function (f, i) {
     return '<button class="al-item" data-fl="' + i + '">' +
       '<div class="al-time"><img class="al-logo" src="img/' + f.img + '.png" alt="">' + f.time + '</div>' +
-      '<div class="al-sub">' + portA.code + '-' + portB.code + ' · ' + f.air + '<b class="al-seat">' + f.seat + '</b></div>' +
+      '<div class="al-sub">' + portA.code + '-' + (portB ? portB.code : '') + ' · ' + f.air + '<b class="al-seat">' + f.seat + '</b></div>' +
       '<div class="al-pay">' + f.pay + '<b class="al-price">' + won(f.price) + '</b></div>' +
       '<div class="al-note">1인 편도 가격' + (f.left ? ' <em>' + f.left + '</em>' : '') + '</div>' +
       '</button>';
   }).join('');
 }
 $('#airSearch').addEventListener('click', function () {
+  if (!portB) {                              // 도착지부터
+    toast('도착지를 골라 주세요.');
+    openPortPick('b');
+    return;
+  }
   if (!datesReady()) {                       // 날짜부터 골라야 한다
     toast(isRound ? '가는날과 오는날을 먼저 골라 주세요.' : '가는날을 먼저 골라 주세요.');
     renderCalendar();
@@ -1627,7 +1634,7 @@ $('#airPay').addEventListener('click', function () {
   }
   if (!cardSet) { toast('결제카드를 먼저 등록해 주세요.'); hintShow(); return; }
   goHome(function () {
-    finish('항공권을 예매했어요.\n' + portA.city + ' → ' + portB.city + ', ' + ((chosenPax && chosenPax.ko) || '탑승객') +
+    finish('항공권을 예매했어요.\n' + portA.city + ' → ' + (portB ? portB.city : '') + ', ' + ((chosenPax && chosenPax.ko) || '탑승객') +
            ' 님\n항공권 예매 연습을 마쳤어요.');
   });
 });
@@ -1783,6 +1790,9 @@ var DP_DAY = ['일', '월', '화', '수', '목', '금', '토'];
 var dpFrom = null, dpTo = null;                 // 'YYYY-M-D'
 var TRIP = { from: '26.09.05(토)', to: '26.09.15(화)' };   // 편 목록·여정에 쓰는 값
 var DP_TODAY = new Date(2026, 8, 3);            // 연습 기준일 (2026.09.03)
+/* 달력에 빨갛게 적어 주는 날 — 실제 앱처럼 이름이 붙는다 */
+var HOLIDAY = { '2026-9-24': '추석', '2026-9-25': '추석', '2026-9-26': '추석',
+                '2026-10-3': '개천절', '2026-10-9': '한글날' };
 
 function dpKey(y, m, d) { return y + '-' + m + '-' + d; }
 function dpNum(k) { var a = k.split('-'); return (+a[0]) * 10000 + (+a[1]) * 100 + (+a[2]); }
@@ -1802,29 +1812,42 @@ function renderCalendar() {
     for (var b = 0; b < first.getDay(); b++) html += '<div></div>';
     for (var d = 1; d <= last; d++) {
       var key = dpKey(yy, mm, d), n = dpNum(key);
-      var past = new Date(yy, mm - 1, d) < DP_TODAY;
-      var cls = 'dp-cell' + (new Date(yy, mm - 1, d).getDay() === 0 ? ' sun' : '');
+      var day = new Date(yy, mm - 1, d);
+      var past = day < DP_TODAY;
+      var cls = 'dp-cell' + (day.getDay() === 0 ? ' sun' : '');
+      var note = '';
+      if (n === dpNum(dpKey(DP_TODAY.getFullYear(), DP_TODAY.getMonth() + 1, DP_TODAY.getDate()))) {
+        cls += ' today'; note = '오늘';
+      }
+      if (HOLIDAY[key]) { cls += ' hol'; note = HOLIDAY[key]; }
       if (dpFrom && dpTo) {
         var a = dpNum(dpFrom), z = dpNum(dpTo);
         if (n > a && n < z) cls += ' mid';
         if (n === a && a !== z) cls += ' edge edge--s';
         if (n === z && a !== z) cls += ' edge edge--e';
       }
-      if (key === dpFrom || key === dpTo) cls += ' pick';
+      if (key === dpFrom) { cls += ' pick'; note = '가는 날'; }
+      else if (key === dpTo) { cls += ' pick'; note = '오는 날'; }
       html += '<button class="' + cls + '" data-d="' + key + '"' + (past ? ' disabled' : '') +
-              '><span>' + d + '</span></button>';
+              '><span>' + d + '</span>' + (note ? '<em>' + note + '</em>' : '') + '</button>';
     }
     html += '</div>';
   }
   $('#dpBody').innerHTML = html;
-  $('#dpGoText').textContent   = dpFrom ? dpLabel(dpFrom) : '날짜를 고르세요';
-  $('#dpBackText').textContent = dpTo   ? dpLabel(dpTo)   : '날짜를 고르세요';
-  $('#dpGoBox').classList.toggle('is-on', !dpFrom);
-  $('#dpBackBox').classList.toggle('is-on', !!dpFrom && !dpTo);
+  $('#dpGoText').textContent   = dpFrom ? dpLabel(dpFrom) : '날짜 선택';
+  $('#dpBackText').textContent = dpTo   ? dpLabel(dpTo)   : '날짜 선택';
+  $('#dpGoBox').classList.toggle('is-empty', !dpFrom);
+  $('#dpBackBox').classList.toggle('is-empty', !dpTo);
+  $('#dpRound').classList.toggle('is-on', isRound);
+  $('#dpOneway').classList.toggle('is-on', !isRound);
   $('#dpDone').disabled = isRound ? !(dpFrom && dpTo) : !dpFrom;
 }
 
 $('#airDate').addEventListener('click', function () { renderCalendar(); push('airdate'); });
+
+/* 달력 안에서도 왕복·편도를 바꿀 수 있다 (실제 앱과 같은 자리) */
+$('#dpRound').addEventListener('click', function () { setKind(true); renderCalendar(); });
+$('#dpOneway').addEventListener('click', function () { setKind(false); renderCalendar(); });
 
 $('#dpBody').addEventListener('click', function (e) {
   var b = e.target.closest('[data-d]');
@@ -1873,6 +1896,9 @@ $$('.air-tag').forEach(function (b) {              // 국내선 / 일본 / 동�
 $('.al-change').addEventListener('click', function () {        // 편 목록의 [변경]
   toast('뒤로 가서 출발지·도착지를 바꿀 수 있어요.');
 });
+$('#alSort').addEventListener('click', function () {
+  toast('정렬 바꾸기는 이 연습에 포함되어 있지 않아요.');
+});
 $$('.al-chip').forEach(function (b) {              // 시각 · 항공사 거르기
   b.addEventListener('click', function () {
     toast('정렬과 거르기는 이 연습에 포함되어 있지 않아요.');
@@ -1890,30 +1916,60 @@ $('.ab-detail').addEventListener('click', function () {        // 예매하기�
    항공권 — 출발·도착 공항 고르기와 왕복/편도
    ══════════════════════════════════════════════════════════ */
 
-var AIRPORTS = [
-  { code: 'CJU', city: '제주', air: '제주 국제공항' },
-  { code: 'GMP', city: '김포', air: '김포 국제공항' },
-  { code: 'PUS', city: '김해', air: '김해 국제공항' },
-  { code: 'TAE', city: '대구', air: '대구 국제공항' },
-  { code: 'CJJ', city: '청주', air: '청주 국제공항' },
-  { code: 'KWJ', city: '광주', air: '광주 공항' },
-  { code: 'RSU', city: '여수', air: '여수 공항' },
-  { code: 'USN', city: '울산', air: '울산 공항' }
-];
-var portA = AIRPORTS[0];        // 출발
-var portB = AIRPORTS[1];        // 도착
-var isRound = true;             // 왕복이면 true, 편도면 false
+/* ══════════════════════════════════════════════════════════
+   항공권 — 출발지 / 도착지 고르기 (실제 카카오 T 처럼 전체 화면 검색)
+   ══════════════════════════════════════════════════════════ */
 
-function portLabel(p) { return p.city + ' ' + p.code; }
+var AIRPORTS = [
+  /* 국내 */
+  { code: 'CJU', city: '제주',   air: '제주 국제공항', area: '국내' },
+  { code: 'PUS', city: '부산',   air: '김해 국제공항', area: '국내' },
+  { code: 'SEL', city: '서울',   air: '서울',          area: '국내' },
+  { code: 'GMP', city: '김포',   air: '김포 국제공항', area: '국내' },
+  { code: 'ICN', city: '인천',   air: '인천 국제공항', area: '국내' },
+  { code: 'CJJ', city: '청주',   air: '청주 국제공항', area: '국내' },
+  { code: 'KWJ', city: '광주',   air: '광주 공항',     area: '국내' },
+  { code: 'TAE', city: '대구',   air: '대구 국제공항', area: '국내' },
+  { code: 'USN', city: '울산',   air: '울산 공항',     area: '국내' },
+  { code: 'KUV', city: '군산',   air: '군산 공항',     area: '국내' },
+  { code: 'RSU', city: '여수',   air: '여수 공항',     area: '국내' },
+  { code: 'KPO', city: '포항',   air: '포항경주 공항', area: '국내' },
+  { code: 'MWX', city: '무안',   air: '무안 국제공항', area: '국내' },
+  /* 일본 */
+  { code: 'OSA', city: '오사카',       air: '간사이 국제공항',   area: '일본' },
+  { code: 'TYO', city: '도쿄',         air: '도쿄',              area: '일본' },
+  { code: 'FUK', city: '후쿠오카',     air: '후쿠오카 공항',     area: '일본' },
+  { code: 'OKA', city: '오키나와',     air: '나하 공항',         area: '일본' },
+  { code: 'SPK', city: '삿포로',       air: '신치토세 공항',     area: '일본' },
+  { code: 'NGO', city: '나고야',       air: '주부 국제공항',     area: '일본' },
+  { code: 'MYJ', city: '마쓰야마',     air: '마쓰야마 공항',     area: '일본' },
+  { code: 'FSZ', city: '시즈오카',     air: '시즈오카 공항',     area: '일본' },
+  { code: 'OIT', city: '오이타',       air: '오이타 공항',       area: '일본' },
+  { code: 'HIJ', city: '히로시마',     air: '히로시마 공항',     area: '일본' },
+  { code: 'TAK', city: '다카마쓰',     air: '다카마쓰 공항',     area: '일본' },
+  { code: 'KMJ', city: '구마모토',     air: '구마모토 공항',     area: '일본' },
+  { code: 'HND', city: '도쿄(하네다)', air: '하네다 공항',       area: '일본' },
+  { code: 'NRT', city: '도쿄(나리타)', air: '나리타 국제공항',   area: '일본' }
+];
+
+/* 처음엔 실제 앱과 같이 출발지만 서울, 도착지는 아직 안 정한 상태 */
+var portA = AIRPORTS[2];        // 서울
+var portB = null;               // 도착지 — 아직 안 골랐다
+var isRound = true;             // 왕복이면 true, 편도면 false
+var ppWhich = 'a';              // 지금 고르는 중인 쪽
+
+function portLabel(p) { return p ? p.city + ' ' + p.code : ''; }
 
 /* 노선이 바뀌면 화면 곳곳의 이름을 한꺼번에 고쳐 준다 */
 function renderRoute() {
   $('#portFromCode').textContent = portA.code;
   $('#portFromCity').textContent = portA.city;
-  $('#portToCode').textContent   = portB.code;
-  $('#portToCity').textContent   = portB.city;
-  $('#alRoute').textContent      = portLabel(portA) + ' ⇆ ' + portLabel(portB);
+  $('#portToCode').textContent   = portB ? portB.code : 'IN';
+  $('#portToCity').textContent   = portB ? portB.city : '도착';
+  $('#portTo').classList.toggle('is-empty', !portB);
+  if (!portB) return;
 
+  $('#alRoute').textContent = portLabel(portA) + ' ⇆ ' + portLabel(portB);
   $('#ajGoFromPort').textContent = portLabel(portA);
   $('#ajGoFromAir').textContent  = portA.air;
   $('#ajGoToPort').textContent   = portLabel(portB);
@@ -1924,13 +1980,13 @@ function renderRoute() {
   $('#ajBackToAir').textContent    = portA.air;
 }
 
+
 /* 왕복 / 편도가 바뀌면 날짜 칸과 오는편 카드가 달라진다 */
 function renderKind() {
   $$('.air-kind__b').forEach(function (b, i) {
     b.classList.toggle('is-on', (i === 0) === isRound && i < 2);
   });
   $('#dpBackBox').hidden = !isRound;
-  $('#dpArrow').hidden   = !isRound;
   $('#ajBackLeg').hidden = !isRound;
   if (!isRound) dpTo = null;
   showTripDates();
@@ -1953,35 +2009,79 @@ function showTripDates() {
   $('#alDate').textContent = txt + ' │ 1명 · 일반석';
 }
 
-function pickPort(which) {
-  var cur = which === 'a' ? portA : portB;
-  var names = AIRPORTS.map(function (p) { return p.city + ' (' + p.code + ')'; });
-  var curIdx = AIRPORTS.indexOf(cur);
-  openAirSheet(which === 'a' ? '출발 공항' : '도착 공항', names, function (i) {
-    var p = AIRPORTS[i];
-    var other = which === 'a' ? portB : portA;
-    if (p === other) { toast('출발지와 도착지를 같은 곳으로 정할 수는 없어요.'); return; }
-    if (which === 'a') portA = p; else portB = p;
-    renderRoute();
-    pop();
-    toast((which === 'a' ? '출발' : '도착') + '을 ' + p.city + '으로 정했어요.');
-  }, curIdx);
+/* ── 공항 고르는 화면 ── */
+function renderPortList(q) {
+  q = (q || '').trim();
+  var cur = ppWhich === 'a' ? portA : portB;
+  var hit = AIRPORTS.filter(function (p) {
+    return !q || p.city.indexOf(q) > -1 || p.code.toLowerCase().indexOf(q.toLowerCase()) > -1 ||
+           p.air.indexOf(q) > -1;
+  });
+  if (!hit.length) {
+    $('#ppBody').innerHTML = '<div class="pp-none">찾는 곳이 없어요.<br>도시 이름을 적어 보세요.</div>';
+    return;
+  }
+  var html = '';
+  ['국내', '일본'].forEach(function (area) {
+    var list = hit.filter(function (p) { return p.area === area; });
+    if (!list.length) return;
+    html += '<div class="pp-sec">' + area + '</div><div class="pp-chips">' +
+      list.map(function (p) {
+        var on = cur && cur.code === p.code ? ' is-on' : '';
+        return '<button class="pp-chip' + on + '" data-code="' + p.code + '">' + esc(p.city) + '</button>';
+      }).join('') + '</div>';
+  });
+  $('#ppBody').innerHTML = html;
 }
-$('#portFrom').addEventListener('click', function () { pickPort('a'); });
-$('#portTo').addEventListener('click', function () { pickPort('b'); });
+
+function openPortPick(which) {
+  ppWhich = which;
+  var isFrom = which === 'a';
+  $('#ppTitle').textContent = isFrom ? '출발지 검색' : '도착지 검색';
+  $('#ppInput').placeholder = isFrom ? '출발지 검색' : '도착지 검색';
+  $('#ppInput').value = '';
+  $('#ppDot').classList.toggle('is-dest', !isFrom);
+  renderPortList('');
+  push('portpick');
+  setTimeout(function () { try { $('#ppInput').focus({ preventScroll: true }); } catch (e) {} }, 60);
+}
+
+$('#ppInput').addEventListener('input', function () { renderPortList(this.value); });
+$('#ppBody').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-code]');
+  if (!b) return;
+  var p = AIRPORTS.filter(function (x) { return x.code === b.dataset.code; })[0];
+  if (!p) return;
+  var other = ppWhich === 'a' ? portB : portA;
+  if (other && other.code === p.code) { toast('출발지와 도착지를 같은 곳으로 정할 수는 없어요.'); return; }
+  if (ppWhich === 'a') portA = p; else portB = p;
+  renderRoute();
+  pop();
+  /* 출발지를 막 골랐고 도착지가 비어 있으면 바로 도착지를 고르게 이어 준다 */
+  if (ppWhich === 'a' && !portB) setTimeout(function () { openPortPick('b'); }, 320);
+});
+
+$('#portFrom').addEventListener('click', function () { openPortPick('a'); });
+$('#portTo').addEventListener('click', function () { openPortPick('b'); });
 $('#airSwap').addEventListener('click', function () {
+  if (!portB) { toast('도착지를 먼저 골라 주세요.'); openPortPick('b'); return; }
   var t = portA; portA = portB; portB = t;
   renderRoute();
   toast(portA.city + ' → ' + portB.city + ' 로 바꿨어요.');
 });
 
+
+function setKind(round) {
+  if (isRound === round) return;
+  isRound = round;
+  renderKind();
+  toast(isRound ? '왕복으로 바꿨어요. 가는 날과 오는 날을 고르세요.'
+                : '편도로 바꿨어요. 가는 날만 고르면 돼요.');
+}
 $$('.air-kind__b').forEach(function (b, i) {
   b.addEventListener('click', function () {
     if (i === 2) { toast('다구간은 이 연습에 포함되어 있지 않아요.'); return; }
-    isRound = (i === 0);
-    renderKind();
-    toast(isRound ? '왕복으로 바꿨어요. 가는날과 오는날을 고르세요.'
-                  : '편도로 바꿨어요. 가는날만 고르면 돼요.');
+    setKind(i === 0);
   });
 });
 
