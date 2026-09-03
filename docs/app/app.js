@@ -1361,11 +1361,12 @@ function hintSpot() {
     case 'all':    return one('.screen--all .home-nav [data-nav="home"]',  '[홈]을 눌러 돌아가세요');
     case 'noti':   return one('.screen--noti .home-nav [data-nav="home"]', '[홈]을 눌러 돌아가세요');
     case 'uselog': return one('.ul-back', '왼쪽 위 화살표를 눌러 돌아가세요');
-    case 'air':     return dpFrom && dpTo ? one('#airSearch', '[항공권 검색]을 누르세요')
-                                        : one('#airDate',   '[가는날 - 오는날]을 눌러 날짜를 고르세요');
+    case 'air':     return datesReady() ? one('#airSearch', '[항공권 검색]을 누르세요')
+                                        : one('#airDate', isRound ? '[가는날 - 오는날]을 눌러 날짜를 고르세요'
+                                                                  : '[가는날]을 눌러 날짜를 고르세요');
     case 'airdate': return !dpFrom ? one('.dp-cell:not(:disabled)', '가는날을 누르세요')
-                        : !dpTo   ? one('.dp-cell:not(:disabled)', '오는날을 누르세요')
-                                  : one('#dpDone', '[선택 완료]를 누르세요');
+                        : (isRound && !dpTo) ? one('.dp-cell:not(:disabled)', '오는날을 누르세요')
+                                             : one('#dpDone', '[선택 완료]를 누르세요');
     case 'airlist': return one('#alList .al-item', '타고 갈 비행기를 누르세요');
     case 'airsel':  return one('#airGo',      '[예매하기]를 누르세요');
     case 'airbook':
@@ -1544,7 +1545,16 @@ function renderFlights() {
       '</button>';
   }).join('');
 }
-$('#airSearch').addEventListener('click', function () { renderFlights(); push('airlist'); });
+$('#airSearch').addEventListener('click', function () {
+  if (!datesReady()) {                       // 날짜부터 골라야 한다
+    toast(isRound ? '가는날과 오는날을 먼저 골라 주세요.' : '가는날을 먼저 골라 주세요.');
+    renderCalendar();
+    push('airdate');
+    return;
+  }
+  renderFlights();
+  push('airlist');
+});
 
 $('#alList').addEventListener('click', function (e) {
   var b = e.target.closest('[data-fl]');
@@ -1926,12 +1936,20 @@ function renderKind() {
   showTripDates();
 }
 
+/* 날짜를 다 골랐는지 — 왕복은 두 날, 편도는 하루 */
+function datesReady() { return !!(dpFrom && (!isRound || dpTo)); }
+
 /* 고른 날짜를 첫 화면과 편 목록에 적는다 */
 function showTripDates() {
+  var el = $('#airDateText');
+  if (!datesReady()) {                       // 덜 골랐으면 안내 문구로 되돌린다
+    el.textContent = isRound ? '가는날 - 오는날' : '가는날';
+    el.classList.add('air-row__ph');
+    return;
+  }
   var txt = TRIP.from + (isRound ? ' - ' + TRIP.to : '');
-  if (!dpFrom) return;                       // 아직 안 골랐으면 그대로 둔다
-  $('#airDateText').textContent = txt;
-  $('#airDateText').classList.remove('air-row__ph');
+  el.textContent = txt;
+  el.classList.remove('air-row__ph');
   $('#alDate').textContent = txt + ' │ 1명 · 일반석';
 }
 
