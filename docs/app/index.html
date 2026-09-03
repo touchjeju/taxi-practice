@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=202609031913">
+<link rel="stylesheet" href="style.css?v=202609031924">
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=606067c8b6243ab17db2869c47582727&libraries=services&autoload=false"></script>
 <!-- 연습 기록 임시 창구 — track.js 는 모듈이라 늦게 뜬다.
      그 전에 app.js 가 부른 것들을 시각과 함께 모아 두었다가 그대로 넘긴다. -->
@@ -541,9 +541,9 @@ window.TRACK = (function () {
             <button class="air-kind__b">다구간</button>
           </div>
           <div class="air-route">
-            <div class="air-port"><b>CJU</b><span>제주</span></div>
-            <i class="air-swap"><svg class="i22"><use href="#ic-swap"/></svg></i>
-            <div class="air-port"><b>GMP</b><span>김포</span></div>
+            <button class="air-port" id="portFrom"><b id="portFromCode">CJU</b><span id="portFromCity">제주</span></button>
+            <button class="air-swap" id="airSwap" aria-label="출발·도착 바꾸기"><svg class="i22"><use href="#ic-swap"/></svg></button>
+            <button class="air-port" id="portTo"><b id="portToCode">GMP</b><span id="portToCity">김포</span></button>
           </div>
           <button class="air-row" id="airDate"><svg class="i22"><use href="#ic-cal"/></svg><span class="air-row__ph" id="airDateText">가는날 - 오는날</span></button>
           <div class="air-row air-row--last">
@@ -569,7 +569,7 @@ window.TRACK = (function () {
     <section class="screen screen--airlist" data-screen="airlist">
       <div class="al-head">
         <button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button>
-        <div class="al-title">제주 CJU <i>⇆</i> 김포 GMP<button class="al-change">변경</button></div>
+        <div class="al-title"><span id="alRoute">제주 CJU ⇆ 김포 GMP</span><button class="al-change">변경</button></div>
         <div class="al-date" id="alDate">26.09.05(토) - 26.09.15(화) │ 1명 · 일반석</div>
         <div class="al-chips">
           <button class="al-chip al-chip--ico"><svg class="i20"><use href="#ic-swap"/></svg></button>
@@ -587,7 +587,7 @@ window.TRACK = (function () {
           <div class="aj-leg__t">가는편</div>
           <div class="aj-leg__dur">총 <b id="ajGoDur">1시간 15분</b> 소요</div>
           <div class="aj-point"><i class="aj-dot"></i>
-            <div><b>제주 CJU</b><span id="ajGoFrom">26.09.05(토) 06:25</span><em>제주 국제공항</em></div>
+            <div><b id="ajGoFromPort">제주 CJU</b><span id="ajGoFrom">26.09.05(토) 06:25</span><em id="ajGoFromAir">제주 국제공항</em></div>
           </div>
           <div class="aj-mid">
             <div class="aj-mid__r aj-mid__r--air"><img id="ajGoLogo" src="img/air-oz.png" alt=""><b id="ajGoName">아시아나항공 OZ8900편</b></div>
@@ -596,14 +596,14 @@ window.TRACK = (function () {
             <div class="aj-mid__r"><span class="aj-v">일반석 (JB)</span></div>
           </div>
           <div class="aj-point"><i class="aj-dot aj-dot--end"></i>
-            <div><b>김포 GMP</b><span id="ajGoTo">26.09.05(토) 07:40</span><em>김포 국제공항</em></div>
+            <div><b id="ajGoToPort">김포 GMP</b><span id="ajGoTo">26.09.05(토) 07:40</span><em id="ajGoToAir">김포 국제공항</em></div>
           </div>
         </div>
-        <div class="aj-leg">
+        <div class="aj-leg" id="ajBackLeg">
           <div class="aj-leg__t">오는편</div>
           <div class="aj-leg__dur">총 <b>1시간 15분</b> 소요</div>
           <div class="aj-point"><i class="aj-dot"></i>
-            <div><b>김포 GMP</b><span id="ajBackFrom">26.09.15(화) 06:15</span><em>김포 국제공항</em></div>
+            <div><b id="ajBackFromPort">김포 GMP</b><span id="ajBackFrom">26.09.15(화) 06:15</span><em id="ajBackFromAir">김포 국제공항</em></div>
           </div>
           <div class="aj-mid">
             <div class="aj-mid__r aj-mid__r--air"><img src="img/air-tw.png" alt=""><b>제주항공 7C0101편</b></div>
@@ -612,7 +612,7 @@ window.TRACK = (function () {
             <div class="aj-mid__r"><span class="aj-v">일반석 (JB)</span></div>
           </div>
           <div class="aj-point"><i class="aj-dot aj-dot--end"></i>
-            <div><b>제주 CJU</b><span id="ajBackTo">26.09.15(화) 07:30</span><em>제주 국제공항</em></div>
+            <div><b id="ajBackToPort">제주 CJU</b><span id="ajBackTo">26.09.15(화) 07:30</span><em id="ajBackToAir">제주 국제공항</em></div>
           </div>
         </div>
         <button class="aj-rule" id="ajRule">운임 및 취소/환불 규정</button>
@@ -682,7 +682,7 @@ window.TRACK = (function () {
       </div>
       <div class="dp-sel">
         <div class="dp-sel__b" id="dpGoBox"><span>가는날</span><b id="dpGoText">날짜를 고르세요</b></div>
-        <i class="dp-sel__ar"></i>
+        <i class="dp-sel__ar" id="dpArrow"></i>
         <div class="dp-sel__b" id="dpBackBox"><span>오는날</span><b id="dpBackText">날짜를 고르세요</b></div>
       </div>
       <div class="dp-week"><i>일</i><i>월</i><i>화</i><i>수</i><i>목</i><i>금</i><i>토</i></div>
@@ -834,7 +834,7 @@ window.TRACK = (function () {
   </div>
 </div>
 
-<script src="app.js?v=202609031913"></script>
-<script type="module" src="track.js?v=202609031913"></script>
+<script src="app.js?v=202609031924"></script>
+<script type="module" src="track.js?v=202609031924"></script>
 </body>
 </html>

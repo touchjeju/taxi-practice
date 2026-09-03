@@ -815,7 +815,13 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .air-kind__b.is-on{color:var(--cta)}
 .air-kind__b.is-on::after{content:"";position:absolute;left:22%;right:22%;bottom:0;height:2.5px;background:var(--cta)}
 .air-route{display:flex;align-items:center;justify-content:space-between;padding:18px 26px 16px;border-bottom:1px solid var(--line)}
-.air-port{display:flex;flex-direction:column;align-items:center;gap:2px}
+.air-port{display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:0;padding:6px 10px;border-radius:10px;font:inherit;cursor:pointer}
+.air-port:active{background:#EEF2FF}
+.air-swap{background:#fff;border:1px solid var(--line);border-radius:10px;
+  width:42px;height:42px;display:flex;align-items:center;justify-content:center;
+  color:var(--cta);cursor:pointer;padding:0}
+.air-swap:active{background:#EEF2FF}
 .air-port b{font-size:28px;font-weight:500;letter-spacing:-.5px}
 .air-port span{font-size:14px;color:#8B9099}
 .air-swap{width:42px;height:42px;border-radius:10px;border:1px solid #D6E2FB;color:var(--cta);display:flex;align-items:center;justify-content:center;flex:none}
