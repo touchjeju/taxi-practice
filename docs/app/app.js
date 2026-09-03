@@ -1363,13 +1363,14 @@ function hintSpot() {
     case 'uselog': return one('.ul-back', '왼쪽 위 화살표를 눌러 돌아가세요');
     case 'air':     if (!portB) return one('#portTo', '[도착]을 눌러 갈 곳을 고르세요');
                     return datesReady() ? one('#airSearch', '[항공권 검색]을 누르세요')
-                                        : one('#airDate', isRound ? '[가는날 - 오는날]을 눌러 날짜를 고르세요'
+                                        : one('#airDate', isRound ? '[가는날 - 오는날]을 눌러 일정을 고르세요'
                                                                   : '[가는날]을 눌러 날짜를 고르세요');
     case 'airdate': return !dpFrom ? one('.dp-cell:not(:disabled)', '가는날을 누르세요')
                         : (isRound && !dpTo) ? one('.dp-cell:not(:disabled)', '오는날을 누르세요')
                                              : one('#dpDone', '[적용하기]를 누르세요');
     case 'portpick':return one('#ppBody .pp-chip', '가려는 도시를 누르세요');
-    case 'airlist': return one('#alList .al-item', '타고 갈 비행기를 누르세요');
+    case 'airlist': return one('#alList .al-item',
+                        legStep === 'back' ? '돌아올 때 탈 비행기를 누르세요' : '타고 갈 비행기를 누르세요');
     case 'airsel':  return one('#airGo',      '[예매하기]를 누르세요');
     case 'airbook':
       if (!chosenPax)  return one('#airPickBtn',  '[탑승객을 선택하세요]를 누르세요');
@@ -1530,6 +1531,21 @@ var FLIGHTS = [
     price: 66420, bag: '무료위탁수하물 : 15Kg', left: '2석남음' }
 ];
 
+/* 오는편 — 실제 앱처럼 가는편과 다른 시간·요금이다 */
+var FLIGHTS_BACK = [
+  { logo: 'oz', img: 'air-oz', time: '18:15 - 19:30', dep: '18:15', arr: '19:30',
+    air: '에어서울', code: 'RS902', seat: '이벤트특가석', pay: '일반 카드결제',
+    price: 26700, bag: '무료위탁수하물 : 15Kg', left: '' },
+  { logo: 'tw', img: 'air-tw', time: '17:30 - 18:45', dep: '17:30', arr: '18:45',
+    air: '티웨이항공', code: 'TW1805', seat: '할인석', pay: '일반 카드결제',
+    price: 26800, bag: '무료위탁수하물 : 15Kg', left: '' },
+  { logo: 'tw', img: 'air-tw', time: '19:00 - 20:15', dep: '19:00', arr: '20:15',
+    air: '티웨이항공', code: 'TW1807', seat: '할인석', pay: '일반 카드결제',
+    price: 26800, bag: '무료위탁수하물 : 15Kg', left: '7석남음' }
+];
+var legStep = 'go';       // 왕복일 때 지금 고르는 편 — 'go' 가는편, 'back' 오는편
+var goFlight = null, backFlight = null;
+
 var savedPax = null;      // 저장 목록에 넣은 탑승객
 var chosenPax = null;     // 예매하기에서 고른 탑승객
 var paxDone = false;      // [선택 완료] 까지 눌렀는지
@@ -1538,10 +1554,32 @@ var cardOwner = null, cardInst = '일시불', cardSet = false;
 
 /* ── 편 목록 ── */
 function renderFlights() {
-  $('#alList').innerHTML = FLIGHTS.map(function (f, i) {
+  var back = legStep === 'back';
+  var list = back ? FLIGHTS_BACK : FLIGHTS;
+  var from = back ? (portB ? portB.code : '') : portA.code;
+  var to   = back ? portA.code : (portB ? portB.code : '');
+
+  $('#alNo').textContent   = back ? '2' : '1';
+  $('#alPickT').textContent = back ? '오는편 선택' : '가는편 선택';
+
+  /* 가는편을 고른 뒤에는 그 편을 위에 접어서 보여 준다 */
+  var box = $('#alGoDone');
+  if (back && goFlight) {
+    box.hidden = false;
+    box.innerHTML =
+      '<div class="al-done__t"><i>1</i>가는편<button type="button" id="alGoChange">변경</button></div>' +
+      '<div class="al-done__b"><img src="img/' + goFlight.img + '.png" alt="">' +
+        goFlight.time + '<b>' + won(goFlight.price) + '</b></div>' +
+      '<div class="al-done__s">' + portA.code + '-' + (portB ? portB.code : '') + ' · ' + goFlight.air + '</div>';
+  } else {
+    box.hidden = true;
+    box.innerHTML = '';
+  }
+
+  $('#alList').innerHTML = list.map(function (f, i) {
     return '<button class="al-item" data-fl="' + i + '">' +
       '<div class="al-time"><img class="al-logo" src="img/' + f.img + '.png" alt="">' + f.time + '</div>' +
-      '<div class="al-sub">' + portA.code + '-' + (portB ? portB.code : '') + ' · ' + f.air + '<b class="al-seat">' + f.seat + '</b></div>' +
+      '<div class="al-sub">' + from + '-' + to + ' · ' + f.air + '<b class="al-seat">' + f.seat + '</b></div>' +
       '<div class="al-pay">' + f.pay + '<b class="al-price">' + won(f.price) + '</b></div>' +
       '<div class="al-note">1인 편도 가격' + (f.left ? ' <em>' + f.left + '</em>' : '') + '</div>' +
       '</button>';
@@ -1554,11 +1592,13 @@ $('#airSearch').addEventListener('click', function () {
     return;
   }
   if (!datesReady()) {                       // 날짜부터 골라야 한다
-    toast(isRound ? '가는날과 오는날을 먼저 골라 주세요.' : '가는날을 먼저 골라 주세요.');
+    toast(isRound ? '가는 날과 오는 날을 먼저 골라 주세요.' : '가는 날을 먼저 골라 주세요.');
     renderCalendar();
     push('airdate');
     return;
   }
+  legStep = 'go';
+  goFlight = null; backFlight = null;
   renderFlights();
   push('airlist');
 });
@@ -1566,17 +1606,31 @@ $('#airSearch').addEventListener('click', function () {
 $('#alList').addEventListener('click', function (e) {
   var b = e.target.closest('[data-fl]');
   if (!b) return;
-  var f = FLIGHTS[+b.dataset.fl];
+  /* 왕복인데 아직 가는편만 골랐으면 오는편을 고르러 간다 */
+  if (isRound && legStep === 'go') {
+    goFlight = FLIGHTS[+b.dataset.fl];
+    legStep = 'back';
+    renderFlights();
+    $('.al-list').scrollTop = 0;
+    toast('가는편을 골랐어요. 이제 오는편을 고르세요.');
+    return;
+  }
+  var f, bf = null;
+  if (isRound) { f = goFlight; bf = FLIGHTS_BACK[+b.dataset.fl]; backFlight = bf; }
+  else { f = FLIGHTS[+b.dataset.fl]; goFlight = f; }
   $('#ajGoFrom').textContent = TRIP.from + ' ' + f.dep;
   $('#ajGoTo').textContent   = TRIP.from + ' ' + f.arr;
   $('#ajGoName').textContent = f.air + ' ' + f.code + '편';
   /* 오는편도 고른 날짜를 따라간다 — 예전에는 26.09.15 로 굳어 있었다 */
-  if (isRound) {
-    $('#ajBackFrom').textContent = TRIP.to + ' 06:15';
-    $('#ajBackTo').textContent   = TRIP.to + ' 07:30';
+  if (isRound && bf) {
+    $('#ajBackFrom').textContent = TRIP.to + ' ' + bf.dep;
+    $('#ajBackTo').textContent   = TRIP.to + ' ' + bf.arr;
+    $('#ajBackName').textContent = bf.air + ' ' + bf.code + '편';
+    $('#ajBackBag').textContent  = bf.bag;
+    $('#ajBackLogo').src = 'img/' + bf.img + '.png';
   }
   $('#ajGoLogo').src = 'img/' + f.img + '.png';
-  $('#asTotal').textContent = won(isRound ? f.price + 27700 : f.price);
+  $('#asTotal').textContent = won(isRound && bf ? f.price + bf.price : f.price);
   push('airsel');
 });
 $('#ajRule').addEventListener('click', function () { toast('운임 규정은 이 연습에 포함되어 있지 않아요.'); });
@@ -1896,6 +1950,12 @@ $$('.air-tag').forEach(function (b) {              // 국내선 / 일본 / 동�
 $('.al-change').addEventListener('click', function () {        // 편 목록의 [변경]
   toast('뒤로 가서 출발지·도착지를 바꿀 수 있어요.');
 });
+$('#alGoDone').addEventListener('click', function (e) {
+  if (!e.target.closest('#alGoChange')) return;
+  legStep = 'go';                            // 가는편부터 다시
+  goFlight = null;
+  renderFlights();
+});
 $('#alSort').addEventListener('click', function () {
   toast('정렬 바꾸기는 이 연습에 포함되어 있지 않아요.');
 });
@@ -2057,8 +2117,6 @@ $('#ppBody').addEventListener('click', function (e) {
   if (ppWhich === 'a') portA = p; else portB = p;
   renderRoute();
   pop();
-  /* 출발지를 막 골랐고 도착지가 비어 있으면 바로 도착지를 고르게 이어 준다 */
-  if (ppWhich === 'a' && !portB) setTimeout(function () { openPortPick('b'); }, 320);
 });
 
 $('#portFrom').addEventListener('click', function () { openPortPick('a'); });

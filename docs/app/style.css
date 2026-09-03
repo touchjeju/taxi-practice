@@ -900,6 +900,18 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .al-chip{height:40px;padding:0 16px;border-radius:999px;border:1px solid #E2E4E8;background:#fff;
   font-size:15.5px;font-weight:500;color:#3F434B}
 .al-chip--ico{width:44px;padding:0;display:flex;align-items:center;justify-content:center;color:#3F434B}
+/* 왕복에서 가는편을 고른 뒤 접혀 보이는 칸 */
+.al-done{margin:0 14px 4px;padding:14px 16px;background:#fff;border-radius:12px;flex:none}
+.al-done__t{display:flex;align-items:center;gap:8px;font-size:15px;color:#8B9099;margin-bottom:8px}
+.al-done__t i{width:20px;height:20px;border-radius:50%;background:#C3C7CE;color:#fff;font-style:normal;
+  font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.al-done__t button{margin-left:auto;height:32px;padding:0 12px;border:1px solid var(--line2,#DDE0E4);
+  border-radius:8px;background:#fff;font:inherit;font-size:14px;color:#3F434B;cursor:pointer}
+.al-done__b{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:500}
+.al-done__b img{width:20px;height:20px;object-fit:contain}
+.al-done__b b{margin-left:auto;font-weight:500}
+.al-done__s{margin-top:4px;font-size:14px;color:#8B9099}
+
 /* 편 목록 머리 — 실제처럼 "❶ 가는편 선택 / 가격 낮은 순" */
 .al-pick{display:flex;align-items:center;padding:14px 18px 10px;background:#F4F5F7;flex:none}
 .al-pick b{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:500}

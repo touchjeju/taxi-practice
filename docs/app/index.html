@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=202609032100">
+<link rel="stylesheet" href="style.css?v=202609032113">
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=606067c8b6243ab17db2869c47582727&libraries=services&autoload=false"></script>
 <!-- 연습 기록 임시 창구 — track.js 는 모듈이라 늦게 뜬다.
      그 전에 app.js 가 부른 것들을 시각과 함께 모아 두었다가 그대로 넘긴다. -->
@@ -591,9 +591,10 @@ window.TRACK = (function () {
         </div>
       </div>
       <div class="al-pick">
-        <b><i class="al-no">1</i>가는편 선택</b>
+        <b><i class="al-no" id="alNo">1</i><span id="alPickT">가는편 선택</span></b>
         <button class="al-sort" id="alSort">가격 낮은 순</button>
       </div>
+      <div class="al-done" id="alGoDone" hidden></div>
       <div class="al-list" id="alList"></div>
     </section>
 
@@ -619,13 +620,13 @@ window.TRACK = (function () {
         </div>
         <div class="aj-leg" id="ajBackLeg">
           <div class="aj-leg__t">오는편</div>
-          <div class="aj-leg__dur">총 <b>1시간 15분</b> 소요</div>
+          <div class="aj-leg__dur">총 <b id="ajBackDur">1시간 15분</b> 소요</div>
           <div class="aj-point"><i class="aj-dot"></i>
             <div><b id="ajBackFromPort">김포 GMP</b><span id="ajBackFrom">26.09.15(화) 06:15</span><em id="ajBackFromAir">김포 국제공항</em></div>
           </div>
           <div class="aj-mid">
-            <div class="aj-mid__r aj-mid__r--air"><img src="img/air-tw.png" alt=""><b>제주항공 7C0101편</b></div>
-            <div class="aj-mid__r"><span class="aj-k">수하물 규정</span><span class="aj-v">무료위탁수하물 : 15Kg</span></div>
+            <div class="aj-mid__r aj-mid__r--air"><img id="ajBackLogo" src="img/air-tw.png" alt=""><b id="ajBackName">제주항공 7C0101편</b></div>
+            <div class="aj-mid__r"><span class="aj-k">수하물 규정</span><span class="aj-v" id="ajBackBag">무료위탁수하물 : 15Kg</span></div>
             <div class="aj-mid__r"><span class="aj-v">1시간 15분 비행</span></div>
             <div class="aj-mid__r"><span class="aj-v">일반석 (JB)</span></div>
           </div>
@@ -857,7 +858,7 @@ window.TRACK = (function () {
   </div>
 </div>
 
-<script src="app.js?v=202609032100"></script>
-<script type="module" src="track.js?v=202609032100"></script>
+<script src="app.js?v=202609032113"></script>
+<script type="module" src="track.js?v=202609032113"></script>
 </body>
 </html>
