@@ -823,6 +823,8 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .air-row svg{color:#8B9099;flex:none}
 .air-row__ph{color:#9BA0A8}
 .air-direct{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:16px}
+.air-direct,.ac-chk{cursor:pointer}
+.al-chip,.al-change,.ap-edit,.ab-detail,.air-tag,.air-kind__b,.air-swap{cursor:pointer}
 .air-box{width:20px;height:20px;border-radius:5px;border:2px solid #C3C7CE;flex:none;display:block;position:relative}
 .air-box.is-on{background:var(--cta);border-color:var(--cta)}
 .air-box.is-on::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;

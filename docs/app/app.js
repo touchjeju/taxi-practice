@@ -1501,6 +1501,9 @@ $('#alList').addEventListener('click', function (e) {
   $('#ajGoFrom').textContent = TRIP.from + ' ' + f.dep;
   $('#ajGoTo').textContent   = TRIP.from + ' ' + f.arr;
   $('#ajGoName').textContent = f.air + ' ' + f.code + '편';
+  /* 오는편도 고른 날짜를 따라간다 — 예전에는 26.09.15 로 굳어 있었다 */
+  $('#ajBackFrom').textContent = TRIP.to + ' 06:15';
+  $('#ajBackTo').textContent   = TRIP.to + ' 07:30';
   $('#ajGoLogo').src = 'img/' + f.img + '.png';
   $('#asTotal').textContent = won(f.price + 27700);
   push('airsel');
@@ -1777,6 +1780,56 @@ $('#dpDone').addEventListener('click', function () {
   $('#alDate').textContent = TRIP.from + ' - ' + TRIP.to + ' │ 1명 · 일반석';
   pop();
   toast('날짜를 정했어요.');
+});
+
+/* ── 항공권 화면의 나머지 조작들 ──
+   택시 쪽과 마찬가지로, 이 연습에 없는 기능도 누르면 무슨 일이 났는지 알려 준다.
+   아무 반응이 없으면 어르신들은 앱이 고장 난 줄 알고 거기서 멈추신다. */
+
+$$('.air-kind__b').forEach(function (b) {          // 왕복 / 편도 / 다구간
+  b.addEventListener('click', function () {
+    if (b.classList.contains('is-on')) return;
+    toast('이 연습은 왕복으로만 해요.');
+  });
+});
+$('.air-swap').addEventListener('click', function () {
+  toast('이 연습은 제주 → 김포로만 해요.');
+});
+$('.air-row--last').addEventListener('click', function (e) {   // 성인 1명, 일반석
+  if (e.target.closest('.air-direct')) return;                 // 직항은 아래에서 따로
+  toast('사람 수와 좌석은 이 연습에서 바꾸지 않아요.');
+});
+
+/* 체크상자 — 직항 · 법인카드 · 직접입력 : 눌리는 맛이라도 나게 켜고 끈다 */
+$$('.air-direct, .ac-chk').forEach(function (l) {
+  l.addEventListener('click', function (e) {
+    e.preventDefault();
+    var box = $('.air-box', l);
+    if (box) box.classList.toggle('is-on');
+  });
+});
+
+$$('.air-tag').forEach(function (b) {              // 국내선 / 일본 / 동남아
+  b.addEventListener('click', function () {
+    if (b.classList.contains('is-on')) return;
+    toast('이 연습에는 국내선만 담겨 있어요.');
+  });
+});
+
+$('.al-change').addEventListener('click', function () {        // 편 목록의 [변경]
+  toast('이 연습은 제주 → 김포로만 해요.');
+});
+$$('.al-chip').forEach(function (b) {              // 시각 · 항공사 거르기
+  b.addEventListener('click', function () {
+    toast('정렬과 거르기는 이 연습에 포함되어 있지 않아요.');
+  });
+});
+
+$('.ap-edit').addEventListener('click', function () {          // 탑승객 목록의 [편집]
+  toast('편집은 이 연습에 포함되어 있지 않아요.');
+});
+$('.ab-detail').addEventListener('click', function () {        // 예매하기의 [상세일정]
+  toast('상세일정 보기는 이 연습에 포함되어 있지 않아요.');
 });
 
 /* ───────────────────────── 9. 시작 ───────────────────────── */
