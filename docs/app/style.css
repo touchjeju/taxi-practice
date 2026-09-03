@@ -492,6 +492,8 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
   font-size:16px;font-weight:500;color:#7A5A00;
 }
 .geo__note b{font-weight:700}
+.geo__fail{margin:0 0 18px;padding:12px 14px;border-radius:12px;background:#FFF4F2;
+  color:#C0392B;font-size:16px;line-height:1.55;text-align:left}
 .geo__btns{display:flex;gap:10px}
 .geo__no,.geo__ok{flex:1;height:56px;border-radius:9px;font-size:18px;font-weight:500;font-family:inherit}
 .geo__no{flex:0 0 34%;border:1px solid #DDE0E4;background:#fff;color:#7A7F87}

@@ -886,10 +886,14 @@ function geoWarn(msg) {
 }
 function geoWarnOff() { $('#geoWarn').hidden = true; }
 
-function askLocation() {
+function askLocation(report) {
+  var told = false;
+  function tell(ok, msg) { if (told) return; told = true; if (report) report(ok, msg); }
   if (askedLocation || !navigator.geolocation) {
-    if (!askedLocation) geoWarn('이 기기는 위치를 알려 줄 수 없어 제주시청 기준이에요.');
+    var m = '이 기기는 위치를 알려 줄 수 없어 제주시청 기준이에요.';
+    if (!askedLocation) geoWarn(m);
     askedLocation = true;
+    tell(false, m);
     return;
   }
   askedLocation = true;
@@ -907,6 +911,7 @@ function askLocation() {
     first = false;
     gotFix = true;
     geoWarnOff();
+    tell(true);
     origin.lat = q.lat; origin.lng = q.lng;
     if (mapS2) { mapS2.setCenter(LL(q)); }
     resolveOriginName();
@@ -914,9 +919,11 @@ function askLocation() {
   }
   function fail(err) {
     var code = err && err.code;
-    geoWarn(code === 1 ? '위치 사용이 막혀 있어 제주시청 기준이에요. 주소창 왼쪽의 자물쇠(또는 ⓘ)를 눌러 위치를 [허용]으로 바꿔 주세요.'
-          : code === 3 ? '위치를 찾는 데 시간이 너무 걸려요. 하늘이 보이는 곳에서 [다시 시도]를 눌러 보세요.'
-                       : '지금 위치를 못 받아서 제주시청 기준이에요.');
+    var m = code === 1 ? '위치 사용이 막혀 있어요. 주소창 왼쪽의 자물쇠(또는 ⓘ)를 눌러 위치를 [허용]으로 바꾼 뒤 다시 눌러 주세요.'
+          : code === 3 ? '위치를 찾는 데 시간이 너무 걸려요. 하늘이 보이는 곳에서 다시 눌러 보세요.'
+                       : '지금 위치를 못 받았어요. (' + (err && err.message ? err.message : '이유 모름') + ')';
+    geoWarn(m + ' 그동안은 제주시청 기준이에요.');
+    tell(false, m);
   }
 
   var fast = { enableHighAccuracy: false, timeout: 8000,  maximumAge: 60000 };
@@ -1685,16 +1692,32 @@ function beginFlow() {
 }
 
 $('#geoOk').addEventListener('click', function () {
-  pop();
-  askLocation();                       // 여기서 휴대폰의 진짜 허용 창이 뜬다
-  setTimeout(beginFlow, 280);          // 시트가 닫히고 나서 연습을 시작한다
+  var ok = $('#geoOk'), no = $('#geoNo');
+  ok.disabled = true;
+  ok.textContent = '위치를 찾는 중이에요…';
+  $('#geoFail').hidden = true;
+  askLocation(function (good, msg) {   // 여기서 휴대폰의 진짜 허용 창이 뜬다
+    if (good) { leaveGeo(); return; }
+    /* 실패하면 시트를 닫지 않는다 — 왜 안 됐는지 여기서 보여 준다 */
+    ok.disabled = false;
+    ok.textContent = '다시 시도';
+    no.textContent = '제주시청으로 시작';
+    $('#geoNote').hidden = true;
+    $('#geoFail').textContent = msg;
+    $('#geoFail').hidden = false;
+    askedLocation = false;             // 다시 누르면 한 번 더 물어본다
+  });
 });
 $('#geoNo').addEventListener('click', function () {
-  pop();
   askedLocation = true;                // 다시 묻지 않는다
-  toast('제주시청을 기준으로 안내해요.');
-  setTimeout(beginFlow, 280);
+  leaveGeo();
 });
+
+function leaveGeo() {
+  pop();
+  setTimeout(beginFlow, 280);          // 시트가 닫히고 나서 연습을 시작한다
+}
+
 
 /* 취소 연습은 [호출하기] 버튼에서 시작한다 — 제주시청 → 제주국제공항이 미리 잡혀 있다 */
 function startFromCall() {
