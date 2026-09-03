@@ -914,15 +914,21 @@ function askLocation() {
   }
   function fail(err) {
     var code = err && err.code;
-    geoWarn(code === 1 ? '위치 사용이 꺼져 있어 제주시청 기준이에요. 휴대폰 설정에서 이 앱의 위치를 켜 주세요.'
-          : code === 3 ? '위치를 찾는 데 시간이 너무 걸려 제주시청 기준이에요.'
+    geoWarn(code === 1 ? '위치 사용이 막혀 있어 제주시청 기준이에요. 주소창 왼쪽의 자물쇠(또는 ⓘ)를 눌러 위치를 [허용]으로 바꿔 주세요.'
+          : code === 3 ? '위치를 찾는 데 시간이 너무 걸려요. 하늘이 보이는 곳에서 [다시 시도]를 눌러 보세요.'
                        : '지금 위치를 못 받아서 제주시청 기준이에요.');
   }
 
-  var opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
-  navigator.geolocation.getCurrentPosition(apply, fail, opts);
-  // 걸어 다녀도 파란 점이 따라오도록 계속 지켜본다
-  try { navigator.geolocation.watchPosition(apply, function () {}, opts); } catch (err) {}
+  var fast = { enableHighAccuracy: false, timeout: 8000,  maximumAge: 60000 };
+  var fine = { enableHighAccuracy: true,  timeout: 20000, maximumAge: 0 };
+
+  navigator.geolocation.getCurrentPosition(apply, function (err) {
+    if (err && err.code === 1) { fail(err); return; }      // 거부는 다시 물어도 소용없다
+    navigator.geolocation.getCurrentPosition(apply, fail, fine);
+  }, fast);
+
+  // 걸어 다녀도 파란 점이 따라오고, 정확한 좌표가 잡히면 저절로 다듬어진다
+  try { navigator.geolocation.watchPosition(apply, function () {}, fine); } catch (err) {}
 }
 
 /* ───────────────────── 8.5. S6 · 호출 요청 → 배차 완료 → 취소 ─────────────────────
