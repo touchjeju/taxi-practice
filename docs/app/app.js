@@ -610,6 +610,11 @@ $('#ctaCall').addEventListener('click', function () {
 /* ───────────────────────── 6. 결제수단 시트 ───────────────────────── */
 
 var paySel = null;
+
+/* 진짜 카카오 T 와 같게 — 카카오페이에 카드나 계좌가 등록돼 있지 않으면
+   골라도 [적용]이 활성화되지 않는다. 다른 결제수단을 골라야 넘어간다. */
+var PAY_BLOCKED = { kakaopay: true };
+
 onEnter.pay = function () {
   paySel = payMethod || 'kakaopay';   // 처음 열 때도 카카오페이가 골라져 있다
   syncPay();
@@ -620,7 +625,8 @@ function syncPay() {
   $('#deckKakaopay').hidden = paySel !== 'kakaopay';
   $('#deckOther').hidden = paySel !== 'other';
   $('#payNote').hidden = !paySel;
-  $('#payApply').disabled = !paySel;
+  $('#payApply').disabled = !paySel || !!PAY_BLOCKED[paySel];
+  $('#payWarn').hidden = !PAY_BLOCKED[paySel];
 
   var off = paySel === 'other';
   $$('.pay__row').forEach(function (r) { r.classList.toggle('is-off', off); });
@@ -1094,8 +1100,11 @@ function hintSpot() {
     case 'route':  return one('#opts .opt',      '부르고 싶은 택시를 누르세요');
     case 'detail': return payMethod ? one('#ctaCall', '[호출하기]를 누르세요')
                                     : one('#btnPay',  '[결제수단 등록]을 누르세요');
-    case 'pay':    return $('#payApply').disabled ? one('#payCard .pm', '결제수단을 하나 고르세요')
-                                                  : one('#payApply',    '[적용]을 누르세요');
+    case 'pay':
+      if (!$('#payApply').disabled) return one('#payApply', '[적용]을 누르세요');
+      if (PAY_BLOCKED[paySel])
+        return one('.pm[data-pm="other"]', '카카오페이는 등록된 카드가 없어요\n[다른 결제수단]을 눌러 보세요');
+      return one('#payCard .pm', '결제수단을 하나 고르세요');
     case 'ride':
       if (rideScreen.classList.contains('is-wait'))
         return { say: '기사님을 찾는 중이에요.\n잠시 기다려 주세요.' };
@@ -1604,7 +1613,8 @@ function start() {
 /* 취소 연습은 [호출하기] 버튼에서 시작한다 — 제주시청 → 제주국제공항이 미리 잡혀 있다 */
 function startFromCall() {
   picked = OPTS[1];
-  setPayMethod('kakaopay');          // 취소 연습은 결제수단 등록을 건너뛴다
+  setPayMethod('card');              // 취소 연습은 결제수단 등록을 건너뛴다
+                                     // (카카오페이는 등록된 카드가 없어 고를 수 없다)
   chooseDest(FAVS.airport);
   push('detail');
 }

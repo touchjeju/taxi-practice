@@ -431,6 +431,9 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .deck__dots{display:flex;justify-content:center;gap:6px;margin-top:12px}
 .deck__dots i{width:7px;height:7px;border-radius:4px;background:#D8DAE0}
 .deck__dots i.is-on{width:18px;background:#2B2E34}
+/* 카카오페이에 등록된 게 없을 때 — 왜 [적용]이 안 눌리는지 알려 준다 */
+.pm__warn{margin:0 0 10px;padding:9px 12px;border-radius:8px;background:#FFF4F2;
+  color:#C0392B;font-size:14px;line-height:1.45;text-align:center}
 
 .pay__rows{padding:16px 6px 6px;flex:none}
 .pay__row{display:flex;align-items:center;gap:10px;min-height:46px}
