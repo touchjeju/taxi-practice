@@ -225,8 +225,7 @@ function watchPermission() {
   if (!navigator.permissions || !navigator.permissions.query) return;
   navigator.permissions.query({ name: 'geolocation' }).then(function (st) {
     if (st.state === 'denied') {
-      geoWarn('이 사이트의 위치 사용이 막혀 있어요. 주소창 왼쪽의 자물쇠(또는 ⓘ)를 눌러 ' +
-              '위치를 [허용]으로 바꿔 주세요. 그동안은 제주시청 기준이에요.');
+      geoWarn('이 사이트의 위치 사용이 막혀 있어요. ' + unblockHint() + ' 그동안은 제주시청 기준이에요.');
     }
     st.onchange = function () { if (st.state === 'granted') retryLocation(); };
   }).catch(function () {});
@@ -890,6 +889,45 @@ $$('.perk').forEach(function (b) {
 var askedLocation = false;
 var gotFix = false;             // 진짜 위치를 한 번이라도 받았는지
 
+/* 어떤 브라우저로 열었는지 — 위치를 켜는 방법이 저마다 달라서 안내를 바꿔 준다.
+   카카오톡·네이버 같은 앱 안의 간이 브라우저는 주소창(자물쇠)이 아예 없고,
+   위치를 못 쓰는 경우가 많아 진짜 브라우저로 옮겨 열어야 한다. */
+function inAppBrowser() {
+  var u = navigator.userAgent || '';
+  var has = function (t) { return u.toLowerCase().indexOf(t.toLowerCase()) > -1; };
+  if (has('KAKAOTALK'))                  return '카카오톡';
+  if (has('NAVER') && has('inapp'))      return '네이버';
+  if (has('Line/'))                      return '라인';
+  if (has('Instagram') || has('FBAN') || has('FBAV') || has('FB_IAB')) return '페이스북·인스타그램';
+  if (has('DaumApps') || has('BAND/') || has('everytimeApp'))          return '앱';
+  return null;
+}
+
+/* 위치가 막혔을 때 무엇을 눌러야 하는지 — 브라우저에 맞춰 알려 준다 */
+function unblockHint() {
+  var app = inAppBrowser();
+  if (app) {
+    return app + ' 안에서 연 화면이라 위치를 쓸 수 없어요. ' +
+           '오른쪽 아래 [⋮] 또는 [공유]를 눌러 크롬·사파리 같은 인터넷 앱으로 열어 주세요.';
+  }
+  var u = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/i.test(u)) {
+    return '주소창 왼쪽의 [ᴀA]를 누르고 → [웹사이트 설정] → [위치] → [허용]으로 바꿔 주세요. ' +
+           '그래도 안 되면 휴대폰 [설정] → [개인 정보 보호] → [위치 서비스]에서 사파리를 켜 주세요.';
+  }
+  if (/SamsungBrowser/i.test(u)) {
+    return '주소창 왼쪽 아이콘을 누르고 → [권한] → [위치]를 켜 주세요.';
+  }
+  if (/Android/i.test(u)) {
+    /* 요즘 크롬은 자물쇠 대신 조절기(≡ 를 눕힌) 모양이라 못 찾는 분이 많다.
+       못 찾을 때를 위해 메뉴로 가는 길도 같이 알려 준다. */
+    return '주소창 맨 왼쪽 아이콘(자물쇠 또는 조절기 모양)을 누르고 → [권한] → [위치] → [허용]. ' +
+           '아이콘이 안 보이면 화면을 아래로 살짝 내려 주소창을 띄우거나, ' +
+           '오른쪽 위 [⋮] → [설정] → [사이트 설정] → [위치] 에서 이 사이트를 [허용]으로 바꿔 주세요.';
+  }
+  return '브라우저의 사이트 설정에서 이 사이트의 [위치]를 [허용]으로 바꿔 주세요.';
+}
+
 /* 왜 제주시청으로 나오는지 화면에 남겨 둔다 — 잠깐 뜨는 알림은 놓치기 쉽다 */
 function geoWarn(msg) {
   gotFix = false;
@@ -932,8 +970,8 @@ function askLocation(report) {
   }
   function fail(err) {
     var code = err && err.code;
-    var m = code === 1 ? '위치 사용이 막혀 있어요. 주소창 왼쪽의 자물쇠(또는 ⓘ)를 눌러 위치를 [허용]으로 바꾼 뒤 다시 눌러 주세요.'
-          : code === 3 ? '위치를 찾는 데 시간이 너무 걸려요. 하늘이 보이는 곳에서 다시 눌러 보세요.'
+    var m = code === 1 ? '위치 사용이 막혀 있어요. ' + unblockHint()
+          : code === 3 ? '위치를 찾는 데 시간이 너무 걸려요. 하늘이 보이는 곳에서 [다시 시도]를 눌러 보세요.'
                        : '지금 위치를 못 받았어요. (' + (err && err.message ? err.message : '이유 모름') + ')';
     geoWarn(m + ' 그동안은 제주시청 기준이에요.');
     tell(false, m);
@@ -1694,9 +1732,13 @@ function start() {
   /* 앱을 열자마자 지금 위치부터 잡는다 — 허용 창은 브라우저가 알아서 띄운다.
      항공권 연습은 지도를 쓰지 않으니 위치가 필요 없다. */
   if (FLOW !== 'air') {
-    originTextEl.textContent = '내 위치 찾는 중…';
-    askLocation();
-    watchPermission();
+    if (inAppBrowser()) {
+      geoWarn(unblockHint() + ' 그동안은 제주시청 기준이에요.');
+    } else {
+      originTextEl.textContent = '내 위치 찾는 중…';
+      askLocation();
+      watchPermission();
+    }
   }
   beginFlow();
 }
