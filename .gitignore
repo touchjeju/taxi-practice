@@ -5,3 +5,4 @@
 !firebase.json
 !.firebaserc
 !deploy.ps1
+!firestore.rules
