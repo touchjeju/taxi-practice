@@ -647,12 +647,10 @@ $('#ctaCall').addEventListener('click', function () {
 
 var paySel = null;
 
-/* 진짜 카카오 T 와 같게 — 등록해 둔 카드도, 카카오페이도, 포인트도 없는 계정이라
-   골라도 [적용]이 활성화되지 않는다. [다른 결제수단] 의 직접결제만 쓸 수 있다. */
+/* 진짜 카카오 T 와 같게 — 카카오페이에 카드나 계좌가 등록돼 있지 않으면
+   골라도 [적용]이 활성화되지 않는다. 다른 결제수단을 골라야 넘어간다. */
 var PAY_BLOCKED = {
-  kakaopay: '카카오페이에 등록된 카드나 계좌가 없어 결제할 수 없어요.',
-  card:     '등록해 둔 신용/체크카드가 없어 결제할 수 없어요.',
-  point:    '가지고 있는 포인트가 0P 라 결제할 수 없어요.'
+  kakaopay: '카카오페이에 등록된 카드나 계좌가 없어 결제할 수 없어요.'
 };
 
 onEnter.pay = function () {
@@ -668,7 +666,7 @@ function syncPay() {
   $('#payApply').disabled = !paySel || !!PAY_BLOCKED[paySel];
   $('#payWarn').hidden = !PAY_BLOCKED[paySel];
   if (PAY_BLOCKED[paySel])
-    $('#payWarn').textContent = PAY_BLOCKED[paySel] + ' [다른 결제수단]을 골라 주세요.';
+    $('#payWarn').textContent = PAY_BLOCKED[paySel] + ' 다른 방법을 골라 주세요.';
 
   var off = paySel === 'other';
   $$('.pay__row').forEach(function (r) { r.classList.toggle('is-off', off); });
@@ -708,8 +706,7 @@ function setPayMethod(key) {
 $('#payApply').addEventListener('click', function () {
   setPayMethod(paySel);
   pop();
-  toast(PAY_LABEL[payMethod] + '(으)로 결제수단을 설정했어요.');
-  showCallSpot(2800);      // 안내 말풍선은 위 알림이 사라진 뒤에 띄운다
+  showCallSpot(400);       // 화면이 넘어온 뒤 곧바로 [호출하기] 안내를 띄운다
 });
 
 /* ───────────────────────── 7. 광고 팝업 ───────────────────────── */
@@ -1153,7 +1150,7 @@ function hintSpot() {
     case 'pay':
       if (!$('#payApply').disabled) return one('#payApply', '[적용]을 누르세요');
       if (PAY_BLOCKED[paySel])
-        return one('.pm[data-pm="other"]', '이 방법은 등록된 게 없어 못 써요\n[다른 결제수단]을 눌러 보세요');
+        return one('.pm[data-pm="card"]', '카카오페이는 등록된 카드가 없어요\n다른 것을 골라 보세요');
       return one('#payCard .pm', '결제수단을 하나 고르세요');
     case 'ride':
       if (rideScreen.classList.contains('is-wait'))
