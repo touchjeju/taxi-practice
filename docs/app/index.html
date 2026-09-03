@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=202609031606">
+<link rel="stylesheet" href="style.css?v=202609031612">
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=606067c8b6243ab17db2869c47582727&libraries=services&autoload=false"></script>
 <!-- 연습 기록 임시 창구 — track.js 는 모듈이라 늦게 뜬다.
      그 전에 app.js 가 부른 것들을 시각과 함께 모아 두었다가 그대로 넘긴다. -->
@@ -771,28 +771,6 @@ window.TRACK = (function () {
     </section>
 
     <!-- ═══════════  S0 · 시작 광고 (앱을 열면 한 번, tp-01 캡처)  ═══════════ -->
-    <!-- ═══════════  위치 정보 동의 (앱을 처음 열면 맨 먼저)  ═══════════
-         [동의하고 시작하기] 를 누르면 그제야 휴대폰이 진짜 위치 허용 창을 띄운다.
-         그 창에서 [허용] 을 눌러야 한다는 걸 미리 알려 준다. -->
-    <section class="screen screen--overlay screen--geo" data-screen="geo">
-      <div class="geo__dim"></div>
-      <div class="geo__sheet">
-        <div class="geo__ico"><svg viewBox="0 0 24 24"><use href="#ic-crosshair"/></svg></div>
-        <h2 class="geo__title">위치 정보 이용에 동의해 주세요</h2>
-        <p class="geo__body">지금 계신 곳에서 택시를 부르려면<br>휴대폰의 위치 정보가 필요해요.</p>
-        <ul class="geo__list">
-          <li>타는 곳이 저절로 잡혀요</li>
-          <li>가까운 택시를 찾아 줘요</li>
-        </ul>
-        <p class="geo__note" id="geoNote">누르면 뜨는 창에서 <b>[허용]</b>을 눌러 주세요.</p>
-        <p class="geo__fail" id="geoFail" hidden></p>
-        <div class="geo__btns">
-          <button class="geo__no" id="geoNo" type="button">나중에</button>
-          <button class="geo__ok" id="geoOk" type="button">동의하고 시작하기</button>
-        </div>
-      </div>
-    </section>
-
     <section class="screen screen--overlay screen--ad0" data-screen="ad0">
       <div class="ad__dim" data-back></div>
       <div class="ad0__wrap">
@@ -844,7 +822,7 @@ window.TRACK = (function () {
   </div>
 </div>
 
-<script src="app.js?v=202609031606"></script>
-<script type="module" src="track.js?v=202609031606"></script>
+<script src="app.js?v=202609031612"></script>
+<script type="module" src="track.js?v=202609031612"></script>
 </body>
 </html>

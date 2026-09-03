@@ -106,7 +106,7 @@ body{
    수강생이 선생님께 받은 링크(/join/?c=코드)로 들어오는 자리.
    이름을 한 번 적으면 그 기기에 남아, 다음 시간에는 바로 연습 목록이 뜬다.
    ========================================================================== */
-import { db, anonUser, doc, getDoc, setDoc, updateDoc } from "../common/fb.js?v=202609031606";
+import { db, anonUser, doc, getDoc, setDoc, updateDoc } from "../common/fb.js?v=202609031612";
 
 var STORE = 'tj.student';
 var code  = (new URLSearchParams(location.search).get('c') || '').trim().toUpperCase();

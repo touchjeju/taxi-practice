@@ -220,6 +220,18 @@ btnLocate.addEventListener('click', function () {
   mapS2.panTo(LL(myPos));
 });
 
+/* 브라우저가 이 사이트의 위치를 막아 두었는지 미리 보고, 설정에서 켜면 저절로 다시 잡는다 */
+function watchPermission() {
+  if (!navigator.permissions || !navigator.permissions.query) return;
+  navigator.permissions.query({ name: 'geolocation' }).then(function (st) {
+    if (st.state === 'denied') {
+      geoWarn('이 사이트의 위치 사용이 막혀 있어요. 주소창 왼쪽의 자물쇠(또는 ⓘ)를 눌러 ' +
+              '위치를 [허용]으로 바꿔 주세요. 그동안은 제주시청 기준이에요.');
+    }
+    st.onchange = function () { if (st.state === 'granted') retryLocation(); };
+  }).catch(function () {});
+}
+
 /* 다시 시도 — 권한을 켜고 온 뒤에도 새로고침 없이 잡히게 한다 */
 function retryLocation() {
   askedLocation = false;
@@ -883,6 +895,7 @@ function geoWarn(msg) {
   gotFix = false;
   $('#geoWarnText').textContent = msg;
   $('#geoWarn').hidden = false;
+  if (originTextEl.textContent === '내 위치 찾는 중…') setOrigin('제주시청');
 }
 function geoWarnOff() { $('#geoWarn').hidden = true; }
 
@@ -1678,45 +1691,22 @@ function start() {
   setOrigin('제주시청');
   if (K) initS2Map();
   else $('#phone').classList.add('no-map');   // 지도 자리에 안내 문구만 남긴다
-  /* 진짜 앱처럼 위치 동의부터 받는다 — 그래야 타는 곳이 지금 계신 곳으로 잡힌다.
-     항공권 연습은 지도를 쓰지 않으니 묻지 않고 바로 시작한다. */
-  if (FLOW === 'air') { beginFlow(); return; }
-  setTimeout(function () { push('geo'); }, 300);
+  /* 앱을 열자마자 지금 위치부터 잡는다 — 허용 창은 브라우저가 알아서 띄운다.
+     항공권 연습은 지도를 쓰지 않으니 위치가 필요 없다. */
+  if (FLOW !== 'air') {
+    originTextEl.textContent = '내 위치 찾는 중…';
+    askLocation();
+    watchPermission();
+  }
+  beginFlow();
 }
 
-/* 위치 동의를 마친 뒤 실제 연습을 시작한다 */
 function beginFlow() {
   if (FLOW === 'cancel') startFromCall();
   else if (FLOW === 'air') setTimeout(function () { push('air'); }, 200);
   else setTimeout(function () { push('ad0'); }, 500);   // 앱을 열면 시작 광고가 한 번 뜬다
 }
 
-$('#geoOk').addEventListener('click', function () {
-  var ok = $('#geoOk'), no = $('#geoNo');
-  ok.disabled = true;
-  ok.textContent = '위치를 찾는 중이에요…';
-  $('#geoFail').hidden = true;
-  askLocation(function (good, msg) {   // 여기서 휴대폰의 진짜 허용 창이 뜬다
-    if (good) { leaveGeo(); return; }
-    /* 실패하면 시트를 닫지 않는다 — 왜 안 됐는지 여기서 보여 준다 */
-    ok.disabled = false;
-    ok.textContent = '다시 시도';
-    no.textContent = '제주시청으로 시작';
-    $('#geoNote').hidden = true;
-    $('#geoFail').textContent = msg;
-    $('#geoFail').hidden = false;
-    askedLocation = false;             // 다시 누르면 한 번 더 물어본다
-  });
-});
-$('#geoNo').addEventListener('click', function () {
-  askedLocation = true;                // 다시 묻지 않는다
-  leaveGeo();
-});
-
-function leaveGeo() {
-  pop();
-  setTimeout(beginFlow, 280);          // 시트가 닫히고 나서 연습을 시작한다
-}
 
 
 /* 취소 연습은 [호출하기] 버튼에서 시작한다 — 제주시청 → 제주국제공항이 미리 잡혀 있다 */
