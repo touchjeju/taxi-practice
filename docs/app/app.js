@@ -168,13 +168,19 @@ var lastRoute = null;
 /* 경로의 i 번째 점에서 차가 나아가는 방향(길이 뻗은 쪽).
    끝점을 바라보게 하면 길이 굽은 데서 건물을 가로지르는 것처럼 보인다. */
 function roadDir(pts, i) {
-  var a = { lat: pts[i][0], lng: pts[i][1] };
-  for (var j = i + 1; j < pts.length; j++) {
-    var b = { lat: pts[j][0], lng: pts[j][1] };
-    if (haversine(a, b) >= 8) return bearing(a, b);
+  var here = { lat: pts[i][0], lng: pts[i][1] };
+  var back = here, fwd = here, j;
+  for (j = i - 1; j >= 0; j--) {                 // 10m 뒤
+    var p = { lat: pts[j][0], lng: pts[j][1] };
+    if (haversine(p, here) >= 10) { back = p; break; }
   }
+  for (j = i + 1; j < pts.length; j++) {         // 10m 앞
+    var q = { lat: pts[j][0], lng: pts[j][1] };
+    if (haversine(q, here) >= 10) { fwd = q; break; }
+  }
+  if (back !== fwd) return bearing(back, fwd);   // 앞뒤를 이으면 길과 나란해진다
   var e = pts[pts.length - 1];
-  return bearing(a, { lat: e[0], lng: e[1] });
+  return bearing(here, { lat: e[0], lng: e[1] });
 }
 
 function placeTaxiOnRoad() {
@@ -365,22 +371,71 @@ function typing() {
   sugTimer = setTimeout(function () { suggest(q); }, 220);
 }
 
+/* ── 장소 이름과 주소를 함께 찾는다 ──────────────────────────────
+   카카오는 둘을 다른 창구로 준다.
+     장소검색(keywordSearch) : "제주국제공항", "제주시청" 같은 이름
+     주소검색(addressSearch) : "제주시 광양9길 10" 같은 주소
+   집으로 가려면 주소를 넣어야 하는데 예전에는 장소검색만 해서 아무것도 안 나왔다.
+   둘 다 물어보고 합쳐서 돌려준다. 주소로 찾은 것을 앞에 둔다.                */
+function findPlaces(q, done) {
+  var left = 2, addrRows = [], placeRows = [];
+  function step() {
+    if (--left > 0) return;
+    var seen = {}, near = [], far = [];
+    addrRows.concat(placeRows).forEach(function (r) {
+      var key = r.name + '|' + r.addr;
+      if (seen[key]) return;
+      seen[key] = 1;
+      r.km = haversine(origin, { lat: r.lat, lng: r.lng }) / 1000;
+      /* 주소검색은 전국을 뒤져서 "연동 261-9" 에 세종시가 먼저 나오기도 한다.
+         택시로 갈 만한 거리를 앞에 두고, 먼 곳은 뒤로 민다. */
+      (r.km > 100 ? far : near).push(r);
+    });
+    done(near.concat(far));
+  }
+
+  places.keywordSearch(q, function (data, status) {
+    if (status === K.services.Status.OK) {
+      placeRows = data.map(function (d) {
+        return {
+          name: d.place_name,
+          addr: d.road_address_name || d.address_name || '',
+          lat: +d.y, lng: +d.x
+        };
+      });
+    }
+    step();
+  }, Object.assign(jejuArea(), { size: 15 }));
+
+  if (geocoder) {
+    geocoder.addressSearch(q, function (res, status) {
+      if (status === K.services.Status.OK) {
+        addrRows = res.map(function (d) {
+          var road = d.road_address, land = d.address;
+          return {
+            name: (road && road.address_name) || (land && land.address_name) || q,
+            addr: (land && land.address_name) || (road && road.address_name) || '',
+            lat: +d.y, lng: +d.x
+          };
+        });
+      }
+      step();
+    });
+  } else step();
+}
+
 function suggest(q) {
   if (!places) { srchBody.innerHTML = '<div class="srch-empty">검색을 사용할 수 없어요.</div>'; return; }
-  places.keywordSearch(q, function (data, status) {
-    if (srchInput.value.trim() !== q) return;
-    if (status !== K.services.Status.OK || !data.length) {
+  findPlaces(q, function (rows) {
+    if (srchInput.value.trim() !== q) return;          // 그 사이 더 적으셨다
+    if (!rows.length) {
       srchBody.innerHTML = '<button class="sug" data-sug="' + esc(q) + '">' + highlight(q, q) + '</button>';
       return;
     }
-    var seen = {}, rows = [];
-    data.forEach(function (d) {
-      if (seen[d.place_name] || rows.length >= 7) return;
-      seen[d.place_name] = 1;
-      rows.push('<button class="sug" data-sug="' + esc(d.place_name) + '">' + highlight(d.place_name, q) + '</button>');
-    });
-    srchBody.innerHTML = rows.join('');
-  }, Object.assign(jejuArea(), { size: 10 }));
+    srchBody.innerHTML = rows.slice(0, 7).map(function (p) {
+      return '<button class="sug" data-sug="' + esc(p.name) + '">' + highlight(p.name, q) + '</button>';
+    }).join('');
+  });
 }
 
 function search(q) {
@@ -389,19 +444,13 @@ function search(q) {
   srchInput.blur();
   if (!places) { srchBody.innerHTML = '<div class="srch-empty">검색을 사용할 수 없어요.</div>'; return; }
   srchBody.innerHTML = '<div class="srch-empty">찾는 중…</div>';
-  places.keywordSearch(q, function (data, status) {
-    if (status !== K.services.Status.OK || !data.length) {
-      srchBody.innerHTML = '<div class="srch-empty">검색 결과가 없어요.</div>';
+  findPlaces(q, function (rows) {
+    if (!rows.length) {
+      srchBody.innerHTML = '<div class="srch-empty">찾는 곳이 없어요.<br>' +
+        '이름을 줄여서 적거나, 주소를 적어 보세요.</div>';
       return;
     }
-    lastResults = data.map(function (d) {
-      return {
-        name: d.place_name,
-        addr: d.road_address_name || d.address_name,
-        lat: +d.y, lng: +d.x,
-        km: d.distance ? (+d.distance / 1000) : haversine(origin, { lat: +d.y, lng: +d.x }) / 1000
-      };
-    });
+    lastResults = rows;
     srchBody.innerHTML = '<div class="res-head">장소결과</div>' + lastResults.map(function (p, i) {
       /* 줄 전체가 눌린다 — 오른쪽 작은 [도착] 버튼만 눌러야 하는 줄 모르고
          이름을 눌렀다가 아무 일도 안 일어나 "검색이 안 된다"고 하신다. */
@@ -413,7 +462,7 @@ function search(q) {
         '<button class="res__btn" data-pick="' + i + '">' + (srchMode === 'origin' ? '출발' : '도착') + '</button>' +
       '</div>';
     }).join('');
-  }, Object.assign(jejuArea(), { size: 15 }));
+  });
 }
 
 srchInput.addEventListener('input', typing);
@@ -1186,7 +1235,7 @@ function updateRideInfo() {
 onEnter.ride = function () {
   drawRideMap();
   clearTimeout(waitTimer);
-  waitTimer = setTimeout(matchDriver, 6500);      // 기다리면 저절로 배차된다
+  waitTimer = setTimeout(matchDriver, 3000);      // 기다리면 저절로 배차된다
 };
 onLeave.ride = function () { clearTimeout(waitTimer); stopTaxi(); };
 
@@ -1236,6 +1285,9 @@ function openCancel() {
   $('#cxTime').textContent = hhmm(matchedAt || new Date());
   push('cancel');
 }
+$('#btnAddCall').addEventListener('click', function () {
+  toast('추가 호출은 이 연습에 포함되어 있지 않아요.\n지금 부른 택시를 기다려 주세요.');
+});
 $('#btnCancel').addEventListener('click', openCancel);
 $('#btnCancelTop').addEventListener('click', openCancel);
 $('#cxSel').addEventListener('click', function () { push('reason'); });

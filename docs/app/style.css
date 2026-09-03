@@ -494,8 +494,10 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .screen--ride{background:#DCE9F5}
 .ride-map{position:absolute;inset:0}
 .map-back--home{color:#17171B}
+/* 지도 위 오른쪽 버튼 줄 — [추가 호출] [호출취소] */
+.ride-topbtns{position:absolute;right:14px;top:14px;display:flex;gap:8px;z-index:5}
 .ride-topx{
-  position:absolute;right:14px;top:14px;height:48px;padding:0 22px;border-radius:999px;
+  height:48px;padding:0 18px;border-radius:999px;white-space:nowrap;
   background:#fff;color:#17171B;font-size:18px;font-weight:500;letter-spacing:-.5px;
   box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:5;
 }
@@ -639,7 +641,7 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
    좁은 폰(360px 이하)에서는 이 여백을 주면 "어디로 갈까요?" 가 두 줄로 깨진다.
    그런 폰에서는 여백을 걷고, [?] 가 [회사] 위에 살짝 겹치는 쪽을 택한다. */
 @media (min-width:384px){ .home-search{padding-right:54px} }
-.ride-topx{right:64px}
+.ride-topbtns{right:64px}
 
 /* 위치를 못 받았을 때 택시 화면에 남는 안내 */
 .geowarn{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:10px 12px;
