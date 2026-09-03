@@ -13,8 +13,8 @@
    여기서 시각까지 그대로 이어받는다.
    ========================================================================== */
 import { db, anonUser, doc, setDoc, serverTimestamp }
-  from "../common/fb.js?v=202609031617";
-import { stuckLevel, STEPS } from "../common/steps.js?v=202609031617";
+  from "../common/fb.js?v=202609031624";
+import { stuckLevel, STEPS } from "../common/steps.js?v=202609031624";
 
 var STORE = 'tj.student';
 var qs    = new URLSearchParams(location.search);

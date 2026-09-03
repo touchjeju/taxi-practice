@@ -224,10 +224,14 @@ btnLocate.addEventListener('click', function () {
 function watchPermission() {
   if (!navigator.permissions || !navigator.permissions.query) return;
   navigator.permissions.query({ name: 'geolocation' }).then(function (st) {
+    if (st.state === 'prompt' && !gotFix) askOn();   // 곧 허용 창이 뜬다
     if (st.state === 'denied') {
-      geoWarn('이 사이트의 위치 사용이 막혀 있어요. ' + unblockHint() + ' 그동안은 제주시청 기준이에요.');
+      geoWarn('위치가 막혀 있어 제주시청 기준이에요. ' + unblockHint());
     }
-    st.onchange = function () { if (st.state === 'granted') retryLocation(); };
+    st.onchange = function () {
+      askOff();
+      if (st.state === 'granted') retryLocation();
+    };
   }).catch(function () {});
 }
 
@@ -906,30 +910,21 @@ function inAppBrowser() {
 /* 위치가 막혔을 때 무엇을 눌러야 하는지 — 브라우저에 맞춰 알려 준다 */
 function unblockHint() {
   var app = inAppBrowser();
-  if (app) {
-    return app + ' 안에서 연 화면이라 위치를 쓸 수 없어요. ' +
-           '오른쪽 아래 [⋮] 또는 [공유]를 눌러 크롬·사파리 같은 인터넷 앱으로 열어 주세요.';
-  }
+  if (app) return app + ' 안에서 열려 위치를 쓸 수 없어요. [⋮]나 [공유]로 크롬에서 열어 주세요.';
   var u = navigator.userAgent || '';
-  if (/iPhone|iPad|iPod/i.test(u)) {
-    return '주소창 왼쪽의 [ᴀA]를 누르고 → [웹사이트 설정] → [위치] → [허용]으로 바꿔 주세요. ' +
-           '그래도 안 되면 휴대폰 [설정] → [개인 정보 보호] → [위치 서비스]에서 사파리를 켜 주세요.';
-  }
-  if (/SamsungBrowser/i.test(u)) {
-    return '주소창 왼쪽 아이콘을 누르고 → [권한] → [위치]를 켜 주세요.';
-  }
-  if (/Android/i.test(u)) {
-    /* 요즘 크롬은 자물쇠 대신 조절기(≡ 를 눕힌) 모양이라 못 찾는 분이 많다.
-       못 찾을 때를 위해 메뉴로 가는 길도 같이 알려 준다. */
-    return '주소창 맨 왼쪽 아이콘(자물쇠 또는 조절기 모양)을 누르고 → [권한] → [위치] → [허용]. ' +
-           '아이콘이 안 보이면 화면을 아래로 살짝 내려 주소창을 띄우거나, ' +
-           '오른쪽 위 [⋮] → [설정] → [사이트 설정] → [위치] 에서 이 사이트를 [허용]으로 바꿔 주세요.';
-  }
-  return '브라우저의 사이트 설정에서 이 사이트의 [위치]를 [허용]으로 바꿔 주세요.';
+  /* 요즘 크롬은 주소창의 자물쇠가 없어져서 못 찾는 분이 많다 — 메뉴 길 하나만 알려 준다 */
+  if (/iPhone|iPad|iPod/i.test(u))  return '주소창 왼쪽 [ᴀA] → 웹사이트 설정 → 위치 → 허용 으로 바꿔 주세요.';
+  if (/SamsungBrowser/i.test(u))    return '주소창 왼쪽 아이콘 → 권한 → 위치 를 켜 주세요.';
+  if (/Android/i.test(u))           return '크롬 오른쪽 위 [⋮] → 설정 → 사이트 설정 → 위치 에서 이 사이트를 허용해 주세요.';
+  return '브라우저 사이트 설정에서 이 사이트의 위치를 허용해 주세요.';
 }
 
 /* 왜 제주시청으로 나오는지 화면에 남겨 둔다 — 잠깐 뜨는 알림은 놓치기 쉽다 */
+function askOn()  { $('#geoAsk').hidden = false; }
+function askOff() { $('#geoAsk').hidden = true; }
+
 function geoWarn(msg) {
+  askOff();
   gotFix = false;
   $('#geoWarnText').textContent = msg;
   $('#geoWarn').hidden = false;
@@ -961,6 +956,7 @@ function askLocation(report) {
     }
     first = false;
     gotFix = true;
+    askOff();
     geoWarnOff();
     tell(true);
     origin.lat = q.lat; origin.lng = q.lng;
@@ -970,10 +966,10 @@ function askLocation(report) {
   }
   function fail(err) {
     var code = err && err.code;
-    var m = code === 1 ? '위치 사용이 막혀 있어요. ' + unblockHint()
-          : code === 3 ? '위치를 찾는 데 시간이 너무 걸려요. 하늘이 보이는 곳에서 [다시 시도]를 눌러 보세요.'
-                       : '지금 위치를 못 받았어요. (' + (err && err.message ? err.message : '이유 모름') + ')';
-    geoWarn(m + ' 그동안은 제주시청 기준이에요.');
+    var m = code === 1 ? '위치가 막혀 있어 제주시청 기준이에요. ' + unblockHint()
+          : code === 3 ? '위치를 찾는 데 시간이 걸려 제주시청 기준이에요. 밖에서 [다시 시도]를 눌러 보세요.'
+                       : '위치를 못 받아 제주시청 기준이에요. (' + (err && err.message ? err.message : '이유 모름') + ')';
+    geoWarn(m);
     tell(false, m);
   }
 
@@ -1733,7 +1729,7 @@ function start() {
      항공권 연습은 지도를 쓰지 않으니 위치가 필요 없다. */
   if (FLOW !== 'air') {
     if (inAppBrowser()) {
-      geoWarn(unblockHint() + ' 그동안은 제주시청 기준이에요.');
+      geoWarn('제주시청 기준이에요. ' + unblockHint());
     } else {
       originTextEl.textContent = '내 위치 찾는 중…';
       askLocation();

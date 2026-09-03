@@ -639,6 +639,24 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 @media (min-width:384px){ .home-search{padding-right:54px} }
 .ride-topx{right:64px}
 
+/* 위치를 못 받았을 때 택시 화면에 남는 안내 */
+.geowarn{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:10px 12px;
+  max-height:26vh;overflow-y:auto;
+  border-radius:10px;background:#FFF4F2;color:#C0392B;font-size:15px;line-height:1.45}
+.geowarn span{flex:1}
+.geowarn button{flex:none;height:34px;padding:0 12px;border:1px solid #E8BDB6;border-radius:8px;
+  background:#fff;color:#C0392B;font:inherit;font-size:14px;font-weight:500}
+
+/* 위치 허용 창이 떠 있는 동안만 보이는 안내 — 창에 가리지 않게 화면 가운데쯤에 둔다 */
+.geoask{position:absolute;left:0;right:0;top:34%;z-index:62;display:flex;
+  justify-content:center;padding:0 18px;pointer-events:none}
+.geoask__box{
+  max-width:100%;padding:16px 18px;border-radius:14px;background:rgba(24,26,30,.94);
+  color:#fff;font-size:16px;line-height:1.55;text-align:center;
+  box-shadow:0 8px 24px rgba(0,0,0,.32);
+}
+.geoask__box b{display:block;margin-bottom:5px;font-size:18px;font-weight:700;color:#FFE04D}
+
 .hint-layer{position:absolute;inset:0;z-index:59;pointer-events:none}
 
 /* 눌러야 할 자리 — 조금 둥근 빨간 사각형, 숨을 쉬듯 커졌다 작아진다 */
