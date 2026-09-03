@@ -1039,9 +1039,25 @@ function geoWarn(msg) {
   gotFix = false;
   $('#geoWarnText').textContent = msg;
   $('#geoWarn').hidden = false;
+  $('.sheet--taxi').classList.add('has-warn');
+  fitMapToSheet();
   if (originTextEl.textContent === '내 위치 찾는 중…') setOrigin('제주시청');
 }
-function geoWarnOff() { $('#geoWarn').hidden = true; }
+function geoWarnOff() {
+  $('#geoWarn').hidden = true;
+  $('.sheet--taxi').classList.remove('has-warn');
+  fitMapToSheet();
+}
+
+/* 아래 시트 높이에 맞춰 지도 자리를 잡는다 — 시트가 커져도 지도 위 버튼이 가리지 않게 */
+function fitMapToSheet() {
+  setTimeout(function () {
+    var sh = $('.sheet--taxi');
+    if (!sh || !mapBox) return;
+    mapBox.style.bottom = Math.round(sh.getBoundingClientRect().height) + 'px';
+    if (mapS2) { mapS2.relayout(); mapS2.setCenter(LL(origin)); }
+  }, 30);
+}
 
 function askLocation(report) {
   var told = false;
