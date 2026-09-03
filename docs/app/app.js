@@ -1377,13 +1377,15 @@ function hintSpot() {
       if (!paxDone)    return one('#abPickDone',  '[선택 완료]를 누르세요');
       if (!$('#airEmail').value.trim()) return one('#airEmail', '이메일 주소를 적으세요');
       if (!cardSet)    return one('#airCardBtn', '[결제카드 정보입력]을 누르세요');
-      return one('#airPay', '[결제하기]를 누르세요');
+      if ($('#airPay').disabled) return one('#tmAll', '[필수 약관 전체동의]를 누르세요');
+      return one('#airPay', '맨 아래 결제 버튼을 누르세요');
     case 'airpax':  return savedPax ? one('.air-back', '저장됐어요. 뒤로 가서 고르세요')
                                     : one('#airPaxAdd', '[탑승객 추가]를 누르세요');
     case 'airagree':return agreed ? one('#agOk', '[동의]를 누르세요')
                                    : one('#agAll', '[모두 확인, 동의합니다]를 누르세요');
     case 'airform': return $('#afDone').disabled ? one('#afLastKo', '빈칸을 채우세요')
                                                 : one('#afDone', '[입력 완료]를 누르세요');
+    case 'paycond': return one('#pcDone', '[선택 완료]를 누르세요');
     case 'airsheet':return one('#airSheetList .as-opt', '하나를 누르세요');
     case 'aircard':
       if ($('#acNum').value.replace(/D/g, '').length < 16) return one('#acNum', '카드번호 16자리를 적으세요');
@@ -1606,33 +1608,71 @@ $('#airSearch').addEventListener('click', function () {
 $('#alList').addEventListener('click', function (e) {
   var b = e.target.closest('[data-fl]');
   if (!b) return;
-  /* 왕복인데 아직 가는편만 골랐으면 오는편을 고르러 간다 */
-  if (isRound && legStep === 'go') {
-    goFlight = FLIGHTS[+b.dataset.fl];
-    legStep = 'back';
-    renderFlights();
-    $('.al-list').scrollTop = 0;
-    toast('가는편을 골랐어요. 이제 오는편을 고르세요.');
-    return;
-  }
-  var f, bf = null;
-  if (isRound) { f = goFlight; bf = FLIGHTS_BACK[+b.dataset.fl]; backFlight = bf; }
-  else { f = FLIGHTS[+b.dataset.fl]; goFlight = f; }
+  /* 실제 앱처럼, 편을 고르면 곧바로 결제조건부터 고른다 */
+  if (legStep === 'go') goFlight  = FLIGHTS[+b.dataset.fl];
+  else                  backFlight = FLIGHTS_BACK[+b.dataset.fl];
+  openPayCond(legStep === 'go' ? goFlight : backFlight);
+});
+
+/* ── 결제조건 선택 — 편마다 한 번씩 고른다 ── */
+var payCond = 'kakao';
+function openPayCond(f) {
+  payCond = 'kakao';
+  $('#pcPrice1').textContent = won(f.price) + '~';
+  $('#pcPrice2').textContent = won(f.price) + '~';
+  syncPayCond();
+  push('paycond');
+}
+function syncPayCond() {
+  $$('.pc-opt').forEach(function (o) { o.classList.toggle('is-on', o.dataset.pc === payCond); });
+  $('.pc-desc').hidden    = payCond !== 'kakao';
+  $('.pc-desc--2').hidden = payCond !== 'card';
+}
+$('#pcList').addEventListener('click', function (e) {
+  var o = e.target.closest('[data-pc]');
+  if (!o) return;
+  payCond = o.dataset.pc;
+  syncPayCond();
+});
+$('#pcDone').addEventListener('click', function () {
+  pop();
+  setTimeout(function () {
+    if (isRound && legStep === 'go') {          // 왕복이면 이제 오는편 차례
+      legStep = 'back';
+      renderFlights();
+      toast('가는편을 골랐어요. 이제 오는편을 고르세요.');
+      return;
+    }
+    showChosen();
+  }, 300);
+});
+
+/* 고른 편들로 [선택한 항공권] 화면을 채우고 연다 */
+var asPrice = 0;
+function showChosen() {
+  var f = goFlight, bf = isRound ? backFlight : null;
+  if (!f) return;
   $('#ajGoFrom').textContent = TRIP.from + ' ' + f.dep;
   $('#ajGoTo').textContent   = TRIP.from + ' ' + f.arr;
   $('#ajGoName').textContent = f.air + ' ' + f.code + '편';
-  /* 오는편도 고른 날짜를 따라간다 — 예전에는 26.09.15 로 굳어 있었다 */
-  if (isRound && bf) {
+  $('#ajGoLogo').src = 'img/' + f.img + '.png';
+  if (bf) {
     $('#ajBackFrom').textContent = TRIP.to + ' ' + bf.dep;
     $('#ajBackTo').textContent   = TRIP.to + ' ' + bf.arr;
     $('#ajBackName').textContent = bf.air + ' ' + bf.code + '편';
     $('#ajBackBag').textContent  = bf.bag;
     $('#ajBackLogo').src = 'img/' + bf.img + '.png';
   }
-  $('#ajGoLogo').src = 'img/' + f.img + '.png';
-  $('#asTotal').textContent = won(isRound && bf ? f.price + bf.price : f.price);
+  asPrice = f.price + (bf ? bf.price : 0);
+  $('#asTotal').textContent = won(asPrice);
+  /* 약관의 운임규정 줄에도 고른 항공사를 적어 준다 */
+  $('#tmGo').textContent = '[필수] 가는편 ' + f.air + ' 운임규정';
+  $('#tmBackRow').hidden = !bf;
+  if (bf) $('#tmBack').textContent = '[필수] 오는편 ' + bf.air + ' 운임규정';
+  resetTerms();
   push('airsel');
-});
+}
+
 $('#ajRule').addEventListener('click', function () { toast('운임 규정은 이 연습에 포함되어 있지 않아요.'); });
 $('#airGo').addEventListener('click', function () { push('airbook'); });
 
@@ -1674,6 +1714,34 @@ $('#airEmail').addEventListener('input', function () {
 /* ── 예매하기 · 결제카드 ── */
 $('#airCardBtn').addEventListener('click', function () { push('aircard'); });
 
+/* ── 예매하기 안의 약관 동의 ── */
+function termBoxes() { return $$('.ab-sec--terms .tm-row:not([hidden]) .air-box'); }
+function syncTerms() {
+  var rows = termBoxes();
+  var all = rows.length > 0 && rows.filter(function (i) {
+    return i.classList.contains('is-on');
+  }).length === rows.length;
+  $('.tm-all .air-box').classList.toggle('is-on', all);
+  $('#airPay').disabled = !all;
+  $('#airPay').textContent = all && asPrice ? won(asPrice) + ' 결제' : '결제하기';
+}
+function resetTerms() {
+  $$('.ab-sec--terms .air-box').forEach(function (i) { i.classList.remove('is-on'); });
+  syncTerms();
+}
+$('#tmAll').addEventListener('click', function () {
+  var on = !$('.tm-all .air-box').classList.contains('is-on');
+  termBoxes().forEach(function (i) { i.classList.toggle('is-on', on); });
+  syncTerms();
+});
+$$('.ab-sec--terms .tm-row').forEach(function (r) {
+  r.addEventListener('click', function (e) {
+    if (e.target.tagName === 'EM') { toast('약관 전문 보기는 이 연습에 포함되어 있지 않아요.'); return; }
+    $('.air-box', r).classList.toggle('is-on');
+    syncTerms();
+  });
+});
+
 $('#airPay').addEventListener('click', function () {
   if (!paxDone || !chosenPax) {
     toast(chosenPax ? '[선택 완료]를 눌러 주세요.' : '탑승객을 먼저 선택해 주세요.');
@@ -1687,6 +1755,7 @@ $('#airPay').addEventListener('click', function () {
     hintShow(); return;
   }
   if (!cardSet) { toast('결제카드를 먼저 등록해 주세요.'); hintShow(); return; }
+  if ($('#airPay').disabled) { toast('약관에 모두 동의해 주세요.'); hintShow(); return; }
   goHome(function () {
     finish('항공권을 예매했어요.\n' + portA.city + ' → ' + (portB ? portB.city : '') + ', ' + ((chosenPax && chosenPax.ko) || '탑승객') +
            ' 님\n항공권 예매 연습을 마쳤어요.');
@@ -1843,10 +1912,25 @@ $('#acDone').addEventListener('click', function () {
 var DP_DAY = ['일', '월', '화', '수', '목', '금', '토'];
 var dpFrom = null, dpTo = null;                 // 'YYYY-M-D'
 var TRIP = { from: '26.09.05(토)', to: '26.09.15(화)' };   // 편 목록·여정에 쓰는 값
-var DP_TODAY = new Date(2026, 8, 3);            // 연습 기준일 (2026.09.03)
-/* 달력에 빨갛게 적어 주는 날 — 실제 앱처럼 이름이 붙는다 */
-var HOLIDAY = { '2026-9-24': '추석', '2026-9-25': '추석', '2026-9-26': '추석',
-                '2026-10-3': '개천절', '2026-10-9': '한글날' };
+/* 오늘 — 연습하는 날이 곧 기준이 된다 */
+var DP_TODAY = (function () { var t = new Date(); t.setHours(0, 0, 0, 0); return t; })();
+var DP_MONTHS = 12;                             // 오늘부터 열두 달치 달력
+
+/* 날짜가 고정인 공휴일 */
+var HOL_FIXED = { '1-1': '신정', '3-1': '삼일절', '5-5': '어린이날', '6-6': '현충일',
+                  '8-15': '광복절', '10-3': '개천절', '10-9': '한글날', '12-25': '성탄절' };
+/* 해마다 날짜가 바뀌는 명절 — 몇 해치를 적어 둔다 */
+var HOL_MOON = {
+  '2026-2-16': '설날', '2026-2-17': '설날', '2026-2-18': '설날',
+  '2026-5-24': '부처님오신날',
+  '2026-9-24': '추석', '2026-9-25': '추석', '2026-9-26': '추석',
+  '2027-2-6': '설날', '2027-2-7': '설날', '2027-2-8': '설날',
+  '2027-5-13': '부처님오신날',
+  '2027-9-14': '추석', '2027-9-15': '추석', '2027-9-16': '추석'
+};
+function holidayName(y, m, d) {
+  return HOL_MOON[y + '-' + m + '-' + d] || HOL_FIXED[m + '-' + d] || '';
+}
 
 function dpKey(y, m, d) { return y + '-' + m + '-' + d; }
 function dpNum(k) { var a = k.split('-'); return (+a[0]) * 10000 + (+a[1]) * 100 + (+a[2]); }
@@ -1857,8 +1941,8 @@ function dpLabel(k) {
 }
 
 function renderCalendar() {
-  var html = '', base = new Date(2026, 8, 1);
-  for (var k = 0; k < 2; k++) {
+  var html = '', base = new Date(DP_TODAY.getFullYear(), DP_TODAY.getMonth(), 1);
+  for (var k = 0; k < DP_MONTHS; k++) {
     var y = base.getFullYear(), m = base.getMonth() + k;
     var yy = y + Math.floor(m / 12), mm = (m % 12) + 1;
     var first = new Date(yy, mm - 1, 1), last = new Date(yy, mm, 0).getDate();
@@ -1873,7 +1957,8 @@ function renderCalendar() {
       if (n === dpNum(dpKey(DP_TODAY.getFullYear(), DP_TODAY.getMonth() + 1, DP_TODAY.getDate()))) {
         cls += ' today'; note = '오늘';
       }
-      if (HOLIDAY[key]) { cls += ' hol'; note = HOLIDAY[key]; }
+      var hol = holidayName(yy, mm, d);
+      if (hol) { cls += ' hol'; note = hol; }
       if (dpFrom && dpTo) {
         var a = dpNum(dpFrom), z = dpNum(dpTo);
         if (n > a && n < z) cls += ' mid';

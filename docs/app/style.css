@@ -482,6 +482,47 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
 .pp-none{padding:40px 0;text-align:center;color:#9AA0A8;font-size:15px;line-height:1.7}
 
 /* ══════════════════════════════════════════════════════════
+   결제조건 선택 — 편을 고르면 아래에서 올라온다
+   ══════════════════════════════════════════════════════════ */
+.pc-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;
+  border-radius:18px 18px 0 0;padding:24px 18px 18px;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.61,.36,1)}
+.is-in .pc-sheet{transform:none}
+.pc-title{margin:0;font-size:21px;font-weight:500;text-align:center}
+.pc-sub{margin:8px 0 18px;font-size:15px;color:var(--cta);text-align:center}
+.pc-opt{display:flex;align-items:center;gap:12px;width:100%;height:60px;padding:0 16px;
+  border:1px solid var(--line2,#DDE0E4);border-radius:10px;background:#fff;font:inherit;text-align:left}
+.pc-opt.is-on{border-color:var(--cta);border-width:2px}
+.pc-radio{width:20px;height:20px;border-radius:50%;border:2px solid #C3C7CE;flex:none;position:relative}
+.pc-opt.is-on .pc-radio{border-color:var(--cta)}
+.pc-opt.is-on .pc-radio::after{content:"";position:absolute;left:3px;top:3px;width:10px;height:10px;
+  border-radius:50%;background:var(--cta)}
+.pc-name{font-size:17px;color:var(--ink)}
+.pc-price{margin-left:auto;font-size:17px;font-weight:500;color:var(--cta)}
+.pc-desc{margin:8px 4px 14px;font-size:14px;color:#8B9099;line-height:1.5}
+.pc-go{width:100%;height:56px;margin-top:14px;border:0;border-radius:9px;
+  background:var(--cta);color:#fff;font:inherit;font-size:19px;font-weight:500}
+
+/* ── 예매하기 안의 약관 동의 ── */
+.ab-sec--terms{position:relative}
+.tm-tip{display:inline-block;margin:2px 0 10px;padding:8px 12px;border-radius:10px;
+  background:var(--cta);color:#fff;font-size:14px;line-height:1.4;position:relative}
+.tm-tip::after{content:"";position:absolute;left:22px;bottom:-6px;width:12px;height:12px;
+  background:var(--cta);transform:rotate(45deg)}
+.tm-box{border:1px solid var(--line2,#DDE0E4);border-radius:10px;padding:6px 14px 10px}
+.tm-all{display:flex;align-items:center;gap:10px;width:100%;padding:12px 0;border:0;background:none;
+  font:inherit;font-size:16.5px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--line);
+  text-align:left;cursor:pointer}
+.tm-row{display:flex;align-items:center;gap:10px;padding:11px 0;font-size:15px;color:#3F434B}
+.tm-row span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm-row em{font-style:normal;font-size:14px;color:#8B9099;text-decoration:underline}
+.tm-warn{margin-top:16px;font-size:14px;line-height:1.65;color:#6E727A}
+.tm-warn b{display:block;margin-bottom:8px;font-size:16px;color:var(--ink)}
+.tm-warn p{margin:0 0 8px}
+.tm-red{color:#E8402A}
+.tm-red b{display:inline;color:#E8402A}
+
+/* ══════════════════════════════════════════════════════════
    광고 팝업 (tp-03)
    ══════════════════════════════════════════════════════════ */
 .ad__dim{position:absolute;inset:0;background:rgba(0,0,0,.6)}   /* 캡처에서 잰 값 */

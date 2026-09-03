@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=202609032113">
+<link rel="stylesheet" href="style.css?v=202609032124">
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=606067c8b6243ab17db2869c47582727&libraries=services&autoload=false"></script>
 <!-- 연습 기록 임시 창구 — track.js 는 모듈이라 늦게 뜬다.
      그 전에 app.js 가 부른 것들을 시각과 함께 모아 두었다가 그대로 넘긴다. -->
@@ -689,8 +689,26 @@ window.TRACK = (function () {
           <div class="ab-sec__head"><b>결제카드</b></div>
           <button class="ab-cardbtn" id="airCardBtn"><span id="airCardText">결제카드 정보입력</span><svg class="i16"><use href="#ic-chev"/></svg></button>
         </div>
+        <div class="ab-sec ab-sec--terms">
+          <div class="ab-sec__head"><b>약관 동의</b></div>
+          <div class="tm-tip">예약규정과 운임규정을 꼭 확인해주세요!</div>
+          <div class="tm-box">
+            <button class="tm-all" id="tmAll" type="button"><i class="air-box"></i>필수 약관 전체동의</button>
+            <div class="tm-row"><i class="air-box"></i><span>[필수] 예약규정</span><em>보기</em></div>
+            <div class="tm-row"><i class="air-box"></i><span id="tmGo">[필수] 가는편 운임규정</span><em>보기</em></div>
+            <div class="tm-row tm-row--back" id="tmBackRow"><i class="air-box"></i><span id="tmBack">[필수] 오는편 운임규정</span><em>보기</em></div>
+            <div class="tm-row"><i class="air-box"></i><span>[필수] 개인정보 수집 및 이용 동의</span><em>보기</em></div>
+            <div class="tm-row"><i class="air-box"></i><span>[필수] 개인정보 제3자 제공 동의</span><em>보기</em></div>
+          </div>
+          <div class="tm-warn">
+            <b>ⓘ 결제 전 꼭 확인해주세요!</b>
+            <p class="tm-red">· 취소/환불 처리 시간: <b>평일 09시~18시</b> (주말/공휴일의 경우 접수만 가능하며, 취소/환불 처리가 진행되지 않습니다.)</p>
+            <p>· 국내 항공은 왕복이 같은 항공사여도 편도로 각각 예매 생성 및 결제가 진행됩니다.</p>
+            <p>· 항공료 결제 및 발권 실패 시 예매는 자동으로 취소되므로, 예매 가능한 스케줄로 검색하여 다시 예매하시기 바랍니다.</p>
+          </div>
+        </div>
       </div>
-      <div class="ab-foot"><button class="as-go" id="airPay">결제하기</button></div>
+      <div class="ab-foot"><button class="as-go" id="airPay" disabled>결제하기</button></div>
     </section>
 
     <!-- ═══════════  A11 · 날짜 선택 (가는날 - 오는날)  ═══════════ -->
@@ -715,6 +733,30 @@ window.TRACK = (function () {
     </section>
 
     <!-- ═══════════  A10 · 광고 (터치제주)  ═══════════ -->
+    <!-- ═══════════  A2-1 · 결제조건 선택 (편을 고르면 뜬다)  ═══════════ -->
+    <section class="screen screen--overlay screen--paycond" data-screen="paycond">
+      <div class="rs__dim" data-back></div>
+      <div class="pc-sheet">
+        <h2 class="pc-title">결제조건 선택</h2>
+        <p class="pc-sub">성인 1명 기준, 편도 가격입니다.</p>
+        <div class="pc-list" id="pcList">
+          <button class="pc-opt is-on" data-pc="kakao">
+            <i class="pc-radio"></i>
+            <span class="pc-name">카카오 T 결제</span>
+            <b class="pc-price" id="pcPrice1">60,900원~</b>
+          </button>
+          <p class="pc-desc">· 등록해 놓은 결제카드, 포인트로 간편하게 결제</p>
+          <button class="pc-opt" data-pc="card">
+            <i class="pc-radio"></i>
+            <span class="pc-name">일반 카드결제</span>
+            <b class="pc-price" id="pcPrice2">60,900원~</b>
+          </button>
+          <p class="pc-desc pc-desc--2" hidden>· 카카오 T에 등록된 카드와는 별도로 카드정보를 새로 입력</p>
+        </div>
+        <button class="pc-go" id="pcDone">선택 완료</button>
+      </div>
+    </section>
+
     <!-- ═══════════  A5 · 탑승객 저장 목록  ═══════════ -->
     <section class="screen screen--airpax" data-screen="airpax">
       <div class="ap-head"><button class="air-back" data-back aria-label="뒤로"><svg class="i27"><use href="#ic-back"/></svg></button></div>
@@ -858,7 +900,7 @@ window.TRACK = (function () {
   </div>
 </div>
 
-<script src="app.js?v=202609032113"></script>
-<script type="module" src="track.js?v=202609032113"></script>
+<script src="app.js?v=202609032124"></script>
+<script type="module" src="track.js?v=202609032124"></script>
 </body>
 </html>
