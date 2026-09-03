@@ -120,12 +120,14 @@ function initS2Map() {
     pinEl.classList.add('is-drag');
     originTextEl.textContent = '위치 확인 중...';
   });
+  updateTaxiHeading();          // 지도를 만지기 전에도 한 번은 도로를 찾아 둔다
   K.event.addListener(mapS2, 'idle', function () {
     pinEl.classList.remove('is-drag');
     var c = mapS2.getCenter();
     origin.lat = c.getLat(); origin.lng = c.getLng();
     btnLocate.classList.toggle('is-moved', haversine(origin, myPos) > 25);
     resolveOriginName();
+    placeTaxiOnRoad();          // 확대·축소만 해도 도로를 벗어나지 않게
     updateTaxiHeading();
   });
 }
@@ -136,7 +138,7 @@ var meOverlay = null;
    출발점까지 실제 길찾기를 돌린 뒤, 도착 직전 구간의 방위각을 진행 방향으로
    쓴다.  경로를 못 구하면 기본값(동쪽)을 그대로 둔다. */
 var taxiEl = document.querySelector(".pin__taxi");
-var TAXI_BACK = 44;          // 핀 뒤로 물러나 있는 거리(px)
+var TAXI_BACK = 74;          // 핀 뒤로 물러나 있는 거리(px) — 말풍선에 겹치지 않을 만큼
 var headTimer = null, headFrom = null, headSeq = 0;
 
 function bearing(a, b) {
@@ -155,6 +157,44 @@ function placeTaxi(deg) {
   var dx = -TAXI_BACK * Math.sin(r), dy = TAXI_BACK * Math.cos(r);
   taxiEl.style.transform =
     "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) rotate(" + (deg - 90).toFixed(1) + "deg)";
+}
+
+/* 마지막으로 구한 접근 경로 — 도로를 따라가는 점들이다.
+   택시를 이 선 위에 올려야 건물 안에 박히지 않는다. */
+var lastRoute = null;
+
+/* 경로선 위에서 핀으로부터 화면상 TAXI_BACK 쯤 떨어진 점을 찾아 택시를 놓는다.
+   지도를 확대·축소해도 도로를 벗어나지 않는다. 놓을 자리를 못 찾으면 false. */
+function placeTaxiOnRoad() {
+  if (!taxiEl || !mapS2 || !K || !lastRoute || lastRoute.length < 2) return false;
+  var proj = mapS2.getProjection();
+  if (!proj || !proj.containerPointFromCoords) return false;
+  var c;
+  try { c = proj.containerPointFromCoords(mapS2.getCenter()); } catch (e) { return false; }
+  if (!c) return false;
+
+  var pts = lastRoute, end = pts[pts.length - 1], best = null;
+  /* 지도를 많이 옮겼으면 이 경로는 이미 딴 곳 것이다 — 새 경로가 올 때까지 그대로 둔다 */
+  if (haversine({ lat: end[0], lng: end[1] }, origin) > 40) return false;
+  for (var i = pts.length - 2; i >= 0; i--) {
+    var p;
+    try { p = proj.containerPointFromCoords(new K.LatLng(pts[i][0], pts[i][1])); } catch (e) { break; }
+    if (!p) break;
+    var dx = p.x - c.x, dy = p.y - c.y;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    if (!best || Math.abs(d - TAXI_BACK) < Math.abs(best.d - TAXI_BACK)) {
+      best = { d: d, dx: dx, dy: dy, i: i };
+    }
+    if (d > TAXI_BACK * 3) break;            // 충분히 멀어졌으면 더 볼 것 없다
+  }
+  if (!best) return false;
+
+  var deg = bearing({ lat: pts[best.i][0], lng: pts[best.i][1] },
+                    { lat: end[0],        lng: end[1] });
+  taxiEl.style.transform =
+    'translate(' + best.dx.toFixed(1) + 'px,' + best.dy.toFixed(1) + 'px) ' +
+    'rotate(' + (deg - 90).toFixed(1) + 'deg)';
+  return true;
 }
 
 /* 출발점으로 접근하는 길을 만들기 위한 기준점 — 현위치가 쓸 만하면 그걸,
@@ -176,7 +216,9 @@ function updateTaxiHeading() {
       if (seq !== headSeq) return;                          // 그 사이 또 움직였다
       var c = r.coords, end = c[c.length - 1];
       if (!end) return;
-      for (var i = c.length - 2; i >= 0; i--) {             // 15m 이상 떨어진 점까지 되짚어
+      lastRoute = c;
+      if (placeTaxiOnRoad()) return;                        // 도로 위에 올렸다
+      for (var i = c.length - 2; i >= 0; i--) {             // 못 올렸으면 방향만이라도
         var pt = { lat: c[i][0], lng: c[i][1] };
         if (haversine(pt, { lat: end[0], lng: end[1] }) >= 15) {
           placeTaxi(bearing(pt, { lat: end[0], lng: end[1] }));
@@ -749,7 +791,11 @@ $('#ad0Close').addEventListener('click', function () { pop(); });
 
 function openTaxi() {
   push('taxi');
-  if (mapS2) setTimeout(function () { mapS2.relayout(); mapS2.setCenter(LL(origin)); }, 30);
+  if (mapS2) setTimeout(function () {
+    mapS2.relayout();
+    mapS2.setCenter(LL(origin));
+    updateTaxiHeading();          // 도로 위에 택시를 올려 둔다
+  }, 30);
   if (!adShown) { adShown = true; setTimeout(function () { push('ad'); }, 320); }
   askLocation();
 }

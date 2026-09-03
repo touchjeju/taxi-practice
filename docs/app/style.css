@@ -202,6 +202,7 @@ svg[class^="i1"],svg[class^="i2"],svg[class^="i3"]{fill:none;flex:none}
    기본값은 동쪽(오른쪽) 진행 — 도로 방향을 못 구했을 때의 모습. */
 .pin__taxi{
   position:absolute;left:50%;bottom:-14px;margin-left:-26px;width:52px;height:28px;
+  z-index:-1;   /* 출발 말풍선 뒤로 — 겹쳐도 글자가 가려지지 않는다 */
   transform-origin:50% 50%;transform:translate(-44px,0) rotate(0deg);
   transition:transform .4s cubic-bezier(.22,.61,.36,1);
 }
