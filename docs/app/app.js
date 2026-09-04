@@ -1331,7 +1331,19 @@ function finish(text) {
   TRACK.finish(true);
 }
 $('#doneAgain').addEventListener('click', function () { location.reload(); });
-$('#doneHome').addEventListener('click', function () { location.href = '../'; });
+/* 돌아갈 곳 — 반 링크(?c=코드)로 들어온 수강생은 자기 반 연습 목록으로,
+   그냥 사이트에서 연습한 사람은 터치제주 메인으로 보낸다. */
+function homeUrl() {
+  var code = (location.search.match(/[?&]c=([A-Za-z0-9]+)/) || [])[1] || '';
+  if (!code) {
+    try { code = (JSON.parse(localStorage.getItem('tj.student') || 'null') || {}).code || ''; }
+    catch (e) {}
+  }
+  return code ? '../join/?c=' + encodeURIComponent(code.toUpperCase()) : '../';
+}
+$('#doneHome').addEventListener('click', function () { location.href = homeUrl(); });
+/* 반 수강생에게는 어디로 가는지 그대로 적어 준다 */
+if (homeUrl() !== '../') $('#doneHome').textContent = '연습 목록으로';
 
 /* ───────────────────── 8.6. 힌트 — 모를 때 누르는 버튼 ─────────────────────
    오른쪽 위 [?] 를 누르면 지금 눌러야 할 자리에 빨간 사각형이 나타난다.
